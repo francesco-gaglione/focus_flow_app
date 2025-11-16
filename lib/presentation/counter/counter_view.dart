@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app/theme_cubit.dart';
 import 'counter_bloc.dart';
@@ -52,6 +53,15 @@ class CounterView extends StatelessWidget {
               context.read<CounterBloc>().add(CounterDecrementPressed());
             },
             child: const Icon(Icons.remove),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton.extended(
+            heroTag: 'categories',
+            onPressed: () {
+              context.push('/categories');
+            },
+            icon: const Icon(Icons.category),
+            label: const Text('Categories'),
           ),
         ],
       ),
