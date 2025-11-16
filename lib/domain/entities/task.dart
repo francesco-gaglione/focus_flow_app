@@ -1,17 +1,52 @@
 class Task {
   final String id;
-  final String categoryId;
   final String name;
   final String? description;
-  final DateTime? scheduledDate;
-  final DateTime? completedAt;
+  final String? categoryId;
+  final int? scheduledDate;
+  final int? completedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Task({
     required this.id,
-    required this.categoryId,
     required this.name,
     this.description,
-    required this.scheduledDate,
-    required this.completedAt,
+    this.categoryId,
+    this.scheduledDate,
+    this.completedAt,
+    required this.createdAt,
+    required this.updatedAt,
   });
+
+  Task copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? categoryId,
+    int? scheduledDate,
+    int? completedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      categoryId: categoryId ?? this.categoryId,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      completedAt: completedAt ?? this.completedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  bool get isCompleted => completedAt != null;
+
+  bool get isOrphan => categoryId == null;
+
+  @override
+  String toString() {
+    return 'Task(id: $id, name: $name, description: $description, categoryId: $categoryId, scheduledDate: $scheduledDate, completedAt: $completedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+  }
 }

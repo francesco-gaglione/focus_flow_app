@@ -11,7 +11,8 @@ import 'presentation/app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await setupDependencies();
+  // Initialize the service locator with the base URL from the environment variable
+  await setupDependencies("http://localhost:8080");
 
   runApp(
     App(
