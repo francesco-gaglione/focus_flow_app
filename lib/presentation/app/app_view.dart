@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../counter/counter_page.dart';
+import '../../core/theme/app_theme.dart';
+import '../focus/focus_page.dart';
 import '../category/category_page.dart';
+import '../statistics/statistics_page.dart';
+import '../settings/settings_page.dart';
+import 'main_layout.dart';
 import 'theme_cubit.dart';
 
 class AppView extends StatelessWidget {
@@ -14,9 +18,7 @@ class AppView extends StatelessWidget {
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (_, state) {
         final themeData =
-            state.isDarkMode
-                ? ThemeData.dark(useMaterial3: true)
-                : ThemeData.light(useMaterial3: true);
+            state.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme;
 
         return MaterialApp.router(theme: themeData, routerConfig: _router);
       },
@@ -25,12 +27,27 @@ class AppView extends StatelessWidget {
 }
 
 final _router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/focus',
   routes: [
-    GoRoute(path: '/', builder: (context, state) => const CounterPage()),
-    GoRoute(
-      path: '/categories',
-      builder: (context, state) => const CategoryPage(),
+    ShellRoute(
+      builder: (context, state, child) {
+        return MainLayout(currentPath: state.uri.path, child: child);
+      },
+      routes: [
+        GoRoute(path: '/focus', builder: (context, state) => const FocusPage()),
+        GoRoute(
+          path: '/categories',
+          builder: (context, state) => const CategoryPage(),
+        ),
+        GoRoute(
+          path: '/stats',
+          builder: (context, state) => const StatisticsPage(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsPage(),
+        ),
+      ],
     ),
   ],
 );
