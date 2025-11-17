@@ -1,14 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/presentation/category/category_bloc.dart';
+import 'package:focus_flow_app/presentation/widgets/category/category_card.dart';
+import 'package:focus_flow_app/presentation/widgets/category/dialogs/orphan_task_dialog.dart';
+import 'package:focus_flow_app/presentation/widgets/category/task_list_item.dart';
+import 'package:focus_flow_app/presentation/widgets/category/dialogs/category_form_dialog.dart';
+import 'package:focus_flow_app/presentation/widgets/common/confirmation_dialog.dart';
+import 'package:focus_flow_app/presentation/widgets/common/empty_state.dart';
+import 'package:focus_flow_app/presentation/widgets/common/error_state.dart';
 
 class CategoryView extends StatelessWidget {
   const CategoryView({super.key});
 
+  static const List<Color> _predefinedColors = [
+    Color(0xFF6200EE),
+    Color(0xFF03DAC6),
+    Color(0xFFFF6B6B),
+    Color(0xFF4ECDC4),
+    Color(0xFFFFA726),
+    Color(0xFF66BB6A),
+  ];
+
+  static const Color _orphanTaskColor = Color(0xFFFFA726);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories'), elevation: 0),
+      appBar: AppBar(title: const Text('Categories'), centerTitle: false),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -16,141 +34,186 @@ class CategoryView extends StatelessWidget {
           }
 
           if (state.errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${state.errorMessage}',
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed:
-                        () =>
-                            context.read<CategoryBloc>().add(LoadCategories()),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+            return ErrorState(
+              message: state.errorMessage!,
+              onRetry: () => context.read<CategoryBloc>().add(LoadCategories()),
             );
           }
 
           final categories = state.categories;
 
           if (categories.isEmpty) {
-            return const Center(
-              child: Text('No categories yet.\nTap + to create one.'),
+            return const EmptyState(
+              icon: Icons.category_outlined,
+              title: 'No categories yet',
+              message: 'Tap the + button to create your first category',
             );
           }
+
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final categoryWithTasks = categories[index];
               final category = categoryWithTasks.category;
               final tasks = categoryWithTasks.tasks;
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ExpansionTile(
-                  leading: CircleAvatar(
-                    backgroundColor: _parseColor(category.color),
-                    child: Text(
-                      category.name[0].toUpperCase(),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  title: Text(
-                    category.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  subtitle:
-                      category.description != null
-                          ? Text(
-                            category.description!,
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                            ),
-                          )
-                          : null,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
-                        onPressed: () => _showEditDialog(context, category),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 20),
-                        color: Colors.red,
-                        onPressed:
-                            () => _showDeleteDialog(context, category.id),
-                      ),
-                    ],
-                  ),
-                  children: [
-                    if (tasks.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          'No tasks in this category',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      )
-                    else
-                      ...tasks.map(
-                        (task) => ListTile(
-                          dense: true,
-                          leading: Icon(
-                            task.completedAt != null
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            color:
-                                task.completedAt != null
-                                    ? Colors.green
-                                    : Colors.grey,
-                            size: 20,
-                          ),
-                          title: Text(
-                            task.name,
-                            style: TextStyle(
-                              decoration:
-                                  task.completedAt != null
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                            ),
-                          ),
-                          subtitle:
-                              task.description != null
-                                  ? Text(
-                                    task.description!,
-                                    style: const TextStyle(fontSize: 12),
-                                  )
-                                  : null,
-                        ),
-                      ),
-                  ],
-                ),
+              return CategoryCard(
+                name: category.name,
+                description: category.description,
+                color: _parseColor(category.color),
+                totalTasks: tasks.length,
+                completedTasks:
+                    tasks.where((t) => t.completedAt != null).length,
+                onEdit: () => _showEditCategoryDialog(context, category),
+                onDelete: () => _showDeleteCategoryDialog(context, category.id),
+                taskWidgets: _buildTaskList(context, tasks),
               );
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateDialog(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: _buildFABStack(context),
+    );
+  }
+
+  Widget _buildFABStack(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          bottom: 80,
+          right: 0,
+          child: FloatingActionButton(
+            heroTag: 'orphanTask',
+            onPressed: () => _showCreateOrphanTaskDialog(context),
+            child: const Icon(Icons.add_task),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: FloatingActionButton.extended(
+            heroTag: 'category',
+            onPressed: () => _showCreateCategoryDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Category'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildTaskList(BuildContext context, List<dynamic> tasks) {
+    if (tasks.isEmpty) return [];
+
+    return [
+      ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: tasks.length,
+        separatorBuilder:
+            (context, index) =>
+                const Divider(height: 1, indent: 56, thickness: 0.5),
+        itemBuilder: (context, index) {
+          final task = tasks[index];
+          return TaskListItem(
+            name: task.name,
+            description: task.description,
+            isCompleted: task.completedAt != null,
+            onEdit: () {
+              // TODO: Implement task edit
+            },
+            onToggle: () {
+              // TODO: Implement task toggle
+            },
+            onDelete: () {
+              // TODO: Implement task delete
+            },
+          );
+        },
       ),
+    ];
+  }
+
+  void _showCreateCategoryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => CategoryFormDialog(
+            title: 'Create Category',
+            icon: Icons.create_new_folder_outlined,
+            availableColors: _predefinedColors,
+            onSubmit: (name, description, color) {
+              context.read<CategoryBloc>().add(
+                CreateCategoryEvent(
+                  name: name,
+                  color: _colorToHex(color),
+                  description: description,
+                ),
+              );
+            },
+          ),
+    );
+  }
+
+  void _showEditCategoryDialog(BuildContext context, dynamic category) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => CategoryFormDialog(
+            title: 'Edit Category',
+            icon: Icons.edit_outlined,
+            initialName: category.name,
+            initialDescription: category.description,
+            initialColor: _parseColor(category.color),
+            availableColors: _predefinedColors,
+            onSubmit: (name, description, color) {
+              context.read<CategoryBloc>().add(
+                UpdateCategoryEvent(
+                  id: category.id,
+                  name: name,
+                  color: _colorToHex(color),
+                  description: description,
+                ),
+              );
+            },
+          ),
+    );
+  }
+
+  void _showDeleteCategoryDialog(BuildContext context, String categoryId) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => ConfirmationDialog(
+            title: 'Delete Category?',
+            message:
+                'This will permanently delete the category and all its tasks. This action cannot be undone.',
+            confirmText: 'Delete',
+            onConfirm: () {
+              context.read<CategoryBloc>().add(
+                DeleteCategoryEvent(id: categoryId),
+              );
+            },
+          ),
+    );
+  }
+
+  void _showCreateOrphanTaskDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => OrphanTaskDialog(
+            onSubmit: (name, description) {
+              // TODO: Create orphan task event
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Orphan task created successfully'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+          ),
     );
   }
 
@@ -162,180 +225,7 @@ class CategoryView extends StatelessWidget {
     }
   }
 
-  void _showCreateDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
-    final colorController = TextEditingController(text: '#6200EE');
-
-    showDialog(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Create Category'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name *',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: colorController,
-                    decoration: const InputDecoration(
-                      labelText: 'Color (hex)',
-                      border: OutlineInputBorder(),
-                      hintText: '#6200EE',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (nameController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Name is required')),
-                    );
-                    return;
-                  }
-                  context.read<CategoryBloc>().add(
-                    CreateCategoryEvent(
-                      name: nameController.text.trim(),
-                      color: colorController.text.trim(),
-                      description:
-                          descController.text.trim().isEmpty
-                              ? null
-                              : descController.text.trim(),
-                    ),
-                  );
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Create'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _showEditDialog(BuildContext context, dynamic category) {
-    final nameController = TextEditingController(text: category.name);
-    final descController = TextEditingController(text: category.description);
-    final colorController = TextEditingController(text: category.color);
-
-    showDialog(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Edit Category'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: colorController,
-                    decoration: const InputDecoration(
-                      labelText: 'Color (hex)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<CategoryBloc>().add(
-                    UpdateCategoryEvent(
-                      id: category.id,
-                      name:
-                          nameController.text.trim().isEmpty
-                              ? null
-                              : nameController.text.trim(),
-                      color:
-                          colorController.text.trim().isEmpty
-                              ? null
-                              : colorController.text.trim(),
-                      description:
-                          descController.text.trim().isEmpty
-                              ? null
-                              : descController.text.trim(),
-                    ),
-                  );
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Update'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _showDeleteDialog(BuildContext context, String categoryId) {
-    showDialog(
-      context: context,
-      builder:
-          (dialogContext) => AlertDialog(
-            title: const Text('Delete Category'),
-            content: const Text(
-              'Are you sure? This will also delete all tasks in this category.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  context.read<CategoryBloc>().add(
-                    DeleteCategoryEvent(id: categoryId),
-                  );
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-    );
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
   }
 }
