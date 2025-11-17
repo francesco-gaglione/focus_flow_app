@@ -20,27 +20,18 @@ class MainLayout extends StatelessWidget {
               onDestinationSelected:
                   (index) => _onDestinationSelected(context, index),
               labelType: NavigationRailLabelType.none,
-              extended: true,
+              groupAlignment: 0.0,
               backgroundColor: Theme.of(context).colorScheme.surface,
               elevation: 1,
-              leading: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.timer,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Focus Flow',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              useIndicator: true,
+              indicatorColor: Theme.of(context).colorScheme.secondaryContainer,
+              selectedIconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                size: 28,
+              ),
+              unselectedIconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 24,
               ),
               trailing: Expanded(
                 child: Align(
@@ -48,9 +39,17 @@ class MainLayout extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: IconButton(
-                      icon: const Icon(Icons.settings),
+                      icon: Icon(
+                        currentPath.startsWith('/settings')
+                            ? Icons.settings
+                            : Icons.settings_outlined,
+                      ),
                       onPressed: () => context.go('/settings'),
                       tooltip: 'Settings',
+                      color:
+                          currentPath.startsWith('/settings')
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -59,17 +58,17 @@ class MainLayout extends StatelessWidget {
                 NavigationRailDestination(
                   icon: Icon(Icons.play_circle_outline),
                   selectedIcon: Icon(Icons.play_circle),
-                  label: Text('Focus'),
+                  label: Text(""),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.category_outlined),
                   selectedIcon: Icon(Icons.category),
-                  label: Text('Categories'),
+                  label: Text(''),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.bar_chart_outlined),
                   selectedIcon: Icon(Icons.bar_chart),
-                  label: Text('Statistics'),
+                  label: Text(''),
                 ),
               ],
             ),
@@ -80,39 +79,85 @@ class MainLayout extends StatelessWidget {
       );
     }
 
-    // Mobile Layout with BottomNavigationBar
+    // Mobile Layout - Solo icone, centrate verticalmente
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _getSelectedIndex(),
-        onTap: (index) => _onDestinationSelected(context, index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(
-          context,
-        ).colorScheme.onSurface.withOpacity(0.6),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_circle_outline),
-            activeIcon: Icon(Icons.play_circle),
-            label: 'Focus',
+      bottomNavigationBar: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center, // Aggiungi questo!
+          children: [
+            _buildNavItem(
+              context,
+              icon: Icons.play_circle_outline,
+              selectedIcon: Icons.play_circle,
+              isSelected: currentPath.startsWith('/focus'),
+              onTap: () => context.go('/focus'),
+            ),
+            _buildNavItem(
+              context,
+              icon: Icons.category_outlined,
+              selectedIcon: Icons.category,
+              isSelected: currentPath.startsWith('/categories'),
+              onTap: () => context.go('/categories'),
+            ),
+            _buildNavItem(
+              context,
+              icon: Icons.bar_chart_outlined,
+              selectedIcon: Icons.bar_chart,
+              isSelected: currentPath.startsWith('/stats'),
+              onTap: () => context.go('/stats'),
+            ),
+            _buildNavItem(
+              context,
+              icon: Icons.settings_outlined,
+              selectedIcon: Icons.settings,
+              isSelected: currentPath.startsWith('/settings'),
+              onTap: () => context.go('/settings'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+    BuildContext context, {
+    required IconData icon,
+    required IconData selectedIcon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        child: SizedBox(
+          height: double.infinity, // Occupa tutta l'altezza
+          child: Center(
+            // Center garantisce il centraggio verticale
+            child: Icon(
+              isSelected ? selectedIcon : icon,
+              color:
+                  isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 28,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category_outlined),
-            activeIcon: Icon(Icons.category),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -126,7 +171,6 @@ class MainLayout extends StatelessWidget {
   }
 
   int _getSelectedIndexForRail() {
-    // NavigationRail only has 3 items, settings is separate
     if (currentPath.startsWith('/focus')) return 0;
     if (currentPath.startsWith('/categories')) return 1;
     if (currentPath.startsWith('/stats')) return 2;
