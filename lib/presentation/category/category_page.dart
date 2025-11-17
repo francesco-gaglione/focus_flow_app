@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:focus_flow_app/presentation/category/bloc/category_bloc.dart';
+import 'package:focus_flow_app/presentation/category/bloc/category_event.dart';
 import 'package:focus_flow_app/presentation/category/category_view.dart';
 import '../../core/di/service_locator.dart';
-import 'category_bloc.dart';
 
 class CategoryPage extends StatelessWidget {
   const CategoryPage({super.key});
@@ -13,10 +14,12 @@ class CategoryPage extends StatelessWidget {
       create:
           (_) => CategoryBloc(
             getCategoriesAndTasks: sl(),
+            fetchOrphanTasks: sl(),
             createCategory: sl(),
+            createTask: sl(),
             updateCategory: sl(),
             deleteCategory: sl(),
-          )..add(LoadCategories()),
+          )..add(InitState()),
       child: const CategoryView(),
     );
   }

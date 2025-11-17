@@ -1,5 +1,5 @@
-import '../entities/task.dart';
-import '../repositories/task_repository.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/repositories/task_repository.dart';
 
 class FetchOrphanTasks {
   final TaskRepository taskRepository;

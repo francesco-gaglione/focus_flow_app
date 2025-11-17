@@ -1,6 +1,6 @@
-import '../entities/task.dart';
-import '../repositories/task_repository.dart';
-import '../repositories/category_repository.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/repositories/category_repository.dart';
+import 'package:focus_flow_app/domain/repositories/task_repository.dart';
 
 class CreateTask {
   final TaskRepository taskRepository;
@@ -21,16 +21,6 @@ class CreateTask {
           success: false,
           error: 'Task name cannot be empty',
           errorType: CreateTaskErrorType.validation,
-        );
-      }
-
-      // Check if task already exists
-      final exists = await taskRepository.taskExistsByName(name);
-      if (exists) {
-        return CreateTaskResult(
-          success: false,
-          error: 'Task with this name already exists',
-          errorType: CreateTaskErrorType.conflict,
         );
       }
 

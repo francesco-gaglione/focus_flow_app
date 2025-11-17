@@ -1,4 +1,4 @@
-import '../repositories/task_repository.dart';
+import 'package:focus_flow_app/domain/repositories/task_repository.dart';
 
 class DeleteTasks {
   final TaskRepository taskRepository;

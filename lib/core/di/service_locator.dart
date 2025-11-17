@@ -8,26 +8,21 @@ import 'package:focus_flow_app/domain/repositories/session_repository.dart';
 import 'package:focus_flow_app/domain/repositories/statistics_repository.dart';
 import 'package:focus_flow_app/domain/repositories/task_repository.dart';
 import 'package:focus_flow_app/domain/usecases/calculate_stats_by_period.dart';
-import 'package:focus_flow_app/domain/usecases/create_category.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/create_category.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/delete_category.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/update_category.dart';
 import 'package:focus_flow_app/domain/usecases/create_manual_session.dart';
-import 'package:focus_flow_app/domain/usecases/create_task.dart';
-import 'package:focus_flow_app/domain/usecases/delete_category.dart';
-import 'package:focus_flow_app/domain/usecases/delete_tasks.dart';
-import 'package:focus_flow_app/domain/usecases/fetch_orphan_tasks.dart';
-import 'package:focus_flow_app/domain/usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/get_sessions_with_filters.dart';
-import 'package:focus_flow_app/domain/usecases/update_category.dart';
-import 'package:focus_flow_app/domain/usecases/update_task.dart';
+import 'package:focus_flow_app/domain/usecases/tasks_usecases/create_task.dart';
+import 'package:focus_flow_app/domain/usecases/tasks_usecases/delete_tasks.dart';
+import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
+import 'package:focus_flow_app/domain/usecases/tasks_usecases/update_task.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../adapters/counter/counter_repository_impl.dart';
 import '../../adapters/theme/theme_repository_impl.dart';
-import '../../domain/repositories/counter_repository.dart';
 import '../../domain/repositories/theme_repository.dart';
-import '../../domain/usecases/decrement_counter.dart';
-import '../../domain/usecases/get_counter.dart';
 import '../../domain/usecases/get_theme_settings.dart';
-import '../../domain/usecases/increment_counter.dart';
 import '../../domain/usecases/toggle_theme.dart';
 import '../../domain/usecases/update_accent_color.dart';
 
@@ -45,11 +40,7 @@ Future<void> setupDependencies(String baseUrl) async {
     ),
   );
 
-  // Repositories - Counter & Theme
-  sl.registerLazySingleton<CounterRepository>(
-    () => InMemoryCounterRepositoryImpl(),
-  );
-
+  // Repositories - Theme
   sl.registerLazySingleton<ThemeRepository>(
     () => InMemoryThemeRepositoryImpl(),
   );
@@ -71,19 +62,7 @@ Future<void> setupDependencies(String baseUrl) async {
     () => HttpStatisticsRepository(dio: sl(), baseUrl: baseUrl),
   );
 
-  // Use Cases - Counter & Theme
-  sl.registerLazySingleton<GetCounter>(
-    () => GetCounter(sl<CounterRepository>()),
-  );
-
-  sl.registerLazySingleton<IncrementCounter>(
-    () => IncrementCounter(sl<CounterRepository>()),
-  );
-
-  sl.registerLazySingleton<DecrementCounter>(
-    () => DecrementCounter(sl<CounterRepository>()),
-  );
-
+  // Use Cases - Theme
   sl.registerLazySingleton<GetThemeSettings>(
     () => GetThemeSettings(sl<ThemeRepository>()),
   );

@@ -1,6 +1,6 @@
-import '../entities/category.dart';
-import '../entities/task.dart';
-import '../repositories/category_repository.dart';
+import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/repositories/category_repository.dart';
 
 class GetCategoriesAndTasks {
   final CategoryRepository categoryRepository;

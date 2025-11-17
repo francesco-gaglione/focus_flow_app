@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:focus_flow_app/presentation/category/category_bloc.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/presentation/category/bloc/category_bloc.dart';
+import 'package:focus_flow_app/presentation/category/bloc/category_event.dart';
+import 'package:focus_flow_app/presentation/category/bloc/category_state.dart';
 import 'package:focus_flow_app/presentation/widgets/category/category_card.dart';
 import 'package:focus_flow_app/presentation/widgets/category/dialogs/orphan_task_dialog.dart';
 import 'package:focus_flow_app/presentation/widgets/category/task_list_item.dart';
@@ -41,20 +44,30 @@ class CategoryView extends StatelessWidget {
           }
 
           final categories = state.categories;
+          final orphanTasks = state.tasks;
 
-          if (categories.isEmpty) {
+          if (categories.isEmpty && orphanTasks.isEmpty) {
             return const EmptyState(
               icon: Icons.category_outlined,
-              title: 'No categories yet',
-              message: 'Tap the + button to create your first category',
+              title: 'No categories and tasks yet',
+              message:
+                  'Tap the + button to create your first category or add a task',
             );
           }
 
+          final itemCount =
+              (orphanTasks.isNotEmpty ? 1 : 0) + categories.length;
+
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: categories.length,
+            itemCount: itemCount,
             itemBuilder: (context, index) {
-              final categoryWithTasks = categories[index];
+              if (orphanTasks.isNotEmpty && index == 0) {
+                return _buildOrphanTasksSection(context, orphanTasks);
+              }
+
+              final categoryIndex = orphanTasks.isNotEmpty ? index - 1 : index;
+              final categoryWithTasks = categories[categoryIndex];
               final category = categoryWithTasks.category;
               final tasks = categoryWithTasks.tasks;
 
@@ -74,6 +87,22 @@ class CategoryView extends StatelessWidget {
         },
       ),
       floatingActionButton: _buildFABStack(context),
+    );
+  }
+
+  Widget _buildOrphanTasksSection(
+    BuildContext context,
+    List<Task> orphanTasks,
+  ) {
+    return CategoryCard(
+      name: 'Unassigned Tasks',
+      description: 'Tasks without a category',
+      color: _orphanTaskColor,
+      totalTasks: orphanTasks.length,
+      completedTasks: orphanTasks.where((t) => t.completedAt != null).length,
+      onEdit: () => print("TODO"),
+      onDelete: () => print("TODO"),
+      taskWidgets: _buildTaskList(context, orphanTasks),
     );
   }
 
@@ -205,12 +234,8 @@ class CategoryView extends StatelessWidget {
       builder:
           (dialogContext) => OrphanTaskDialog(
             onSubmit: (name, description) {
-              // TODO: Create orphan task event
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Orphan task created successfully'),
-                  behavior: SnackBarBehavior.floating,
-                ),
+              context.read<CategoryBloc>().add(
+                CreateOrphanTaskEvent(description: description, title: name),
               );
             },
           ),
