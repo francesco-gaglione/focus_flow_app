@@ -11,3 +11,4 @@ class UpdateAccentColor {
     return _repository.saveThemeSettings(updated);
   }
 }
+
