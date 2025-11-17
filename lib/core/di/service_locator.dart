@@ -29,6 +29,7 @@ import '../../domain/usecases/get_counter.dart';
 import '../../domain/usecases/get_theme_settings.dart';
 import '../../domain/usecases/increment_counter.dart';
 import '../../domain/usecases/toggle_theme.dart';
+import '../../domain/usecases/update_accent_color.dart';
 
 final sl = GetIt.instance;
 
@@ -89,6 +90,10 @@ Future<void> setupDependencies(String baseUrl) async {
 
   sl.registerLazySingleton<ToggleTheme>(
     () => ToggleTheme(sl<ThemeRepository>()),
+  );
+
+  sl.registerLazySingleton<UpdateAccentColor>(
+    () => UpdateAccentColor(sl<ThemeRepository>()),
   );
 
   // Use Cases - Category

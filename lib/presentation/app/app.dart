@@ -3,17 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/get_theme_settings.dart';
 import '../../domain/usecases/toggle_theme.dart';
+import '../../domain/usecases/update_accent_color.dart';
 import 'app_view.dart';
 import 'theme_cubit.dart';
 
 class App extends StatelessWidget {
   final GetThemeSettings getThemeSettings;
   final ToggleTheme toggleTheme;
+  final UpdateAccentColor updateAccentColor;
 
   const App({
     super.key,
     required this.getThemeSettings,
     required this.toggleTheme,
+    required this.updateAccentColor,
   });
 
   @override
@@ -23,6 +26,7 @@ class App extends StatelessWidget {
           (_) => ThemeCubit(
             getThemeSettings: getThemeSettings,
             toggleTheme: toggleTheme,
+            updateAccentColor: updateAccentColor,
           )..loadTheme(),
       child: const AppView(),
     );

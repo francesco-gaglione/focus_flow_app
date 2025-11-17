@@ -7,7 +7,7 @@ class ToggleTheme {
   ToggleTheme(this._repository);
 
   Future<ThemeSettings> call(ThemeSettings current) async {
-    final next = ThemeSettings(isDarkMode: !current.isDarkMode);
+    final next = current.copyWith(isDarkMode: !current.isDarkMode);
     return _repository.saveThemeSettings(next);
   }
 }

@@ -17,10 +17,15 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (_, state) {
-        final themeData =
-            state.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme;
+        final lightTheme = AppTheme.light(state.accentColor);
+        final darkTheme = AppTheme.dark(state.accentColor);
 
-        return MaterialApp.router(theme: themeData, routerConfig: _router);
+        return MaterialApp.router(
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          routerConfig: _router,
+        );
       },
     );
   }
