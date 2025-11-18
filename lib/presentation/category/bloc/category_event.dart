@@ -35,6 +35,14 @@ class UpdateCategoryEvent extends CategoryEvent {
   });
 }
 
+class UpdateTaskEvent extends CategoryEvent {
+  final String id;
+  final String? name;
+  final String? description;
+
+  UpdateTaskEvent({required this.id, this.name, this.description});
+}
+
 class DeleteCategoryEvent extends CategoryEvent {
   final String id;
 

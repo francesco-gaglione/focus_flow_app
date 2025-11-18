@@ -17,16 +17,6 @@ class UpdateTask {
     int? completedAt,
   }) async {
     try {
-      // Check if task exists
-      final exists = await taskRepository.taskExists(id);
-      if (!exists) {
-        return UpdateTaskResult(
-          success: false,
-          error: 'Task not found',
-          errorType: UpdateTaskErrorType.notFound,
-        );
-      }
-
       // Validate name if provided
       if (name != null && name.trim().isEmpty) {
         return UpdateTaskResult(
@@ -34,21 +24,6 @@ class UpdateTask {
           error: 'Task name cannot be empty',
           errorType: UpdateTaskErrorType.validation,
         );
-      }
-
-      // Check if new name conflicts with existing task
-      if (name != null) {
-        final currentTask = await taskRepository.getTaskById(id);
-        if (currentTask != null && currentTask.name != name) {
-          final nameExists = await taskRepository.taskExistsByName(name);
-          if (nameExists) {
-            return UpdateTaskResult(
-              success: false,
-              error: 'Task with this name already exists',
-              errorType: UpdateTaskErrorType.conflict,
-            );
-          }
-        }
       }
 
       // Validate category exists if provided

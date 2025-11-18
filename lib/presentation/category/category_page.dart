@@ -18,6 +18,7 @@ class CategoryPage extends StatelessWidget {
             createCategory: sl(),
             createTask: sl(),
             updateCategory: sl(),
+            updateTask: sl(),
             deleteCategory: sl(),
             deleteTasks: sl(),
           )..add(InitState()),

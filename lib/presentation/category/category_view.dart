@@ -5,7 +5,7 @@ import 'package:focus_flow_app/presentation/category/bloc/category_bloc.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_event.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_state.dart';
 import 'package:focus_flow_app/presentation/widgets/category/category_card.dart';
-import 'package:focus_flow_app/presentation/widgets/category/dialogs/orphan_task_dialog.dart';
+import 'package:focus_flow_app/presentation/widgets/category/dialogs/task_form_dialog.dart';
 import 'package:focus_flow_app/presentation/widgets/category/task_list_item.dart';
 import 'package:focus_flow_app/presentation/widgets/category/dialogs/category_form_dialog.dart';
 import 'package:focus_flow_app/presentation/widgets/common/confirmation_dialog.dart';
@@ -141,8 +141,12 @@ class CategoryView extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: tasks.length,
         separatorBuilder:
-            (context, index) =>
-                const Divider(height: 1, indent: 56, thickness: 0.5),
+            (context, index) => const Divider(
+              height: 1,
+              indent: 10,
+              thickness: 0.5,
+              endIndent: 10,
+            ),
         itemBuilder: (context, index) {
           final task = tasks[index];
           return TaskListItem(
@@ -150,8 +154,7 @@ class CategoryView extends StatelessWidget {
             description: task.description,
             isCompleted: task.completedAt != null,
             onEdit: () {
-              // TODO: Implement task edit
-              print('On edit');
+              _showEditOrphanTaskDialog(context, task);
             },
             onDelete: () {
               _showDeleteTaskDialog(context, task.id);
@@ -208,6 +211,26 @@ class CategoryView extends StatelessWidget {
     );
   }
 
+  void _showEditOrphanTaskDialog(BuildContext context, dynamic category) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => TaskDialog(
+            initialName: category.name,
+            initialDescription: category.description,
+            onSubmit: (name, description) {
+              context.read<CategoryBloc>().add(
+                UpdateTaskEvent(
+                  id: category.id,
+                  name: name,
+                  description: description,
+                ),
+              );
+            },
+          ),
+    );
+  }
+
   void _showDeleteCategoryDialog(BuildContext context, String categoryId) {
     showDialog(
       context: context,
@@ -246,7 +269,7 @@ class CategoryView extends StatelessWidget {
     showDialog(
       context: context,
       builder:
-          (dialogContext) => OrphanTaskDialog(
+          (dialogContext) => TaskDialog(
             onSubmit: (name, description) {
               context.read<CategoryBloc>().add(
                 CreateOrphanTaskEvent(description: description, title: name),

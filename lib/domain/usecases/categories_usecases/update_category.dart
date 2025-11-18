@@ -32,23 +32,6 @@ class UpdateCategory {
         );
       }
 
-      // Check if new name conflicts with existing category
-      if (name != null) {
-        final currentCategory = await categoryRepository.getCategoryById(id);
-        if (currentCategory != null && currentCategory.name != name) {
-          final nameExists = await categoryRepository.categoryExistsByName(
-            name,
-          );
-          if (nameExists) {
-            return UpdateCategoryResult(
-              success: false,
-              error: 'Category with this name already exists',
-              errorType: UpdateCategoryErrorType.conflict,
-            );
-          }
-        }
-      }
-
       // Update category
       final updatedCategory = await categoryRepository.updateCategory(
         id: id,

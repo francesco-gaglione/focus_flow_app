@@ -22,11 +22,6 @@ class TaskListItem extends StatelessWidget {
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: Icon(
-        isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-        color:
-            isCompleted ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
-      ),
       title: Text(
         name,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(

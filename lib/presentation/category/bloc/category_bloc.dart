@@ -6,6 +6,7 @@ import 'package:focus_flow_app/domain/usecases/categories_usecases/update_catego
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/create_task.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/delete_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
+import 'package:focus_flow_app/domain/usecases/tasks_usecases/update_task.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_event.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_state.dart';
 import 'package:logger/web.dart';
@@ -18,6 +19,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final CreateCategory _createCategory;
   final CreateTask _createTask;
   final UpdateCategory _updateCategory;
+  final UpdateTask _updateTask;
   final DeleteCategory _deleteCategory;
   final DeleteTasks _deleteTasks;
 
@@ -27,6 +29,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     required CreateCategory createCategory,
     required CreateTask createTask,
     required UpdateCategory updateCategory,
+    required UpdateTask updateTask,
     required DeleteCategory deleteCategory,
     required DeleteTasks deleteTasks,
   }) : _getCategoriesAndTasks = getCategoriesAndTasks,
@@ -34,6 +37,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
        _createCategory = createCategory,
        _createTask = createTask,
        _updateCategory = updateCategory,
+       _updateTask = updateTask,
        _deleteCategory = deleteCategory,
        _deleteTasks = deleteTasks,
        super(const CategoryState(isLoading: true)) {
@@ -43,6 +47,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CreateCategoryEvent>(_onCreateCategory);
     on<CreateOrphanTaskEvent>(_onCreateOrphanTask);
     on<UpdateCategoryEvent>(_onUpdateCategory);
+    on<UpdateTaskEvent>(_onUpdateTask);
     on<DeleteCategoryEvent>(_onDeleteCategory);
     on<DeleteTaskEvent>(_onDeleteTask);
   }
@@ -217,6 +222,28 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           state.copyWith(
             errorMessage: result.error ?? 'Failed to update category',
           ),
+        );
+      }
+    } catch (e) {
+      emit(state.copyWith(errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateTask(
+    UpdateTaskEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
+    try {
+      final result = await _updateTask.execute(
+        id: event.id,
+        name: event.name,
+        description: event.description,
+      );
+      if (result.success) {
+        add(InitState());
+      } else {
+        emit(
+          state.copyWith(errorMessage: result.error ?? 'Failed to update task'),
         );
       }
     } catch (e) {
