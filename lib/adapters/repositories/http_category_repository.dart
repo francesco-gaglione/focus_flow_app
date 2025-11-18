@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:logger/web.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/task.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../dtos/category_dtos.dart';
 
 class HttpCategoryRepository implements CategoryRepository {
+  final Logger logger = Logger();
   final Dio _dio;
   final String baseUrl;
 
@@ -34,8 +36,11 @@ class HttpCategoryRepository implements CategoryRepository {
   @override
   Future<Category?> getCategoryById(String id) async {
     try {
+      logger.d('Fetching category with ID: $id');
       final response = await _dio.get('$baseUrl/api/categories/$id');
+      logger.d('Fetched category with ID: $id');
       final cat = CategoryDto.fromJson(response.data);
+      logger.d('Parsed category with ID: $id');
       return Category(
         id: cat.id,
         name: cat.name,
@@ -141,7 +146,9 @@ class HttpCategoryRepository implements CategoryRepository {
 
   @override
   Future<bool> categoryExists(String id) async {
+    logger.d('Checking if category exists with ID: $id');
     final category = await getCategoryById(id);
+    logger.d('Category found: ${category != null}');
     return category != null;
   }
 }

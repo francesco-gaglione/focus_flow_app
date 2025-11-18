@@ -151,12 +151,10 @@ class CategoryView extends StatelessWidget {
             isCompleted: task.completedAt != null,
             onEdit: () {
               // TODO: Implement task edit
-            },
-            onToggle: () {
-              // TODO: Implement task toggle
+              print('On edit');
             },
             onDelete: () {
-              // TODO: Implement task delete
+              _showDeleteTaskDialog(context, task.id);
             },
           );
         },
@@ -223,6 +221,22 @@ class CategoryView extends StatelessWidget {
               context.read<CategoryBloc>().add(
                 DeleteCategoryEvent(id: categoryId),
               );
+            },
+          ),
+    );
+  }
+
+  void _showDeleteTaskDialog(BuildContext context, String taskId) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => ConfirmationDialog(
+            title: 'Delete Task?',
+            message:
+                'This will permanently delete the task. This action cannot be undone.',
+            confirmText: 'Delete',
+            onConfirm: () {
+              context.read<CategoryBloc>().add(DeleteTaskEvent(id: taskId));
             },
           ),
     );

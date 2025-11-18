@@ -5,7 +5,6 @@ class TaskListItem extends StatelessWidget {
   final String? description;
   final bool isCompleted;
   final VoidCallback onEdit;
-  final VoidCallback onToggle;
   final VoidCallback onDelete;
 
   const TaskListItem({
@@ -14,7 +13,6 @@ class TaskListItem extends StatelessWidget {
     this.description,
     required this.isCompleted,
     required this.onEdit,
-    required this.onToggle,
     required this.onDelete,
   });
 
@@ -67,20 +65,6 @@ class TaskListItem extends StatelessWidget {
                 ),
               ),
               PopupMenuItem(
-                value: 'toggle',
-                child: Row(
-                  children: [
-                    Icon(
-                      isCompleted ? Icons.restart_alt : Icons.check,
-                      size: 20,
-                      color: colorScheme.tertiary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(isCompleted ? 'Mark incomplete' : 'Mark complete'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
                 value: 'delete',
                 child: Row(
                   children: [
@@ -98,8 +82,6 @@ class TaskListItem extends StatelessWidget {
         onSelected: (value) {
           if (value == 'edit') {
             onEdit();
-          } else if (value == 'toggle') {
-            onToggle();
           } else if (value == 'delete') {
             onDelete();
           }

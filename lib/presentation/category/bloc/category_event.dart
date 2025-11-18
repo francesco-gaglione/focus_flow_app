@@ -40,3 +40,9 @@ class DeleteCategoryEvent extends CategoryEvent {
 
   DeleteCategoryEvent({required this.id});
 }
+
+class DeleteTaskEvent extends CategoryEvent {
+  final String id;
+
+  DeleteTaskEvent({required this.id});
+}
