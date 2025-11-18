@@ -168,7 +168,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         description: event.description,
       );
       if (result.success) {
-        add(LoadCategories());
+        add(InitState());
       } else {
         emit(
           state.copyWith(
@@ -259,7 +259,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       logger.d('Deleting category with id ${event.id}');
       final result = await _deleteCategory.execute(id: event.id);
       if (result.success) {
-        add(LoadCategories());
+        add(InitState());
       } else {
         logger.e(
           'Failed to delete category with id ${event.id}: ${result.error}',

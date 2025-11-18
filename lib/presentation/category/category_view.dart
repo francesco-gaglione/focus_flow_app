@@ -15,15 +15,6 @@ import 'package:focus_flow_app/presentation/widgets/common/error_state.dart';
 class CategoryView extends StatelessWidget {
   const CategoryView({super.key});
 
-  static const List<Color> _predefinedColors = [
-    Color(0xFF6200EE),
-    Color(0xFF03DAC6),
-    Color(0xFFFF6B6B),
-    Color(0xFF4ECDC4),
-    Color(0xFFFFA726),
-    Color(0xFF66BB6A),
-  ];
-
   static const Color _orphanTaskColor = Color(0xFFFFA726);
 
   @override
@@ -172,7 +163,6 @@ class CategoryView extends StatelessWidget {
           (dialogContext) => CategoryFormDialog(
             title: 'Create Category',
             icon: Icons.create_new_folder_outlined,
-            availableColors: _predefinedColors,
             onSubmit: (name, description, color) {
               context.read<CategoryBloc>().add(
                 CreateCategoryEvent(
@@ -196,7 +186,6 @@ class CategoryView extends StatelessWidget {
             initialName: category.name,
             initialDescription: category.description,
             initialColor: _parseColor(category.color),
-            availableColors: _predefinedColors,
             onSubmit: (name, description, color) {
               context.read<CategoryBloc>().add(
                 UpdateCategoryEvent(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:focus_flow_app/presentation/widgets/category/color_picker_advanced.dart';
 import 'package:focus_flow_app/presentation/widgets/common/custom_text_field.dart';
-import 'package:focus_flow_app/presentation/widgets/category/color_picker_grid.dart';
 
 class CategoryFormDialog extends StatefulWidget {
   final String title;
@@ -8,7 +8,6 @@ class CategoryFormDialog extends StatefulWidget {
   final String? initialName;
   final String? initialDescription;
   final Color? initialColor;
-  final List<Color> availableColors;
   final Function(String name, String? description, Color color) onSubmit;
 
   const CategoryFormDialog({
@@ -18,7 +17,6 @@ class CategoryFormDialog extends StatefulWidget {
     this.initialName,
     this.initialDescription,
     this.initialColor,
-    required this.availableColors,
     required this.onSubmit,
   });
 
@@ -36,7 +34,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
     super.initState();
     nameController = TextEditingController(text: widget.initialName);
     descController = TextEditingController(text: widget.initialDescription);
-    selectedColor = widget.initialColor ?? widget.availableColors[0];
+    selectedColor = widget.initialColor ?? const Color(0xFFEF5350);
   }
 
   @override
@@ -78,8 +76,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 textCapitalization: TextCapitalization.sentences,
               ),
               const SizedBox(height: 24),
-              ColorPickerGrid(
-                colors: widget.availableColors,
+              ColorPickerAdvanced(
                 selectedColor: selectedColor,
                 onColorSelected:
                     (color) => setState(() => selectedColor = color),
