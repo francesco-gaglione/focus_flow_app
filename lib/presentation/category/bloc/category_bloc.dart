@@ -45,6 +45,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<LoadCategories>(_onLoadCategories);
     on<LoadOrphanTasks>(_onLoadOrphanTasks);
     on<CreateCategoryEvent>(_onCreateCategory);
+    on<CreateTaskEvent>(_onCreateTask);
     on<CreateOrphanTaskEvent>(_onCreateOrphanTask);
     on<UpdateCategoryEvent>(_onUpdateCategory);
     on<UpdateTaskEvent>(_onUpdateTask);
@@ -166,6 +167,30 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         name: event.name,
         color: event.color,
         description: event.description,
+      );
+      if (result.success) {
+        add(InitState());
+      } else {
+        emit(
+          state.copyWith(
+            errorMessage: result.error ?? 'Failed to create category',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(state.copyWith(errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onCreateTask(
+    CreateTaskEvent event,
+    Emitter<CategoryState> emit,
+  ) async {
+    try {
+      final result = await _createTask.execute(
+        name: event.title,
+        description: event.description,
+        categoryId: event.categoryId,
       );
       if (result.success) {
         add(InitState());

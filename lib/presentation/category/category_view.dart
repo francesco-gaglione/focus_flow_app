@@ -71,6 +71,7 @@ class CategoryView extends StatelessWidget {
                     tasks.where((t) => t.completedAt != null).length,
                 onEdit: () => _showEditCategoryDialog(context, category),
                 onDelete: () => _showDeleteCategoryDialog(context, category.id),
+                onAddTask: () => _showCreateTaskDialog(context, category.id),
                 taskWidgets: _buildTaskList(context, tasks),
               );
             },
@@ -262,6 +263,24 @@ class CategoryView extends StatelessWidget {
             onSubmit: (name, description) {
               context.read<CategoryBloc>().add(
                 CreateOrphanTaskEvent(description: description, title: name),
+              );
+            },
+          ),
+    );
+  }
+
+  void _showCreateTaskDialog(BuildContext context, String categoryId) {
+    showDialog(
+      context: context,
+      builder:
+          (dialogContext) => TaskDialog(
+            onSubmit: (name, description) {
+              context.read<CategoryBloc>().add(
+                CreateTaskEvent(
+                  categoryId: categoryId,
+                  description: description,
+                  title: name,
+                ),
               );
             },
           ),

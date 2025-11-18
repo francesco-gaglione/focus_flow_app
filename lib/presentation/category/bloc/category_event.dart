@@ -21,6 +21,18 @@ class CreateOrphanTaskEvent extends CategoryEvent {
   CreateOrphanTaskEvent({required this.title, this.description});
 }
 
+class CreateTaskEvent extends CategoryEvent {
+  final String categoryId;
+  final String title;
+  final String? description;
+
+  CreateTaskEvent({
+    required this.categoryId,
+    required this.title,
+    this.description,
+  });
+}
+
 class UpdateCategoryEvent extends CategoryEvent {
   final String id;
   final String? name;

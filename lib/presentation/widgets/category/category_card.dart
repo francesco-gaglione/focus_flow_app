@@ -8,6 +8,7 @@ class CategoryCard extends StatelessWidget {
   final int completedTasks;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onAddTask; // Add this parameter
   final List<Widget> taskWidgets;
 
   const CategoryCard({
@@ -19,6 +20,7 @@ class CategoryCard extends StatelessWidget {
     required this.completedTasks,
     required this.onEdit,
     required this.onDelete,
+    this.onAddTask, // Add this parameter
     required this.taskWidgets,
   });
 
@@ -164,6 +166,14 @@ class CategoryCard extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
+                        if (onAddTask != null) ...[
+                          const SizedBox(height: 16),
+                          FilledButton.tonalIcon(
+                            onPressed: onAddTask,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add Task'),
+                          ),
+                        ],
                       ],
                     ),
                   ),
