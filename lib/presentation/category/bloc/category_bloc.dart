@@ -9,7 +9,7 @@ import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/update_task.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_event.dart';
 import 'package:focus_flow_app/presentation/category/bloc/category_state.dart';
-import 'package:logger/web.dart';
+import 'package:logger/logger.dart';
 
 // Bloc
 class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {

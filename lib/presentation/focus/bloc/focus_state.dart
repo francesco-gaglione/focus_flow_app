@@ -1,11 +1,37 @@
+import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
+
 class FocusState {
   final bool isLoading;
   final String? errorMessage;
+  final List<CategoryWithTasks> categories;
+  final List<Task> orphanTasks;
+  final Category? selectedCategory;
+  final Task? selectedTask;
 
-  const FocusState({this.isLoading = false, this.errorMessage});
+  const FocusState({
+    this.isLoading = false,
+    this.errorMessage,
+    this.categories = const [],
+    this.orphanTasks = const [],
+    this.selectedCategory,
+    this.selectedTask,
+  });
 
-  FocusState copyWith({bool? isLoading, String? errorMessage}) {
+  FocusState copyWith({
+    List<CategoryWithTasks>? categories,
+    List<Task>? orphanTasks,
+    Category? selectedCategory,
+    Task? selectedTask,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
     return FocusState(
+      categories: categories ?? this.categories,
+      orphanTasks: orphanTasks ?? this.orphanTasks,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
+      selectedTask: selectedTask ?? this.selectedTask,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
     );
