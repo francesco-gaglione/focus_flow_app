@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -45,7 +46,7 @@ class MainLayout extends StatelessWidget {
                             : Icons.settings_outlined,
                       ),
                       onPressed: () => context.go('/settings'),
-                      tooltip: 'Settings',
+                      tooltip: context.tr('navigation.settings'),
                       color:
                           currentPath.startsWith('/settings')
                               ? Theme.of(context).colorScheme.primary

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class StatisticsPage extends StatelessWidget {
@@ -6,7 +7,7 @@ class StatisticsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Statistics')),
+      appBar: AppBar(title: Text(context.tr('statistics.title'))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,12 +19,12 @@ class StatisticsPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Statistics',
+              context.tr('statistics.title'),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
             Text(
-              'Charts and stats will be here',
+              context.tr('statistics.placeholder_message'),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -80,7 +81,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
         child: Column(
           children: [
             Text(
-              'Focus Session',
+              context.tr('focus.session_title'),
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -133,7 +134,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        isRunning ? 'Focusing...' : 'Ready to focus',
+                        isRunning ? context.tr('focus.focusing') : context.tr('focus.ready_to_focus'),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -154,7 +155,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                 FilledButton.icon(
                   onPressed: isRunning ? _stopTimer : _startTimer,
                   icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
-                  label: Text(isRunning ? 'Pause' : 'Start'),
+                  label: Text(isRunning ? context.tr('focus.pause') : context.tr('focus.start')),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
@@ -168,7 +169,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                 OutlinedButton.icon(
                   onPressed: _resetTimer,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Reset'),
+                  label: Text(context.tr('focus.reset')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,

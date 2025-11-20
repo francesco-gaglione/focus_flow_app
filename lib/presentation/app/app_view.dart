@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,9 @@ class AppView extends StatelessWidget {
           darkTheme: darkTheme,
           themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           routerConfig: _router,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
         );
       },
     );

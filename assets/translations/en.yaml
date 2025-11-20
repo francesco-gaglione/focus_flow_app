@@ -1,3 +1,14 @@
+# Common
+common:
+  cancel: Cancel
+  create: Create
+  update: Update
+  delete: Delete
+  retry: Retry
+  save: Save
+  close: Close
+
+# Category Section
 category:
   title: Categories
   empty_state_title: No categories and tasks yet
@@ -12,3 +23,74 @@ category:
   delete_task_dialog_title: Delete Task?
   delete_task_dialog_message: This will permanently delete the task. This action cannot be undone.
   delete_button: Delete
+  name_label: Name
+  name_hint: Enter category name
+  description_label: Description
+  description_hint: Optional description
+  name_required: Please enter a category name
+
+# Task Section
+task:
+  create_orphan_title: Create Orphan Task
+  edit_orphan_title: Edit Orphan Task
+  name_label: Task Name
+  name_hint: Enter task name
+  description_label: Description
+  description_hint: Optional description
+  name_required: Please enter a task name
+
+# Focus Section
+focus:
+  title: Focus
+  session_title: Focus Session
+  focusing: Focusing...
+  ready_to_focus: Ready to focus
+  start: Start
+  pause: Pause
+  reset: Reset
+  level_title: Focus Level
+  level_low: Low focus - Easy tasks
+  level_medium: Medium focus - Regular tasks
+  level_high: High focus - Challenging tasks
+  level_maximum: Maximum focus - Deep work
+  notes_title: Session Notes
+  notes_hint: Write your thoughts, ideas, or reflections...
+  timeline_title: Today's Focus Sessions
+  timeline_empty: No sessions completed yet
+  level_badge: Level
+  select_category_task: Select Category & Task
+  clear_selection: Clear selection
+  category_label: Category
+  task_label: Task
+  orphan_tasks_label: Orphan Tasks
+  orphan_tasks_helper: Tasks without a category
+
+# Settings Section
+settings:
+  title: Settings
+  appearance: Appearance
+  dark_mode: Dark Mode
+  switch_to_light: Switch to light theme
+  switch_to_dark: Switch to dark theme
+  accent_color: Accent color
+  about: About
+  version: Version
+  app_name: Focus Flow
+  app_description: Pomodoro Timer & Task Manager
+
+# Statistics Section
+statistics:
+  title: Statistics
+  placeholder_message: Charts and stats will be here
+
+# Navigation
+navigation:
+  focus: Focus
+  categories: Categories
+  statistics: Statistics
+  settings: Settings
+
+# Error Messages
+error:
+  title: Something went wrong
+  retry: Retry

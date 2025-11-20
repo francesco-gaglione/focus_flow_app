@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class FocusTimelineWidget extends StatelessWidget {
@@ -45,7 +46,7 @@ class FocusTimelineWidget extends StatelessWidget {
                 Icon(Icons.timeline, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Today\'s Focus Sessions',
+                  context.tr('focus.timeline_title'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -67,7 +68,7 @@ class FocusTimelineWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'No sessions completed yet',
+                        context.tr('focus.timeline_empty'),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -164,7 +165,7 @@ class FocusTimelineWidget extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          'Level ${session['focusLevel']}',
+                                          '${context.tr('focus.level_badge')} ${session['focusLevel']}',
                                           style: Theme.of(
                                             context,
                                           ).textTheme.labelSmall?.copyWith(

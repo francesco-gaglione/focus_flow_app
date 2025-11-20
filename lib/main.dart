@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:flutter/material.dart';
 
 import 'core/di/service_locator.dart';
@@ -16,9 +17,10 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: [Locale('en', 'US'), Locale('it', 'IT')],
-      path: 'assets/translations',
-      fallbackLocale: Locale('en', 'US'),
+      supportedLocales: const [Locale('en'), Locale('it')],
+      path: 'assets/translations/',
+      assetLoader: YamlAssetLoader(),
+      fallbackLocale: const Locale('en'),
       child: App(
         getThemeSettings: sl<GetThemeSettings>(),
         toggleTheme: sl<ToggleTheme>(),

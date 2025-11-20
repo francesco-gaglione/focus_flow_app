@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:focus_flow_app/presentation/widgets/common/custom_text_field.dart';
 
@@ -47,7 +48,7 @@ class _TaskDialogState extends State<TaskDialog> {
         isEditMode ? Icons.edit_note : Icons.add_task,
         color: _orphanTaskColor,
       ),
-      title: Text(isEditMode ? 'Edit Orphan Task' : 'Create Orphan Task'),
+      title: Text(isEditMode ? context.tr('task.edit_orphan_title') : context.tr('task.create_orphan_title')),
       content: SizedBox(
         width: 400,
         child: SingleChildScrollView(
@@ -56,18 +57,18 @@ class _TaskDialogState extends State<TaskDialog> {
             children: [
               CustomTextField(
                 controller: nameController,
-                label: 'Task Name',
+                label: context.tr('task.name_label'),
                 icon: Icons.task_outlined,
-                hint: 'Enter task name',
+                hint: context.tr('task.name_hint'),
                 textCapitalization: TextCapitalization.sentences,
                 autofocus: true,
               ),
               const SizedBox(height: 16),
               CustomTextField(
                 controller: descController,
-                label: 'Description',
+                label: context.tr('task.description_label'),
                 icon: Icons.notes_outlined,
-                hint: 'Optional description',
+                hint: context.tr('task.description_hint'),
                 maxLines: 4,
                 minLines: 3,
                 textCapitalization: TextCapitalization.sentences,
@@ -79,15 +80,15 @@ class _TaskDialogState extends State<TaskDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(context.tr('common.cancel')),
         ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: _orphanTaskColor),
           onPressed: () {
             if (nameController.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please enter a task name'),
+                SnackBar(
+                  content: Text(context.tr('task.name_required')),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -101,7 +102,7 @@ class _TaskDialogState extends State<TaskDialog> {
             );
             Navigator.pop(context);
           },
-          child: Text(isEditMode ? 'Update' : 'Create'),
+          child: Text(isEditMode ? context.tr('common.update') : context.tr('common.create')),
         ),
       ],
     );

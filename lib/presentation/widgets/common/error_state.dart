@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class ErrorState extends StatelessWidget {
@@ -23,7 +24,7 @@ class ErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Something went wrong',
+              context.tr('error.title'),
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
@@ -39,7 +40,7 @@ class ErrorState extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(context.tr('error.retry')),
             ),
           ],
         ),

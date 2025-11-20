@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class FocusNotesWidget extends StatefulWidget {
@@ -33,7 +34,7 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
                 Icon(Icons.note_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Session Notes',
+                  context.tr('focus.notes_title'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -46,7 +47,7 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
               controller: _notesController,
               maxLines: 8,
               decoration: InputDecoration(
-                hintText: 'Write your thoughts, ideas, or reflections...',
+                hintText: context.tr('focus.notes_hint'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

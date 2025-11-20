@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class FocusLevelSelector extends StatefulWidget {
@@ -27,7 +28,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                 Icon(Icons.psychology_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Focus Level',
+                  context.tr('focus.level_title'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -100,9 +101,9 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
   }
 
   String _getLevelDescription(int level) {
-    if (level <= 3) return 'Low focus - Easy tasks';
-    if (level <= 6) return 'Medium focus - Regular tasks';
-    if (level <= 8) return 'High focus - Challenging tasks';
-    return 'Maximum focus - Deep work';
+    if (level <= 3) return context.tr('focus.level_low');
+    if (level <= 6) return context.tr('focus.level_medium');
+    if (level <= 8) return context.tr('focus.level_high');
+    return context.tr('focus.level_maximum');
   }
 }

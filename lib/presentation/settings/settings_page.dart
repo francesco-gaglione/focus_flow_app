@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,7 +10,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(context.tr('settings.title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -27,7 +28,7 @@ class SettingsPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Appearance',
+                        context.tr('settings.appearance'),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -39,11 +40,11 @@ class SettingsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SwitchListTile(
-                            title: const Text('Dark Mode'),
+                            title: Text(context.tr('settings.dark_mode')),
                             subtitle: Text(
                               state.isDarkMode
-                                  ? 'Switch to light theme'
-                                  : 'Switch to dark theme',
+                                  ? context.tr('settings.switch_to_light')
+                                  : context.tr('settings.switch_to_dark'),
                             ),
                             value: state.isDarkMode,
                             onChanged:
@@ -61,7 +62,7 @@ class SettingsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Accent color',
+                            context.tr('settings.accent_color'),
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 12),
@@ -141,21 +142,21 @@ class SettingsPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'About',
+                        context.tr('settings.about'),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const ListTile(
-                    title: Text('Version'),
-                    subtitle: Text('1.0.0'),
-                    leading: Icon(Icons.code),
+                  ListTile(
+                    title: Text(context.tr('settings.version')),
+                    subtitle: const Text('1.0.0'),
+                    leading: const Icon(Icons.code),
                   ),
-                  const ListTile(
-                    title: Text('Focus Flow'),
-                    subtitle: Text('Pomodoro Timer & Task Manager'),
-                    leading: Icon(Icons.timer),
+                  ListTile(
+                    title: Text(context.tr('settings.app_name')),
+                    subtitle: Text(context.tr('settings.app_description')),
+                    leading: const Icon(Icons.timer),
                   ),
                 ],
               ),

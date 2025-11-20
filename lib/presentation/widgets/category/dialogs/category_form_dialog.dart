@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:focus_flow_app/presentation/widgets/category/color_picker_advanced.dart';
 import 'package:focus_flow_app/presentation/widgets/common/custom_text_field.dart';
+
 
 class CategoryFormDialog extends StatefulWidget {
   final String title;
@@ -59,18 +61,18 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             children: [
               CustomTextField(
                 controller: nameController,
-                label: 'Name',
+                label: context.tr('category.name_label'),
                 icon: Icons.label_outlined,
-                hint: 'Enter category name',
+                hint: context.tr('category.name_hint'),
                 textCapitalization: TextCapitalization.words,
                 autofocus: true,
               ),
               const SizedBox(height: 16),
               CustomTextField(
                 controller: descController,
-                label: 'Description',
+                label: context.tr('category.description_label'),
                 icon: Icons.notes_outlined,
-                hint: 'Optional description',
+                hint: context.tr('category.description_hint'),
                 maxLines: 3,
                 minLines: 2,
                 textCapitalization: TextCapitalization.sentences,
@@ -88,14 +90,14 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(context.tr('common.cancel')),
         ),
         FilledButton(
           onPressed: () {
             if (nameController.text.trim().isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please enter a category name'),
+                SnackBar(
+                  content: Text(context.tr('category.name_required')),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -110,7 +112,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
             );
             Navigator.pop(context);
           },
-          child: Text(widget.initialName == null ? 'Create' : 'Update'),
+          child: Text(widget.initialName == null ? context.tr('common.create') : context.tr('common.update')),
         ),
       ],
     );

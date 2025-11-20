@@ -1,3 +1,14 @@
+# Comune
+common:
+  cancel: Annulla
+  create: Crea
+  update: Aggiorna
+  delete: Elimina
+  retry: Riprova
+  save: Salva
+  close: Chiudi
+
+# Sezione Categorie
 category:
   title: Categorie
   empty_state_title: Nessuna categoria e attività ancora
@@ -12,3 +23,74 @@ category:
   delete_task_dialog_title: Eliminare l'attività?
   delete_task_dialog_message: Questo eliminerà permanentemente l'attività. Questa azione non può essere annullata.
   delete_button: Elimina
+  name_label: Nome
+  name_hint: Inserisci il nome della categoria
+  description_label: Descrizione
+  description_hint: Descrizione opzionale
+  name_required: Inserisci un nome per la categoria
+
+# Sezione Attività
+task:
+  create_orphan_title: Crea Attività Orfana
+  edit_orphan_title: Modifica Attività Orfana
+  name_label: Nome Attività
+  name_hint: Inserisci il nome dell'attività
+  description_label: Descrizione
+  description_hint: Descrizione opzionale
+  name_required: Inserisci un nome per l'attività
+
+# Sezione Focus
+focus:
+  title: Focus
+  session_title: Sessione di Focus
+  focusing: In focus...
+  ready_to_focus: Pronto per il focus
+  start: Avvia
+  pause: Pausa
+  reset: Ripristina
+  level_title: Livello di Focus
+  level_low: Focus basso - Attività facili
+  level_medium: Focus medio - Attività regolari
+  level_high: Focus alto - Attività impegnative
+  level_maximum: Focus massimo - Lavoro profondo
+  notes_title: Note della Sessione
+  notes_hint: Scrivi i tuoi pensieri, idee o riflessioni...
+  timeline_title: Sessioni di Focus di Oggi
+  timeline_empty: Nessuna sessione completata ancora
+  level_badge: Livello
+  select_category_task: Seleziona Categoria e Attività
+  clear_selection: Cancella selezione
+  category_label: Categoria
+  task_label: Attività
+  orphan_tasks_label: Attività Orfane
+  orphan_tasks_helper: Attività senza una categoria
+
+# Sezione Impostazioni
+settings:
+  title: Impostazioni
+  appearance: Aspetto
+  dark_mode: Modalità Scura
+  switch_to_light: Passa al tema chiaro
+  switch_to_dark: Passa al tema scuro
+  accent_color: Colore principale
+  about: Informazioni
+  version: Versione
+  app_name: Focus Flow
+  app_description: Timer Pomodoro e Gestore Attività
+
+# Sezione Statistiche
+statistics:
+  title: Statistiche
+  placeholder_message: Grafici e statistiche saranno qui
+
+# Navigazione
+navigation:
+  focus: Focus
+  categories: Categorie
+  statistics: Statistiche
+  settings: Impostazioni
+
+# Messaggi di Errore
+error:
+  title: Qualcosa è andato storto
+  retry: Riprova

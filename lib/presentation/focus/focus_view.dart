@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/domain/entities/theme_settings.dart';
@@ -20,7 +21,7 @@ class FocusView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Focus'), centerTitle: false),
+      appBar: AppBar(title: Text(context.tr('focus.title')), centerTitle: false),
       body: BlocConsumer<FocusBloc, FocusState>(
         listener: (context, state) {
           if (state.selectedCategory != null) {

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
@@ -103,7 +104,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                 Icon(Icons.category_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Select Category & Task',
+                  context.tr('focus.select_category_task'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -113,7 +114,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                   IconButton(
                     onPressed: _clearCategory,
                     icon: const Icon(Icons.clear),
-                    tooltip: 'Clear selection',
+                    tooltip: context.tr('focus.clear_selection'),
                     iconSize: 20,
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -125,7 +126,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
             DropdownButtonFormField<String>(
               value: selectedCategory,
               decoration: InputDecoration(
-                labelText: 'Category',
+                labelText: context.tr('focus.category_label'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -189,14 +190,14 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
             DropdownButtonFormField<String>(
               value: selectedTask,
               decoration: InputDecoration(
-                labelText: selectedCategory == null ? 'Orphan Tasks' : 'Task',
+                labelText: selectedCategory == null ? context.tr('focus.orphan_tasks_label') : context.tr('focus.task_label'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 prefixIcon: const Icon(Icons.task_outlined),
                 helperText:
                     selectedCategory == null
-                        ? 'Tasks without a category'
+                        ? context.tr('focus.orphan_tasks_helper')
                         : null,
               ),
               items:
