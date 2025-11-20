@@ -8,8 +8,9 @@ class CategoryCard extends StatelessWidget {
   final int completedTasks;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-  final VoidCallback? onAddTask; // Add this parameter
+  final VoidCallback? onAddTask;
   final List<Widget> taskWidgets;
+  final bool showOptions;
 
   const CategoryCard({
     super.key,
@@ -20,8 +21,9 @@ class CategoryCard extends StatelessWidget {
     required this.completedTasks,
     required this.onEdit,
     required this.onDelete,
-    this.onAddTask, // Add this parameter
+    this.onAddTask,
     required this.taskWidgets,
+    this.showOptions = true,
   });
 
   @override
@@ -101,53 +103,56 @@ class CategoryCard extends StatelessWidget {
             ),
           ],
         ),
-        trailing: PopupMenuButton(
-          icon: const Icon(Icons.more_vert),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.edit_outlined,
-                        size: 20,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text('Edit'),
-                    ],
+        trailing:
+            showOptions
+                ? PopupMenuButton(
+                  icon: const Icon(Icons.more_vert),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: colorScheme.error,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Delete',
-                        style: TextStyle(color: colorScheme.error),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-          onSelected: (value) {
-            if (value == 'edit') {
-              onEdit();
-            } else if (value == 'delete') {
-              onDelete();
-            }
-          },
-        ),
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.edit_outlined,
+                                size: 20,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 12),
+                              const Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: colorScheme.error,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: colorScheme.error),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      onEdit();
+                    } else if (value == 'delete') {
+                      onDelete();
+                    }
+                  },
+                )
+                : null,
         children:
             taskWidgets.isEmpty
                 ? [

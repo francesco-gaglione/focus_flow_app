@@ -241,7 +241,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         description: event.description,
       );
       if (result.success) {
-        add(LoadCategories());
+        add(InitState());
       } else {
         emit(
           state.copyWith(

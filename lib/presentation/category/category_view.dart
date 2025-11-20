@@ -95,9 +95,10 @@ class CategoryView extends StatelessWidget {
       color: _orphanTaskColor,
       totalTasks: orphanTasks.length,
       completedTasks: orphanTasks.where((t) => t.completedAt != null).length,
-      onEdit: () => print("TODO"),
-      onDelete: () => print("TODO"),
+      onEdit: () => print("TODO: edit on orphan tasks card is not allowed"),
+      onDelete: () => print("TODO: delete on orphan tasks card is not allowed"),
       taskWidgets: _buildTaskList(context, orphanTasks),
+      showOptions: false,
     );
   }
 
