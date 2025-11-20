@@ -1,0 +1,14 @@
+category:
+  title: Categories
+  empty_state_title: No categories and tasks yet
+  empty_state_message: Tap the + button to create your first category or add a task
+  add_category_button: Category
+  unassigned_tasks: Unassigned Tasks
+  unassigned_task_description: Tasks without a category
+  create_category_dialog_title: Create Category
+  edit_category_dialog_title: Edit Category
+  delete_category_dialog_title: Delete Category?
+  delete_category_dialog_message: This will permanently delete the category and all its tasks. This action cannot be undone.
+  delete_task_dialog_title: Delete Task?
+  delete_task_dialog_message: This will permanently delete the task. This action cannot be undone.
+  delete_button: Delete

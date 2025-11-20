@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
@@ -20,7 +21,10 @@ class CategoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories'), centerTitle: false),
+      appBar: AppBar(
+        title: Text(context.tr('category.title')),
+        centerTitle: false,
+      ),
       body: BlocBuilder<CategoryBloc, CategoryState>(
         builder: (context, state) {
           if (state.isLoading) {
@@ -38,11 +42,10 @@ class CategoryView extends StatelessWidget {
           final orphanTasks = state.tasks;
 
           if (categories.isEmpty && orphanTasks.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.category_outlined,
-              title: 'No categories and tasks yet',
-              message:
-                  'Tap the + button to create your first category or add a task',
+              title: context.tr('category.empty_state_title'),
+              message: context.tr('category.empty_state_message'),
             );
           }
 
@@ -87,8 +90,8 @@ class CategoryView extends StatelessWidget {
     List<Task> orphanTasks,
   ) {
     return CategoryCard(
-      name: 'Unassigned Tasks',
-      description: 'Tasks without a category',
+      name: context.tr('category.unassigned_tasks'),
+      description: context.tr('category.unassigned_task_description'),
       color: _orphanTaskColor,
       totalTasks: orphanTasks.length,
       completedTasks: orphanTasks.where((t) => t.completedAt != null).length,
@@ -117,7 +120,7 @@ class CategoryView extends StatelessWidget {
             heroTag: 'category',
             onPressed: () => _showCreateCategoryDialog(context),
             icon: const Icon(Icons.add),
-            label: const Text('Category'),
+            label: Text(context.tr('category.add_category_button')),
           ),
         ),
       ],
@@ -162,7 +165,7 @@ class CategoryView extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => CategoryFormDialog(
-            title: 'Create Category',
+            title: context.tr('category.create_category_dialog_title'),
             icon: Icons.create_new_folder_outlined,
             onSubmit: (name, description, color) {
               context.read<CategoryBloc>().add(
@@ -182,7 +185,7 @@ class CategoryView extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => CategoryFormDialog(
-            title: 'Edit Category',
+            title: context.tr('category.edit_category_dialog_title'),
             icon: Icons.edit_outlined,
             initialName: category.name,
             initialDescription: category.description,
@@ -226,10 +229,9 @@ class CategoryView extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => ConfirmationDialog(
-            title: 'Delete Category?',
-            message:
-                'This will permanently delete the category and all its tasks. This action cannot be undone.',
-            confirmText: 'Delete',
+            title: context.tr('category.delete_category_dialog_title'),
+            message: context.tr('category.delete_category_dialog_message'),
+            confirmText: context.tr('category.delete_button'),
             onConfirm: () {
               context.read<CategoryBloc>().add(
                 DeleteCategoryEvent(id: categoryId),
@@ -244,10 +246,9 @@ class CategoryView extends StatelessWidget {
       context: context,
       builder:
           (dialogContext) => ConfirmationDialog(
-            title: 'Delete Task?',
-            message:
-                'This will permanently delete the task. This action cannot be undone.',
-            confirmText: 'Delete',
+            title: context.tr('category.delete_task_dialog_title'),
+            message: context.tr('category.delete_task_dialog_message'),
+            confirmText: context.tr('category.delete_button'),
             onConfirm: () {
               context.read<CategoryBloc>().add(DeleteTaskEvent(id: taskId));
             },

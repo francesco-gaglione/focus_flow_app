@@ -1,0 +1,14 @@
+category:
+  title: Categorie
+  empty_state_title: Nessuna categoria e attività ancora
+  empty_state_message: Tocca il pulsante + per creare la tua prima categoria o aggiungere un'attività
+  add_category_button: Categoria
+  unassigned_tasks: Attività non assegnate
+  unassigned_task_description: Attività senza una categoria
+  create_category_dialog_title: Crea Categoria
+  edit_category_dialog_title: Modifica Categoria
+  delete_category_dialog_title: Eliminare la categoria?
+  delete_category_dialog_message: Questo eliminerà permanentemente la categoria e tutte le sue attività. Questa azione non può essere annullata.
+  delete_task_dialog_title: Eliminare l'attività?
+  delete_task_dialog_message: Questo eliminerà permanentemente l'attività. Questa azione non può essere annullata.
+  delete_button: Elimina
