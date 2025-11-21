@@ -9,6 +9,8 @@ class CategoryTaskSelector extends StatefulWidget {
   final List<Task> orphanTasks;
   final ValueChanged<Category?>? onCategoryChanged;
   final ValueChanged<Task?>? onTaskChanged;
+  final String? initialCategoryId;
+  final String? initialTaskId;
 
   const CategoryTaskSelector({
     Key? key,
@@ -16,6 +18,8 @@ class CategoryTaskSelector extends StatefulWidget {
     required this.orphanTasks,
     this.onCategoryChanged,
     this.onTaskChanged,
+    this.initialCategoryId,
+    this.initialTaskId,
   }) : super(key: key);
 
   @override
@@ -31,21 +35,70 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
   @override
   void initState() {
     super.initState();
-    tasks = widget.orphanTasks;
-  }
 
-  @override
-  void didUpdateWidget(CategoryTaskSelector oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Update tasks when category changes
+    selectedCategory = widget.initialCategoryId;
+    selectedTask = widget.initialTaskId;
+
     if (selectedCategory != null) {
       final category = widget.categories.firstWhere(
         (cat) => cat.category.id == selectedCategory,
         orElse: () => widget.categories.first,
       );
       tasks = category.tasks;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onCategoryChanged?.call(_getCategoryById(selectedCategory!));
+        if (selectedTask != null) {
+          widget.onTaskChanged?.call(_getTaskById(selectedTask!));
+        }
+      });
     } else {
       tasks = widget.orphanTasks;
+    }
+  }
+
+  @override
+  void didUpdateWidget(CategoryTaskSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.initialCategoryId != widget.initialCategoryId ||
+        oldWidget.initialTaskId != widget.initialTaskId) {
+      setState(() {
+        selectedCategory = widget.initialCategoryId;
+        selectedTask = widget.initialTaskId;
+
+        if (selectedCategory != null) {
+          CategoryWithTasks? category;
+          try {
+            category = widget.categories.firstWhere(
+              (cat) => cat.category.id == selectedCategory,
+            );
+          } catch (e) {
+            // Not found
+            category = null;
+          }
+
+          if (category != null) {
+            tasks = category.tasks;
+            // Also, validate if the selectedTask is in the new list of tasks
+            if (selectedTask != null &&
+                !tasks.any((t) => t.id == selectedTask)) {
+              selectedTask = null;
+            }
+          } else {
+            // Category from websocket not found in the list.
+            tasks = [];
+            selectedCategory = null; // This will make the dropdown empty.
+            selectedTask = null;
+          }
+        } else {
+          tasks = widget.orphanTasks;
+          // Also, validate if the selectedTask is in the new list of orphan tasks
+          if (selectedTask != null && !tasks.any((t) => t.id == selectedTask)) {
+            selectedTask = null;
+          }
+        }
+      });
     }
   }
 
@@ -64,7 +117,6 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
       tasks = widget.orphanTasks;
     });
 
-    // Emit changes
     widget.onCategoryChanged?.call(null);
     widget.onTaskChanged?.call(null);
   }
@@ -164,7 +216,6 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                   selectedCategory = value;
                   selectedTask = null;
 
-                  // Update tasks based on selected category
                   if (value != null) {
                     final category = widget.categories.firstWhere(
                       (cat) => cat.category.id == value,
@@ -175,11 +226,8 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                   }
                 });
 
-                // Emit category change
                 final category = value != null ? _getCategoryById(value) : null;
                 widget.onCategoryChanged?.call(category);
-
-                // Reset task selection
                 widget.onTaskChanged?.call(null);
               },
             ),
@@ -190,7 +238,10 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
             DropdownButtonFormField<String>(
               value: selectedTask,
               decoration: InputDecoration(
-                labelText: selectedCategory == null ? context.tr('focus.orphan_tasks_label') : context.tr('focus.task_label'),
+                labelText:
+                    selectedCategory == null
+                        ? context.tr('focus.orphan_tasks_label')
+                        : context.tr('focus.task_label'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

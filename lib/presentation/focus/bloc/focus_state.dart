@@ -26,12 +26,18 @@ class FocusState {
     Task? selectedTask,
     bool? isLoading,
     String? errorMessage,
+    bool clearSelectedCategory = false,
+    bool clearSelectedTask = false,
   }) {
     return FocusState(
       categories: categories ?? this.categories,
       orphanTasks: orphanTasks ?? this.orphanTasks,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
-      selectedTask: selectedTask ?? this.selectedTask,
+      selectedCategory:
+          clearSelectedCategory
+              ? null
+              : selectedCategory ?? this.selectedCategory,
+      selectedTask:
+          clearSelectedTask ? null : selectedTask ?? this.selectedTask,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
     );

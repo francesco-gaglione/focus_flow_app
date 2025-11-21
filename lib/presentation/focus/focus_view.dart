@@ -21,7 +21,10 @@ class FocusView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('focus.title')), centerTitle: false),
+      appBar: AppBar(
+        title: Text(context.tr('focus.title')),
+        centerTitle: false,
+      ),
       body: BlocConsumer<FocusBloc, FocusState>(
         listener: (context, state) {
           if (state.selectedCategory != null) {
@@ -108,10 +111,15 @@ class FocusView extends StatelessWidget {
                 CategoryTaskSelector(
                   categories: state.categories,
                   orphanTasks: state.orphanTasks,
+                  initialCategoryId: state.selectedCategory?.id,
+                  initialTaskId: state.selectedTask?.id,
                   onCategoryChanged:
-                      (category) => context.read<FocusBloc>().add(
-                        CategorySelected(category: category),
-                      ),
+                      (category) => {
+                        print('Category changed to $category'),
+                        context.read<FocusBloc>().add(
+                          CategorySelected(category: category),
+                        ),
+                      },
                   onTaskChanged:
                       (task) => context.read<FocusBloc>().add(
                         TaskSelected(task: task),
@@ -142,6 +150,18 @@ class FocusView extends StatelessWidget {
           CategoryTaskSelector(
             categories: state.categories,
             orphanTasks: state.orphanTasks,
+            initialCategoryId: state.selectedCategory?.id,
+            initialTaskId: state.selectedTask?.id,
+            onCategoryChanged:
+                (category) => {
+                  print('Category changed to $category'),
+                  context.read<FocusBloc>().add(
+                    CategorySelected(category: category),
+                  ),
+                },
+            onTaskChanged:
+                (task) =>
+                    context.read<FocusBloc>().add(TaskSelected(task: task)),
           ),
           const SizedBox(height: 24),
 
