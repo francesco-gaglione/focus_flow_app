@@ -1,14 +1,17 @@
+import 'package:equatable/equatable.dart';
+import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 
-class FocusState {
+class FocusState extends Equatable {
   final bool isLoading;
   final String? errorMessage;
   final List<CategoryWithTasks> categories;
   final List<Task> orphanTasks;
   final Category? selectedCategory;
   final Task? selectedTask;
+  final SessionState? sessionState;
 
   const FocusState({
     this.isLoading = false,
@@ -17,6 +20,7 @@ class FocusState {
     this.orphanTasks = const [],
     this.selectedCategory,
     this.selectedTask,
+    this.sessionState,
   });
 
   FocusState copyWith({
@@ -28,6 +32,9 @@ class FocusState {
     String? errorMessage,
     bool clearSelectedCategory = false,
     bool clearSelectedTask = false,
+    int? selectedFocusLevel,
+    SessionState? sessionState,
+    bool clearSessionState = false,
   }) {
     return FocusState(
       categories: categories ?? this.categories,
@@ -40,6 +47,50 @@ class FocusState {
           clearSelectedTask ? null : selectedTask ?? this.selectedTask,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
+      sessionState:
+          clearSessionState ? null : sessionState ?? this.sessionState,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    isLoading,
+    errorMessage,
+    categories,
+    orphanTasks,
+    selectedCategory,
+    selectedTask,
+    sessionState,
+  ];
+}
+
+class SessionState extends Equatable {
+  final SessionTypeEnum sessionType;
+  final int startDate;
+  final int? selectedFocusLevel;
+  final String? note;
+
+  const SessionState({
+    required this.sessionType,
+    required this.startDate,
+    this.selectedFocusLevel,
+    this.note,
+  });
+
+  SessionState copyWith({
+    SessionTypeEnum? sessionType,
+    int? startDate,
+    int? selectedFocusLevel,
+    String? note,
+  }) {
+    return SessionState(
+      sessionType: sessionType ?? this.sessionType,
+      startDate: startDate ?? this.startDate,
+      selectedFocusLevel: selectedFocusLevel ?? this.selectedFocusLevel,
+      note: note ?? this.note,
+    );
+  }
+
+  @override
+  List<Object?> get props => [sessionType, startDate, selectedFocusLevel, note];
 }

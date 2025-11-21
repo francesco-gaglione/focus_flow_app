@@ -73,9 +73,10 @@ Map<String, dynamic> _$$UpdateCurrentSessionImplToJson(
 };
 
 const _$SessionTypeEnumEnumMap = {
+  SessionTypeEnum.work: 'Work',
   SessionTypeEnum.focus: 'focus',
-  SessionTypeEnum.shortBreak: 'break',
-  SessionTypeEnum.longBreak: 'longBreak',
+  SessionTypeEnum.shortBreak: 'ShortBreak',
+  SessionTypeEnum.longBreak: 'LongBreak',
 };
 
 _$UpdatePomodoroStateImpl _$$UpdatePomodoroStateImplFromJson(

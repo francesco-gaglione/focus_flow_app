@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/repositories/category_repository.dart';
@@ -33,11 +34,14 @@ class GetCategoriesAndTasks {
   }
 }
 
-class CategoryWithTasks {
+class CategoryWithTasks extends Equatable {
   final Category category;
   final List<Task> tasks;
 
-  CategoryWithTasks({required this.category, required this.tasks});
+  const CategoryWithTasks({required this.category, required this.tasks});
+
+  @override
+  List<Object?> get props => [category, tasks];
 }
 
 class GetCategoriesAndTasksResult {

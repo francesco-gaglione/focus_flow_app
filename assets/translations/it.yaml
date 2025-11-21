@@ -43,10 +43,16 @@ task:
 focus:
   title: Focus
   session_title: Sessione di Focus
+  short_break_title: Pausa Breve
+  long_break_title: Pausa Lunga
+  short_break_status: In pausa breve...
+  long_break_status: In pausa lunga...
   focusing: In focus...
   ready_to_focus: Pronto per il focus
   start: Avvia
   pause: Pausa
+  break: Pausa
+  terminate: Termina
   reset: Ripristina
   level_title: Livello di Focus
   level_low: Focus basso - Attività facili

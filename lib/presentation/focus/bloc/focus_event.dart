@@ -17,6 +17,24 @@ class TaskSelected extends FocusEvent {
   TaskSelected({required this.task});
 }
 
+class StartFocus extends FocusEvent {}
+
+class BreakFocus extends FocusEvent {}
+
+class TerminateFocus extends FocusEvent {}
+
+class UpdateNote extends FocusEvent {
+  final String note;
+
+  UpdateNote({required this.note});
+}
+
+class FocusLevelSelected extends FocusEvent {
+  final int focusLevel;
+
+  FocusLevelSelected({required this.focusLevel});
+}
+
 class PomodoroStateUpdated extends FocusEvent {
   final dynamic pomodoroState;
 

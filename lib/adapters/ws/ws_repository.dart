@@ -10,19 +10,25 @@ class WebsocketRepository {
   final Logger logger = Logger();
   final String wsUrl;
   final Uuid _uuid = const Uuid();
-  
+
   WebSocket? _ws;
   StreamSubscription? _subscription;
-  
+
   // Stream controllers for different message types
-  final _serverResponseController = StreamController<ServerResponse>.broadcast();
-  final _broadcastEventController = StreamController<BroadcastEvent>.broadcast();
-  final _pomodoroStateController = StreamController<UpdatePomodoroState>.broadcast();
-  
+  final _serverResponseController =
+      StreamController<ServerResponse>.broadcast();
+  final _broadcastEventController =
+      StreamController<BroadcastEvent>.broadcast();
+  final _pomodoroStateController =
+      StreamController<UpdatePomodoroState>.broadcast();
+
   // Streams for listening to messages
-  Stream<ServerResponse> get serverResponses => _serverResponseController.stream;
-  Stream<BroadcastEvent> get broadcastEvents => _broadcastEventController.stream;
-  Stream<UpdatePomodoroState> get pomodoroStateUpdates => _pomodoroStateController.stream;
+  Stream<ServerResponse> get serverResponses =>
+      _serverResponseController.stream;
+  Stream<BroadcastEvent> get broadcastEvents =>
+      _broadcastEventController.stream;
+  Stream<UpdatePomodoroState> get pomodoroStateUpdates =>
+      _pomodoroStateController.stream;
 
   WebsocketRepository(this.wsUrl);
 
@@ -32,7 +38,7 @@ class WebsocketRepository {
       logger.d('Connecting to $wsUrl...');
       _ws = await WebSocket.connect(wsUrl);
       logger.i('Connected to $wsUrl');
-      
+
       // Start listening to incoming messages
       _subscription = _ws!.listen(
         _handleMessage,
@@ -54,7 +60,7 @@ class WebsocketRepository {
     try {
       logger.d('Received message: $data');
       final jsonData = json.decode(data as String) as Map<String, dynamic>;
-      
+
       // Check which type of message we received based on the keys
       if (jsonData.containsKey('success')) {
         // Success response
@@ -82,7 +88,8 @@ class WebsocketRepository {
         _pomodoroStateController.add(pomodoroState);
       } else if (jsonData.containsKey('pomodoroSessionUpdate')) {
         // Broadcast event
-        final updateData = jsonData['pomodoroSessionUpdate'] as Map<String, dynamic>;
+        final updateData =
+            jsonData['pomodoroSessionUpdate'] as Map<String, dynamic>;
         final pomodoroState = UpdatePomodoroState.fromJson(updateData);
         final event = BroadcastEvent.pomodoroSessionUpdate(pomodoroState);
         _broadcastEventController.add(event);
@@ -108,7 +115,7 @@ class WebsocketRepository {
       // Example: {"requestId": "123", "requestSync": {}}
       final reqId = requestId ?? _uuid.v4();
       final Map<String, dynamic> jsonMessage = {'requestId': reqId};
-      
+
       // Add the message type and payload based on the message variant
       message.when(
         requestSync: () {
@@ -133,7 +140,7 @@ class WebsocketRepository {
           jsonMessage['updateConcentrationScore'] = payload.toJson();
         },
       );
-      
+
       final jsonString = json.encode(jsonMessage);
       logger.d('Sending message: $jsonString');
       _ws!.add(jsonString);
@@ -202,7 +209,9 @@ class WebsocketRepository {
   // -----------------------------------------------------------------------------
 
   /// Register a raw listener (deprecated - use typed streams instead)
-  @Deprecated('Use serverResponses, broadcastEvents, or pomodoroStateUpdates streams instead')
+  @Deprecated(
+    'Use serverResponses, broadcastEvents, or pomodoroStateUpdates streams instead',
+  )
   void registerListener(Function(dynamic) callback) {
     if (_ws != null) {
       _subscription = _ws!.listen(callback);
@@ -212,7 +221,9 @@ class WebsocketRepository {
   }
 
   /// Send raw string message (deprecated - use typed methods instead)
-  @Deprecated('Use typed message methods like requestSync(), sendStartEvent(), etc.')
+  @Deprecated(
+    'Use typed message methods like requestSync(), sendStartEvent(), etc.',
+  )
   void send(String message) {
     if (_ws != null) {
       logger.d('Sending raw message: $message');
@@ -245,7 +256,7 @@ class WebsocketRepository {
       await _ws!.close();
       logger.i('Disconnected from websocket');
     }
-    
+
     // Close stream controllers
     await _serverResponseController.close();
     await _broadcastEventController.close();

@@ -9,11 +9,13 @@ part 'ws_dtos.g.dart';
 
 /// Mapped from `common::session_type_enum::SessionTypeEnum`
 enum SessionTypeEnum {
+  @JsonValue('Work')
+  work,
   @JsonValue('focus')
   focus,
-  @JsonValue('break')
-  shortBreak, // Rename based on your actual Rust enum variants
-  @JsonValue('longBreak')
+  @JsonValue('ShortBreak')
+  shortBreak,
+  @JsonValue('LongBreak')
   longBreak,
 }
 

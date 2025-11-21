@@ -2,17 +2,44 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class FocusNotesWidget extends StatefulWidget {
-  const FocusNotesWidget({Key? key}) : super(key: key);
+  final String? initialNotes;
+  final ValueChanged<String>? onNotesChanged;
+
+  const FocusNotesWidget({Key? key, this.initialNotes, this.onNotesChanged})
+    : super(key: key);
 
   @override
   State<FocusNotesWidget> createState() => _FocusNotesWidgetState();
 }
 
 class _FocusNotesWidgetState extends State<FocusNotesWidget> {
-  final TextEditingController _notesController = TextEditingController();
+  late TextEditingController _notesController;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController = TextEditingController(text: widget.initialNotes ?? '');
+    _notesController.addListener(_onTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant FocusNotesWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialNotes != oldWidget.initialNotes &&
+        widget.initialNotes != _notesController.text) {
+      _notesController.text = widget.initialNotes ?? '';
+    }
+  }
+
+  void _onTextChanged() {
+    if (widget.onNotesChanged != null) {
+      widget.onNotesChanged!(_notesController.text);
+    }
+  }
 
   @override
   void dispose() {
+    _notesController.removeListener(_onTextChanged);
     _notesController.dispose();
     super.dispose();
   }
@@ -42,7 +69,6 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
               ],
             ),
             const SizedBox(height: 16),
-
             TextField(
               controller: _notesController,
               maxLines: 8,

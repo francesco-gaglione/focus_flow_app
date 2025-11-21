@@ -1,4 +1,6 @@
-class Category {
+import 'package:equatable/equatable.dart';
+
+class Category extends Equatable {
   final String id;
   final String name;
   final String color;
@@ -6,7 +8,7 @@ class Category {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Category({
+  const Category({
     required this.id,
     required this.name,
     required this.color,
@@ -37,4 +39,14 @@ class Category {
   String toString() {
     return 'Category(id: $id, name: $name, color: $color, description: $description, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    name,
+    color,
+    description,
+    createdAt,
+    updatedAt,
+  ];
 }

@@ -11,12 +11,50 @@ import 'package:focus_flow_app/presentation/widgets/focus/focus_level_selector.d
 import 'package:focus_flow_app/presentation/widgets/focus/focus_notes.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timeline.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timer.dart';
+import 'package:logger/logger.dart';
 
-class FocusView extends StatelessWidget {
-  const FocusView({Key? key}) : super(key: key);
+class FocusView extends StatefulWidget {
+  FocusView({Key? key}) : super(key: key);
 
-  // Breakpoint for desktop layout
+  @override
+  _FocusViewState createState() => _FocusViewState();
+}
+
+class _FocusViewState extends State<FocusView> {
+  final Logger logger = Logger();
+
   static const double desktopBreakpoint = 900;
+
+  void _onFocusLevelChanged(BuildContext context, int level) {
+    logger.d('Focus level changed to $level');
+    context.read<FocusBloc>().add(FocusLevelSelected(focusLevel: level));
+  }
+
+  void _onCategoryChanged(BuildContext context, category) {
+    logger.d('Category changed to $category');
+    context.read<FocusBloc>().add(CategorySelected(category: category));
+  }
+
+  void _onTaskChanged(BuildContext context, task) {
+    context.read<FocusBloc>().add(TaskSelected(task: task));
+  }
+
+  void _onNoteChanged(BuildContext context, String note) {
+    context.read<FocusBloc>().add(UpdateNote(note: note));
+  }
+
+  void _onStart() {
+    logger.d('Starting timer');
+    context.read<FocusBloc>().add(StartFocus());
+  }
+
+  void _onBreak() {
+    context.read<FocusBloc>().add(BreakFocus());
+  }
+
+  void _onTerminate() {
+    context.read<FocusBloc>().add(TerminateFocus());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,139 +81,125 @@ class FocusView extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth >= desktopBreakpoint;
-
-              if (isDesktop) {
-                return _buildDesktopLayout(context, state);
-              } else {
-                return _buildMobileLayout(context, state);
-              }
-            },
+          logger.d(
+            'Building FocusView with sessionState: ${state.sessionState}',
           );
-        },
-      ),
-    );
-  }
+          if (state.isLoading)
+            return const Center(child: CircularProgressIndicator());
 
-  /// Desktop layout with split view
-  Widget _buildDesktopLayout(BuildContext context, FocusState state) {
-    return Row(
-      children: [
-        // Left side - Timer, Focus Level, Notes
-        Expanded(
-          flex: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                right: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Timer Widget
-                  const FocusTimerWidget(),
-                  const SizedBox(height: 32),
+          final isDesktop =
+              MediaQuery.of(context).size.width >= desktopBreakpoint;
 
-                  // Focus Level Selector
-                  const FocusLevelSelector(),
-                  const SizedBox(height: 32),
+          final focusLevelSelector =
+              state.sessionState != null
+                  ? FocusLevelSelector(
+                    initialLevel: state.sessionState?.selectedFocusLevel,
+                    onFocusLevelChanged:
+                        (level) => _onFocusLevelChanged(context, level),
+                  )
+                  : SizedBox(height: 0);
 
-                  // Notes
-                  const FocusNotesWidget(),
-                ],
-              ),
-            ),
-          ),
-        ),
+          final notesWidget =
+              state.sessionState != null
+                  ? FocusNotesWidget(
+                    initialNotes: state.sessionState?.note,
+                    onNotesChanged: (notes) => _onNoteChanged(context, notes),
+                  )
+                  : SizedBox(height: 0);
 
-        // Right side - Category/Task Selector and Timeline
-        Expanded(
-          flex: 1,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CategoryTaskSelector(
-                  categories: state.categories,
-                  orphanTasks: state.orphanTasks,
-                  initialCategoryId: state.selectedCategory?.id,
-                  initialTaskId: state.selectedTask?.id,
-                  onCategoryChanged:
-                      (category) => {
-                        print('Category changed to $category'),
-                        context.read<FocusBloc>().add(
-                          CategorySelected(category: category),
-                        ),
-                      },
-                  onTaskChanged:
-                      (task) => context.read<FocusBloc>().add(
-                        TaskSelected(task: task),
-                      ),
-                ),
-                const SizedBox(height: 32),
-                const FocusTimelineWidget(),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Mobile layout with vertical scroll
-  Widget _buildMobileLayout(BuildContext context, FocusState state) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Timer Widget
-          const FocusTimerWidget(),
-          const SizedBox(height: 24),
-
-          // Category and Task Selector - Pass data from state
-          CategoryTaskSelector(
+          final categoryTaskSelector = CategoryTaskSelector(
             categories: state.categories,
             orphanTasks: state.orphanTasks,
             initialCategoryId: state.selectedCategory?.id,
             initialTaskId: state.selectedTask?.id,
-            onCategoryChanged:
-                (category) => {
-                  print('Category changed to $category'),
-                  context.read<FocusBloc>().add(
-                    CategorySelected(category: category),
+            onCategoryChanged: (cat) => _onCategoryChanged(context, cat),
+            onTaskChanged: (task) => _onTaskChanged(context, task),
+          );
+
+          final timelineWidget = FocusTimelineWidget();
+
+          final focusTimerWidget = FocusTimerWidget(
+            startDate:
+                state.sessionState != null
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                      state.sessionState!.startDate * 1000,
+                    )
+                    : null,
+
+            sessionType: state.sessionState?.sessionType,
+
+            onStart: _onStart,
+
+            onBreak: _onBreak,
+
+            onTerminate: _onTerminate,
+          );
+
+          if (isDesktop) {
+            return Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          focusTimerWidget,
+                          const SizedBox(height: 32),
+                          focusLevelSelector,
+                          const SizedBox(height: 32),
+                          notesWidget,
+                        ],
+                      ),
+                    ),
                   ),
-                },
-            onTaskChanged:
-                (task) =>
-                    context.read<FocusBloc>().add(TaskSelected(task: task)),
-          ),
-          const SizedBox(height: 24),
-
-          // Focus Level Selector
-          const FocusLevelSelector(),
-          const SizedBox(height: 24),
-
-          // Notes
-          const FocusNotesWidget(),
-          const SizedBox(height: 24),
-
-          // Timeline
-          const FocusTimelineWidget(),
-        ],
+                ),
+                Expanded(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        categoryTaskSelector,
+                        const SizedBox(height: 32),
+                        timelineWidget,
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  focusTimerWidget,
+                  const SizedBox(height: 24),
+                  categoryTaskSelector,
+                  const SizedBox(height: 24),
+                  focusLevelSelector,
+                  const SizedBox(height: 24),
+                  notesWidget,
+                  const SizedBox(height: 24),
+                  timelineWidget,
+                ],
+              ),
+            );
+          }
+        },
       ),
     );
   }

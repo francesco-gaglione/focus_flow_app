@@ -2,7 +2,14 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 
 class FocusLevelSelector extends StatefulWidget {
-  const FocusLevelSelector({Key? key}) : super(key: key);
+  final ValueChanged<int> onFocusLevelChanged;
+  final int? initialLevel;
+
+  const FocusLevelSelector({
+    Key? key,
+    required this.onFocusLevelChanged,
+    this.initialLevel,
+  }) : super(key: key);
 
   @override
   State<FocusLevelSelector> createState() => _FocusLevelSelectorState();
@@ -10,6 +17,12 @@ class FocusLevelSelector extends StatefulWidget {
 
 class _FocusLevelSelectorState extends State<FocusLevelSelector> {
   int? selectedLevel;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedLevel = widget.initialLevel;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +54,16 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: List.generate(10, (index) {
+              children: List.generate(5, (index) {
                 final level = index + 1;
                 final isSelected = selectedLevel == level;
 
                 return InkWell(
-                  onTap: () => setState(() => selectedLevel = level),
+                  onTap:
+                      () => {
+                        widget.onFocusLevelChanged(level),
+                        setState(() => selectedLevel = level),
+                      },
                   borderRadius: BorderRadius.circular(12),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),

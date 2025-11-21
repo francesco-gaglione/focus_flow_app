@@ -31,6 +31,11 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     on<CategorySelected>(_onCategorySelected);
     on<TaskSelected>(_onTaskSelected);
     on<PomodoroStateUpdated>(_onPomodoroStateUpdated);
+    on<FocusLevelSelected>(_onFocusLevelSelected);
+    on<UpdateNote>(_onUpdateNote);
+    on<StartFocus>(_onStartFocus);
+    on<BreakFocus>(_onBreakFocus);
+    on<TerminateFocus>(_onTerminateFocus);
   }
 
   @override
@@ -75,7 +80,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         final tasksResult = await _fetchOrphanTasks.execute();
 
         emit(
-          FocusState(
+          state.copyWith(
             categories: categories,
             orphanTasks: tasksResult.orphanTasks ?? [],
             isLoading: false,
@@ -126,6 +131,46 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       categoryId: state.selectedCategory?.id,
       taskId: event.task?.id,
     );
+  }
+
+  Future<void> _onFocusLevelSelected(
+    FocusLevelSelected event,
+    Emitter<FocusState> emit,
+  ) async {
+    logger.d('Focus level selected: ${event.focusLevel}');
+    emit(state.copyWith(selectedFocusLevel: event.focusLevel));
+    _websocketRepository.updateConcentrationScore(event.focusLevel);
+  }
+
+  Future<void> _onUpdateNote(UpdateNote event, Emitter<FocusState> emit) async {
+    logger.d('Note updated: ${event.note}');
+    if (state.sessionState != null) {
+      SessionState sessionState = state.sessionState!.copyWith(
+        note: event.note,
+      );
+      emit(state.copyWith(sessionState: sessionState));
+      _websocketRepository.updateNote(event.note);
+    } else {
+      logger.e('Session state is null');
+    }
+  }
+
+  Future<void> _onStartFocus(StartFocus event, Emitter<FocusState> emit) async {
+    logger.d('Focus started');
+    _websocketRepository.sendStartEvent();
+  }
+
+  Future<void> _onBreakFocus(BreakFocus event, Emitter<FocusState> emit) async {
+    logger.d('Focus broken');
+    _websocketRepository.sendBreakEvent();
+  }
+
+  Future<void> _onTerminateFocus(
+    TerminateFocus event,
+    Emitter<FocusState> emit,
+  ) async {
+    logger.d('Focus terminated');
+    _websocketRepository.sendTerminateEvent();
   }
 
   /// Handle WebSocket messages from the repository
@@ -222,6 +267,16 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       }
     }
 
+    SessionState? sessionState;
+    if (pomodoroState.currentSession != null) {
+      sessionState = SessionState(
+        sessionType: pomodoroState.currentSession!.sessionType,
+        startDate: pomodoroState.currentSession!.sessionStartTime,
+        note: pomodoroState.currentSession!.note,
+        selectedFocusLevel: pomodoroState.currentSession!.concentrationScore,
+      );
+    }
+
     logger.d(
       'Updating state - Category: ${selectedCategory?.name}, Task: ${selectedTask?.name}',
     );
@@ -231,6 +286,8 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         selectedTask: selectedTask,
         clearSelectedCategory: selectedCategory == null,
         clearSelectedTask: selectedTask == null,
+        sessionState: sessionState,
+        clearSessionState: sessionState == null,
       ),
     );
   }

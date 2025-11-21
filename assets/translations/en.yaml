@@ -43,10 +43,16 @@ task:
 focus:
   title: Focus
   session_title: Focus Session
+  short_break_title: Short Break
+  long_break_title: Long Break
+  short_break_status: On a short break...
+  long_break_status: On a long break...
   focusing: Focusing...
   ready_to_focus: Ready to focus
   start: Start
   pause: Pause
+  break: Break
+  terminate: Terminate
   reset: Reset
   level_title: Focus Level
   level_low: Low focus - Easy tasks

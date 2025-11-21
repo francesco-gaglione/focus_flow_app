@@ -17,7 +17,7 @@ class FocusPage extends StatelessWidget {
             fetchOrphanTasks: sl(),
             websocketRepository: sl(),
           )..add(InitState()),
-      child: const FocusView(),
+      child: FocusView(),
     );
   }
 }

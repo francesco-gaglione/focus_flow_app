@@ -1,187 +1,279 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class FocusTimerWidget extends StatefulWidget {
-  const FocusTimerWidget({Key? key}) : super(key: key);
+import 'package:logger/logger.dart';
 
-  @override
-  State<FocusTimerWidget> createState() => _FocusTimerWidgetState();
-}
+import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 
-class _FocusTimerWidgetState extends State<FocusTimerWidget>
-    with SingleTickerProviderStateMixin {
-  bool isRunning = false;
-  int totalSeconds = 25 * 60; // 25 minutes default
-  int remainingSeconds = 25 * 60;
+class FocusTimerWidget extends StatelessWidget {
+  Logger logger = Logger();
 
-  late AnimationController _animationController;
+  final DateTime? startDate;
+  final VoidCallback onStart;
+  final VoidCallback onBreak;
+  final VoidCallback onTerminate;
+  final SessionTypeEnum? sessionType;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..addListener(() {
-      if (isRunning && remainingSeconds > 0) {
-        setState(() {
-          remainingSeconds--;
-        });
-      } else if (remainingSeconds == 0) {
-        _stopTimer();
-      }
-    });
+  FocusTimerWidget({
+    Key? key,
+    this.startDate,
+    required this.onStart,
+    required this.onBreak,
+    required this.onTerminate,
+    this.sessionType,
+  }) : super(key: key);
+
+  int _getTotalSeconds(SessionTypeEnum? sessionType) {
+    switch (sessionType) {
+      case SessionTypeEnum.focus:
+      case SessionTypeEnum.work:
+        return 25 * 60;
+      case SessionTypeEnum.shortBreak:
+        return 5 * 60;
+      case SessionTypeEnum.longBreak:
+        return 15 * 60;
+      default:
+        return 25 * 60;
+    }
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
+  String _getTitle(BuildContext context, SessionTypeEnum? sessionType) {
+    switch (sessionType) {
+      case SessionTypeEnum.focus:
+      case SessionTypeEnum.work:
+        return context.tr('focus.session_title');
+      case SessionTypeEnum.shortBreak:
+        return context.tr('focus.short_break_title');
+      case SessionTypeEnum.longBreak:
+        return context.tr('focus.long_break_title');
+      default:
+        return context.tr('focus.session_title');
+    }
   }
 
-  void _startTimer() {
-    setState(() {
-      isRunning = true;
-    });
-    _animationController.repeat();
-  }
+  String _getStatusText(BuildContext context, SessionTypeEnum? sessionType) {
+    if (startDate == null) {
+      return context.tr('focus.ready_to_focus');
+    }
 
-  void _stopTimer() {
-    setState(() {
-      isRunning = false;
-    });
-    _animationController.stop();
-  }
+    switch (sessionType) {
+      case SessionTypeEnum.focus:
+      case SessionTypeEnum.work:
+        return context.tr('focus.focusing');
 
-  void _resetTimer() {
-    setState(() {
-      isRunning = false;
-      remainingSeconds = totalSeconds;
-    });
-    _animationController.stop();
-  }
+      case SessionTypeEnum.shortBreak:
+        return context.tr('focus.short_break_status');
 
-  String _formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final secs = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+      case SessionTypeEnum.longBreak:
+        return context.tr('focus.long_break_status');
+
+      default:
+        return context.tr('focus.focusing');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final progress = remainingSeconds / totalSeconds;
+    logger.i('Building FocusTimerWidget, startDate: $startDate');
 
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          children: [
-            Text(
-              context.tr('focus.session_title'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
+    final bool isRunning = startDate != null;
 
-            // Circular Timer
-            SizedBox(
-              width: 280,
-              height: 280,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Background circle
-                  CustomPaint(
-                    size: const Size(280, 280),
-                    painter: _TimerPainter(
-                      progress: 1.0,
-                      color: colorScheme.outlineVariant.withOpacity(0.3),
-                    ),
-                  ),
+    return StreamBuilder<int>(
+      stream:
+          isRunning
+              ? Stream.periodic(const Duration(seconds: 1), (i) => i)
+              : null,
 
-                  // Progress circle with animation
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        size: const Size(280, 280),
-                        painter: _TimerPainter(
-                          progress: progress,
-                          color: colorScheme.primary,
-                          strokeWidth: 12,
-                        ),
-                      );
-                    },
-                  ),
+      builder: (context, snapshot) {
+        final totalSeconds = _getTotalSeconds(sessionType);
 
-                  // Time display
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        int remainingSeconds;
+
+        if (isRunning) {
+          final now = DateTime.now();
+
+          final elapsed = now.difference(startDate!).inSeconds;
+
+          remainingSeconds = (totalSeconds - elapsed).clamp(0, totalSeconds);
+        } else {
+          remainingSeconds = totalSeconds;
+        }
+
+        final colorScheme = Theme.of(context).colorScheme;
+
+        final progress =
+            totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
+
+        String formatTime(int seconds) {
+          final minutes = seconds ~/ 60;
+
+          final secs = seconds % 60;
+
+          return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+        }
+
+        return Card(
+          elevation: 0,
+
+          color: colorScheme.surfaceContainerHighest,
+
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+
+            child: Column(
+              children: [
+                Text(
+                  _getTitle(context, sessionType),
+
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 32),
+
+                SizedBox(
+                  width: 280,
+
+                  height: 280,
+
+                  child: Stack(
+                    alignment: Alignment.center,
+
                     children: [
-                      Text(
-                        _formatTime(remainingSeconds),
-                        style: Theme.of(
-                          context,
-                        ).textTheme.displayLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 56,
+                      CustomPaint(
+                        size: const Size(280, 280),
+
+                        painter: _TimerPainter(
+                          progress: 1.0,
+
+                          color: colorScheme.outlineVariant.withOpacity(0.3),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isRunning ? context.tr('focus.focusing') : context.tr('focus.ready_to_focus'),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+
+                      CustomPaint(
+                        size: const Size(280, 280),
+
+                        painter: _TimerPainter(
+                          progress: progress,
+
+                          color: colorScheme.primary,
+
+                          strokeWidth: 12,
+                        ),
+                      ),
+
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Text(
+                            formatTime(remainingSeconds),
+
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displayLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+
+                              fontSize: 56,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            _getStatusText(context, sessionType),
+
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                if (!isRunning)
+                  FilledButton.icon(
+                    onPressed: onStart,
+
+                    icon: const Icon(Icons.play_arrow),
+
+                    label: Text(context.tr('focus.start')),
+
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+
+                        vertical: 16,
+                      ),
+                    ),
+                  )
+                else if (sessionType == SessionTypeEnum.shortBreak ||
+                    sessionType == SessionTypeEnum.longBreak)
+                  FilledButton.icon(
+                    onPressed: onStart,
+
+                    icon: const Icon(Icons.play_arrow),
+
+                    label: Text(context.tr('focus.start')),
+
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+
+                        vertical: 16,
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: [
+                      FilledButton.icon(
+                        onPressed: onBreak,
+
+                        icon: const Icon(Icons.pause),
+
+                        label: Text(context.tr('focus.break')),
+
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      OutlinedButton.icon(
+                        onPressed: onTerminate,
+
+                        icon: const Icon(Icons.stop),
+
+                        label: Text(context.tr('focus.terminate')),
+
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+
+                            vertical: 16,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Control buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Play/Pause button
-                FilledButton.icon(
-                  onPressed: isRunning ? _stopTimer : _startTimer,
-                  icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
-                  label: Text(isRunning ? context.tr('focus.pause') : context.tr('focus.start')),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Reset button
-                OutlinedButton.icon(
-                  onPressed: _resetTimer,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.tr('focus.reset')),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                  ),
-                ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
