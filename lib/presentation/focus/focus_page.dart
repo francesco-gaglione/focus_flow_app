@@ -12,9 +12,11 @@ class FocusPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create:
-          (_) =>
-              FocusBloc(getCategoriesAndTask: sl(), fetchOrphanTasks: sl())
-                ..add(InitState()),
+          (_) => FocusBloc(
+            getCategoriesAndTask: sl(),
+            fetchOrphanTasks: sl(),
+            websocketRepository: sl(),
+          )..add(InitState()),
       child: const FocusView(),
     );
   }

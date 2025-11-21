@@ -13,7 +13,10 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
 
   // Initialize the service locator with the base URL from the environment variable
-  await setupDependencies("http://localhost:8080");
+  await setupDependencies(
+    "http://localhost:8080",
+    "ws://localhost:8080/ws/workspace/session",
+  );
 
   runApp(
     EasyLocalization(

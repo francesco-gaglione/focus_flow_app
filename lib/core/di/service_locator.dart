@@ -3,6 +3,7 @@ import 'package:focus_flow_app/adapters/repositories/http_category_repository.da
 import 'package:focus_flow_app/adapters/repositories/http_session_repository.dart';
 import 'package:focus_flow_app/adapters/repositories/http_statistics_repository.dart';
 import 'package:focus_flow_app/adapters/repositories/http_task_repository.dart';
+import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/repositories/category_repository.dart';
 import 'package:focus_flow_app/domain/repositories/session_repository.dart';
 import 'package:focus_flow_app/domain/repositories/statistics_repository.dart';
@@ -28,7 +29,7 @@ import '../../domain/usecases/update_accent_color.dart';
 
 final sl = GetIt.instance;
 
-Future<void> setupDependencies(String baseUrl) async {
+Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   // Dio
   sl.registerLazySingleton<Dio>(
     () => Dio(
@@ -60,6 +61,12 @@ Future<void> setupDependencies(String baseUrl) async {
 
   sl.registerLazySingleton<StatisticsRepository>(
     () => HttpStatisticsRepository(dio: sl(), baseUrl: baseUrl),
+  );
+
+  // Repositories - WebSocket
+  sl.registerLazySingleton<WebsocketRepository>(
+    //TODO read ws url from config
+    () => WebsocketRepository(wsUrl),
   );
 
   // Use Cases - Theme
