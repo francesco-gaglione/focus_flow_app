@@ -1,37 +1,25 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
+import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/focus_session.dart';
+import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 
 class FocusTimelineWidget extends StatelessWidget {
-  const FocusTimelineWidget({Key? key}) : super(key: key);
+  final List<FocusSession> sessions;
+  final List<CategoryWithTasks> categories;
+  final List<Task> orphanTasks;
+
+  const FocusTimelineWidget({
+    super.key,
+    this.sessions = const [],
+    this.categories = const [],
+    this.orphanTasks = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
-    // Mock data - replace with actual data from BLoC
-    final List<Map<String, dynamic>> sessions = [
-      {
-        'time': '09:00 - 09:25',
-        'category': 'Work',
-        'task': 'Email responses',
-        'focusLevel': 7,
-        'color': Colors.blue,
-      },
-      {
-        'time': '10:00 - 10:25',
-        'category': 'Study',
-        'task': 'Math homework',
-        'focusLevel': 9,
-        'color': Colors.green,
-      },
-      {
-        'time': '14:30 - 14:55',
-        'category': 'Personal',
-        'task': 'Workout',
-        'focusLevel': 6,
-        'color': Colors.purple,
-      },
-    ];
 
     return Card(
       elevation: 0,
@@ -64,7 +52,9 @@ class FocusTimelineWidget extends StatelessWidget {
                       Icon(
                         Icons.event_available_outlined,
                         size: 48,
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+                        color: colorScheme.onSurfaceVariant.withAlpha(
+                          (255 * 0.3).round(),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -86,6 +76,65 @@ class FocusTimelineWidget extends StatelessWidget {
                   final session = sessions[index];
                   final isLast = index == sessions.length - 1;
 
+                  final startTime = DateFormat('HH:mm').format(
+                    DateTime.fromMillisecondsSinceEpoch(session.startedAt),
+                  );
+                  final endTime =
+                      session.endedAt != null
+                          ? DateFormat('HH:mm').format(
+                            DateTime.fromMillisecondsSinceEpoch(
+                              session.endedAt!,
+                            ),
+                          )
+                          : '';
+                  final time = '$startTime - $endTime';
+
+                  Category? category;
+                  Task? task;
+
+                  if (session.categoryId != null) {
+                    try {
+                      category =
+                          categories
+                              .firstWhere(
+                                (c) => c.category.id == session.categoryId,
+                              )
+                              .category;
+                    } catch (e) {
+                      category = null;
+                    }
+                  }
+
+                  if (session.taskId != null) {
+                    if (category != null) {
+                      try {
+                        task = categories
+                            .firstWhere(
+                              (c) => c.category.id == session.categoryId,
+                            )
+                            .tasks
+                            .firstWhere((t) => t.id == session.taskId);
+                      } catch (e) {
+                        task = null;
+                      }
+                    } else {
+                      try {
+                        task = orphanTasks.firstWhere(
+                          (t) => t.id == session.taskId,
+                        );
+                      } catch (e) {
+                        task = null;
+                      }
+                    }
+                  }
+
+                  final color =
+                      category != null
+                          ? Color(
+                            int.parse(category.color.replaceFirst('#', '0xFF')),
+                          )
+                          : Colors.grey;
+
                   return IntrinsicHeight(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,7 +146,7 @@ class FocusTimelineWidget extends StatelessWidget {
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: session['color'],
+                                color: color,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: colorScheme.surface,
@@ -126,7 +175,7 @@ class FocusTimelineWidget extends StatelessWidget {
                                 color: colorScheme.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: session['color'].withOpacity(0.3),
+                                  color: color.withAlpha((255 * 0.3).round()),
                                   width: 2,
                                 ),
                               ),
@@ -143,7 +192,7 @@ class FocusTimelineWidget extends StatelessWidget {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        session['time'],
+                                        time,
                                         style: Theme.of(
                                           context,
                                         ).textTheme.labelSmall?.copyWith(
@@ -151,44 +200,45 @@ class FocusTimelineWidget extends StatelessWidget {
                                         ),
                                       ),
                                       const Spacer(),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: session['color'].withOpacity(
-                                            0.2,
+                                      if (session.concentrationScore != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                          decoration: BoxDecoration(
+                                            color: color.withAlpha(
+                                              (255 * 0.2).round(),
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${context.tr('focus.level_badge')} ${session.concentrationScore}',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall?.copyWith(
+                                              color: color,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
-                                        child: Text(
-                                          '${context.tr('focus.level_badge')} ${session['focusLevel']}',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall?.copyWith(
-                                            color: session['color'],
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    session['category'],
+                                    category?.name ?? 'Uncategorized',
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: session['color'],
+                                      color: color,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    session['task'],
+                                    task?.name ?? 'Unknown Task',
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),

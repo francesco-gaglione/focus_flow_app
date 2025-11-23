@@ -95,8 +95,10 @@ class CategoryView extends StatelessWidget {
       color: _orphanTaskColor,
       totalTasks: orphanTasks.length,
       completedTasks: orphanTasks.where((t) => t.completedAt != null).length,
-      onEdit: () => print("TODO: edit on orphan tasks card is not allowed"),
-      onDelete: () => print("TODO: delete on orphan tasks card is not allowed"),
+      onEdit:
+          () => debugPrint("TODO: edit on orphan tasks card is not allowed"),
+      onDelete:
+          () => debugPrint("TODO: delete on orphan tasks card is not allowed"),
       taskWidgets: _buildTaskList(context, orphanTasks),
       showOptions: false,
     );
@@ -298,6 +300,6 @@ class CategoryView extends StatelessWidget {
   }
 
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
   }
 }

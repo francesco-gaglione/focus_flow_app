@@ -13,8 +13,8 @@ import 'package:focus_flow_app/domain/usecases/categories_usecases/create_catego
 import 'package:focus_flow_app/domain/usecases/categories_usecases/delete_category.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/update_category.dart';
-import 'package:focus_flow_app/domain/usecases/create_manual_session.dart';
-import 'package:focus_flow_app/domain/usecases/get_sessions_with_filters.dart';
+import 'package:focus_flow_app/domain/usecases/sessions_usecases/create_manual_session.dart';
+import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/create_task.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/delete_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';

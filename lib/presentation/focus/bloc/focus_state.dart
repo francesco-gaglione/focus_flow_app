@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 
@@ -11,6 +12,7 @@ class FocusState extends Equatable {
   final List<Task> orphanTasks;
   final Category? selectedCategory;
   final Task? selectedTask;
+  final List<FocusSession> todaySessions;
   final SessionState? sessionState;
 
   const FocusState({
@@ -21,6 +23,7 @@ class FocusState extends Equatable {
     this.selectedCategory,
     this.selectedTask,
     this.sessionState,
+    this.todaySessions = const [],
   });
 
   FocusState copyWith({
@@ -35,6 +38,7 @@ class FocusState extends Equatable {
     int? selectedFocusLevel,
     SessionState? sessionState,
     bool clearSessionState = false,
+    List<FocusSession>? todaySessions,
   }) {
     return FocusState(
       categories: categories ?? this.categories,
@@ -49,6 +53,7 @@ class FocusState extends Equatable {
       errorMessage: errorMessage,
       sessionState:
           clearSessionState ? null : sessionState ?? this.sessionState,
+      todaySessions: todaySessions ?? this.todaySessions,
     );
   }
 
@@ -61,6 +66,7 @@ class FocusState extends Equatable {
     selectedCategory,
     selectedTask,
     sessionState,
+    todaySessions,
   ];
 }
 

@@ -93,14 +93,14 @@ class ColorPickerAdvanced extends StatelessWidget {
             if (isSelected)
               // Enhanced shadow for selected color to emphasize choice
               BoxShadow(
-                color: color.withOpacity(0.5),
+                color: color.withAlpha((255 * 0.5).round()),
                 blurRadius: 8,
                 spreadRadius: 2,
               )
             else
               // Subtle elevation for unselected colors
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha((255 * 0.1).round()),
                 blurRadius: 4,
                 spreadRadius: 0,
                 offset: const Offset(0, 2),

@@ -14,13 +14,13 @@ import 'package:focus_flow_app/presentation/widgets/focus/focus_timer.dart';
 import 'package:logger/logger.dart';
 
 class FocusView extends StatefulWidget {
-  FocusView({Key? key}) : super(key: key);
+  const FocusView({super.key});
 
   @override
-  _FocusViewState createState() => _FocusViewState();
+  FocusViewState createState() => FocusViewState();
 }
 
-class _FocusViewState extends State<FocusView> {
+class FocusViewState extends State<FocusView> {
   final Logger logger = Logger();
 
   static const double desktopBreakpoint = 900;
@@ -84,8 +84,9 @@ class _FocusViewState extends State<FocusView> {
           logger.d(
             'Building FocusView with sessionState: ${state.sessionState}',
           );
-          if (state.isLoading)
+          if (state.isLoading) {
             return const Center(child: CircularProgressIndicator());
+          }
 
           final isDesktop =
               MediaQuery.of(context).size.width >= desktopBreakpoint;
@@ -116,7 +117,11 @@ class _FocusViewState extends State<FocusView> {
             onTaskChanged: (task) => _onTaskChanged(context, task),
           );
 
-          final timelineWidget = FocusTimelineWidget();
+          final timelineWidget = FocusTimelineWidget(
+            sessions: state.todaySessions,
+            categories: state.categories,
+            orphanTasks: state.orphanTasks,
+          );
 
           final focusTimerWidget = FocusTimerWidget(
             startDate:

@@ -100,8 +100,8 @@ class SettingsPage extends StatelessWidget {
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(
-                                              0.1,
+                                            color: Colors.black.withAlpha(
+                                              (255 * 0.1).round(),
                                             ),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),

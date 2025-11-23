@@ -13,14 +13,14 @@ class CategoryTaskSelector extends StatefulWidget {
   final String? initialTaskId;
 
   const CategoryTaskSelector({
-    Key? key,
+    super.key,
     required this.categories,
     required this.orphanTasks,
     this.onCategoryChanged,
     this.onTaskChanged,
     this.initialCategoryId,
     this.initialTaskId,
-  }) : super(key: key);
+  });
 
   @override
   State<CategoryTaskSelector> createState() => _CategoryTaskSelectorState();
@@ -176,7 +176,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Category dropdown
             DropdownButtonFormField<String>(
-              value: selectedCategory,
+              initialValue: selectedCategory,
               decoration: InputDecoration(
                 labelText: context.tr('focus.category_label'),
                 border: OutlineInputBorder(
@@ -236,7 +236,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Task dropdown
             DropdownButtonFormField<String>(
-              value: selectedTask,
+              initialValue: selectedTask,
               decoration: InputDecoration(
                 labelText:
                     selectedCategory == null

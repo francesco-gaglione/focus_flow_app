@@ -163,7 +163,9 @@ class CategoryCard extends StatelessWidget {
                         Icon(
                           Icons.task_outlined,
                           size: 48,
-                          color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+                          color: colorScheme.onSurfaceVariant.withAlpha(
+                            (255 * 0.3).round(),
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(

@@ -89,7 +89,7 @@ class MainLayout extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha((255 * 0.05).round()),
               blurRadius: 8,
               offset: const Offset(0, -2),
             ),
@@ -143,8 +143,12 @@ class MainLayout extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-        highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        splashColor: Theme.of(
+          context,
+        ).colorScheme.primary.withAlpha((255 * 0.1).round()),
+        highlightColor: Theme.of(
+          context,
+        ).colorScheme.primary.withAlpha((255 * 0.05).round()),
         child: SizedBox(
           height: double.infinity, // Occupa tutta l'altezza
           child: Center(
@@ -161,14 +165,6 @@ class MainLayout extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  int _getSelectedIndex() {
-    if (currentPath.startsWith('/focus')) return 0;
-    if (currentPath.startsWith('/categories')) return 1;
-    if (currentPath.startsWith('/stats')) return 2;
-    if (currentPath.startsWith('/settings')) return 3;
-    return 0;
   }
 
   int _getSelectedIndexForRail() {

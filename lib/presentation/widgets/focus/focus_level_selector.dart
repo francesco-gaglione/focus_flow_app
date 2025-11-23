@@ -6,10 +6,10 @@ class FocusLevelSelector extends StatefulWidget {
   final int? initialLevel;
 
   const FocusLevelSelector({
-    Key? key,
+    super.key,
     required this.onFocusLevelChanged,
     this.initialLevel,
-  }) : super(key: key);
+  });
 
   @override
   State<FocusLevelSelector> createState() => _FocusLevelSelectorState();
@@ -79,7 +79,9 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                         color:
                             isSelected
                                 ? colorScheme.primary
-                                : colorScheme.outline.withOpacity(0.3),
+                                : colorScheme.outline.withAlpha(
+                                  (255 * 0.3).round(),
+                                ),
                         width: 2,
                       ),
                     ),

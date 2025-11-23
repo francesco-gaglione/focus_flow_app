@@ -5,6 +5,7 @@ import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
+import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
 import 'package:focus_flow_app/presentation/focus/bloc/focus_event.dart';
 import 'package:focus_flow_app/presentation/focus/bloc/focus_state.dart';
@@ -15,6 +16,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   final GetCategoriesAndTasks _getCategoriesAndTasks;
   final FetchOrphanTasks _fetchOrphanTasks;
   final WebsocketRepository _websocketRepository;
+  final GetSessionsWithFilters _getSessionsWithFilters;
   StreamSubscription? _serverResponsesSubscription;
   StreamSubscription? _broadcastEventsSubscription;
   StreamSubscription? _pomodoroStateUpdatesSubscription;
@@ -23,9 +25,11 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     required GetCategoriesAndTasks getCategoriesAndTask,
     required FetchOrphanTasks fetchOrphanTasks,
     required WebsocketRepository websocketRepository,
+    required GetSessionsWithFilters getSessionsWithFilters,
   }) : _getCategoriesAndTasks = getCategoriesAndTask,
        _fetchOrphanTasks = fetchOrphanTasks,
        _websocketRepository = websocketRepository,
+       _getSessionsWithFilters = getSessionsWithFilters,
        super(const FocusState()) {
     on<InitState>(_onInitState);
     on<CategorySelected>(_onCategorySelected);
@@ -63,6 +67,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       // Request initial sync
       _websocketRepository.requestSync();
 
+      // Load categories and tasks
       final result = await _getCategoriesAndTasks.execute();
 
       if (result.success && result.categoriesWithTasks != null) {
@@ -71,7 +76,6 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
                 .map(
                   (cat) => CategoryWithTasks(
                     category: cat.category,
-
                     tasks: cat.tasks,
                   ),
                 )
@@ -79,10 +83,22 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
 
         final tasksResult = await _fetchOrphanTasks.execute();
 
+        final now = DateTime.now();
+        final startOfDay = DateTime(now.year, now.month, now.day);
+        final endOfDay = startOfDay.add(const Duration(days: 1));
+
+        final todaySessionsResult = await _getSessionsWithFilters.execute(
+          startDate: startOfDay.millisecondsSinceEpoch ~/ 1000,
+          endDate: endOfDay.millisecondsSinceEpoch ~/ 1000,
+        );
+
+        logger.d('Today sessions: ${todaySessionsResult.sessions}');
+
         emit(
           state.copyWith(
             categories: categories,
             orphanTasks: tasksResult.orphanTasks ?? [],
+            todaySessions: todaySessionsResult.sessions ?? [],
             isLoading: false,
             errorMessage: null,
           ),
@@ -138,8 +154,15 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     Emitter<FocusState> emit,
   ) async {
     logger.d('Focus level selected: ${event.focusLevel}');
-    emit(state.copyWith(selectedFocusLevel: event.focusLevel));
-    _websocketRepository.updateConcentrationScore(event.focusLevel);
+    if (state.sessionState != null) {
+      SessionState sessionState = state.sessionState!.copyWith(
+        selectedFocusLevel: event.focusLevel,
+      );
+      emit(state.copyWith(sessionState: sessionState));
+      _websocketRepository.updateConcentrationScore(event.focusLevel);
+    } else {
+      logger.e('Session state is null');
+    }
   }
 
   Future<void> _onUpdateNote(UpdateNote event, Emitter<FocusState> emit) async {
@@ -158,11 +181,13 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   Future<void> _onStartFocus(StartFocus event, Emitter<FocusState> emit) async {
     logger.d('Focus started');
     _websocketRepository.sendStartEvent();
+    add(InitState());
   }
 
   Future<void> _onBreakFocus(BreakFocus event, Emitter<FocusState> emit) async {
     logger.d('Focus broken');
     _websocketRepository.sendBreakEvent();
+    add(InitState());
   }
 
   Future<void> _onTerminateFocus(
@@ -171,6 +196,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   ) async {
     logger.d('Focus terminated');
     _websocketRepository.sendTerminateEvent();
+    add(InitState());
   }
 
   /// Handle WebSocket messages from the repository

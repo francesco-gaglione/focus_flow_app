@@ -5,8 +5,7 @@ class FocusNotesWidget extends StatefulWidget {
   final String? initialNotes;
   final ValueChanged<String>? onNotesChanged;
 
-  const FocusNotesWidget({Key? key, this.initialNotes, this.onNotesChanged})
-    : super(key: key);
+  const FocusNotesWidget({super.key, this.initialNotes, this.onNotesChanged});
 
   @override
   State<FocusNotesWidget> createState() => _FocusNotesWidgetState();

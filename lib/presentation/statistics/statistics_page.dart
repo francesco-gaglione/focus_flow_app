@@ -26,7 +26,9 @@ class StatisticsPage extends StatelessWidget {
             Text(
               context.tr('statistics.placeholder_message'),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withAlpha((255 * 0.6).round()),
               ),
             ),
           ],

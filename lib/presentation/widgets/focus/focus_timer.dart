@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 
 class FocusTimerWidget extends StatelessWidget {
-  Logger logger = Logger();
+  final Logger logger = Logger();
 
   final DateTime? startDate;
   final VoidCallback onStart;
@@ -18,13 +18,13 @@ class FocusTimerWidget extends StatelessWidget {
   final SessionTypeEnum? sessionType;
 
   FocusTimerWidget({
-    Key? key,
+    super.key,
     this.startDate,
     required this.onStart,
     required this.onBreak,
     required this.onTerminate,
     this.sessionType,
-  }) : super(key: key);
+  });
 
   int _getTotalSeconds(SessionTypeEnum? sessionType) {
     switch (sessionType) {
@@ -150,7 +150,9 @@ class FocusTimerWidget extends StatelessWidget {
                         painter: _TimerPainter(
                           progress: 1.0,
 
-                          color: colorScheme.outlineVariant.withOpacity(0.3),
+                          color: colorScheme.outlineVariant.withAlpha(
+                            (255 * 0.3).round(),
+                          ),
                         ),
                       ),
 

@@ -1,5 +1,5 @@
-import '../entities/focus_session.dart';
-import '../repositories/session_repository.dart';
+import 'package:focus_flow_app/domain/entities/focus_session.dart';
+import 'package:focus_flow_app/domain/repositories/session_repository.dart';
 
 class GetSessionsWithFilters {
   final SessionRepository sessionRepository;
