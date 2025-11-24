@@ -130,13 +130,9 @@ class FocusViewState extends State<FocusView> {
                       state.sessionState!.startDate * 1000,
                     )
                     : null,
-
             sessionType: state.sessionState?.sessionType,
-
             onStart: _onStart,
-
             onBreak: _onBreak,
-
             onTerminate: _onTerminate,
           );
 

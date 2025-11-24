@@ -86,109 +86,77 @@ class FocusTimerWidget extends StatelessWidget {
           isRunning
               ? Stream.periodic(const Duration(seconds: 1), (i) => i)
               : null,
-
       builder: (context, snapshot) {
         final totalSeconds = _getTotalSeconds(sessionType);
-
         int remainingSeconds;
-
         if (isRunning) {
           final now = DateTime.now();
-
           final elapsed = now.difference(startDate!).inSeconds;
-
           remainingSeconds = (totalSeconds - elapsed).clamp(0, totalSeconds);
         } else {
           remainingSeconds = totalSeconds;
         }
-
         final colorScheme = Theme.of(context).colorScheme;
-
         final progress =
             totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
-
         String formatTime(int seconds) {
           final minutes = seconds ~/ 60;
-
           final secs = seconds % 60;
-
           return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
         }
 
         return Card(
           elevation: 0,
-
           color: colorScheme.surfaceContainerHighest,
-
           child: Padding(
             padding: const EdgeInsets.all(32),
-
             child: Column(
               children: [
                 Text(
                   _getTitle(context, sessionType),
-
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 32),
-
                 SizedBox(
                   width: 280,
-
                   height: 280,
-
                   child: Stack(
                     alignment: Alignment.center,
-
                     children: [
                       CustomPaint(
                         size: const Size(280, 280),
-
                         painter: _TimerPainter(
                           progress: 1.0,
-
                           color: colorScheme.outlineVariant.withAlpha(
                             (255 * 0.3).round(),
                           ),
                         ),
                       ),
-
                       CustomPaint(
                         size: const Size(280, 280),
-
                         painter: _TimerPainter(
                           progress: progress,
-
                           color: colorScheme.primary,
-
                           strokeWidth: 12,
                         ),
                       ),
-
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-
                         children: [
                           Text(
                             formatTime(remainingSeconds),
-
                             style: Theme.of(
                               context,
                             ).textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-
                               fontSize: 56,
                             ),
                           ),
-
                           const SizedBox(height: 8),
-
                           Text(
                             _getStatusText(context, sessionType),
-
                             style: Theme.of(context).textTheme.bodyLarge
                                 ?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
@@ -197,74 +165,71 @@ class FocusTimerWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 32),
 
                 if (!isRunning)
                   FilledButton.icon(
                     onPressed: onStart,
-
                     icon: const Icon(Icons.play_arrow),
-
                     label: Text(context.tr('focus.start')),
-
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
-
                         vertical: 16,
                       ),
                     ),
                   )
                 else if (sessionType == SessionTypeEnum.shortBreak ||
                     sessionType == SessionTypeEnum.longBreak)
-                  FilledButton.icon(
-                    onPressed: onStart,
-
-                    icon: const Icon(Icons.play_arrow),
-
-                    label: Text(context.tr('focus.start')),
-
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-
-                        vertical: 16,
+                  Column(
+                    children: [
+                      FilledButton.icon(
+                        onPressed: onStart,
+                        icon: const Icon(Icons.play_arrow),
+                        label: Text(context.tr('focus.start')),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: onTerminate,
+                        icon: const Icon(Icons.stop),
+                        label: Text(context.tr('focus.terminate')),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   )
                 else
                   Column(
                     children: [
                       FilledButton.icon(
                         onPressed: onBreak,
-
                         icon: const Icon(Icons.pause),
-
                         label: Text(context.tr('focus.break')),
-
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
-
                             vertical: 16,
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 16),
-
                       OutlinedButton.icon(
                         onPressed: onTerminate,
-
                         icon: const Icon(Icons.stop),
-
                         label: Text(context.tr('focus.terminate')),
-
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
-
                             vertical: 16,
                           ),
                         ),
