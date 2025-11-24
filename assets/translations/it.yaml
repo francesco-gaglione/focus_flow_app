@@ -90,6 +90,24 @@ settings:
 statistics:
   title: Statistiche
   placeholder_message: Grafici e statistiche saranno qui
+  day: Giorno
+  week: Settimana
+  month: Mese
+  focus_time: Tempo di Focus
+  sessions: Sessioni
+  activity: Attività
+  categories: Categorie
+  top_tasks: Attività Principali
+  no_activity_data: Nessun dato di attività
+  no_category_data: Nessun dato di categoria
+  no_task_data: "Nessun dato di attività"
+  concentration_score: "Punteggio Concentrazione"
+  most_productive: "Più Produttivo"
+  least_productive: "Meno Produttivo"
+  average_session: "Sessione Media"
+  break_time: "Tempo di Pausa"
+  morning: "Mattina"
+  afternoon: "Pomeriggio"
 
 # Navigazione
 navigation:

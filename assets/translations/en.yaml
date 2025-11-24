@@ -90,7 +90,24 @@ settings:
 statistics:
   title: Statistics
   placeholder_message: Charts and stats will be here
-
+  day: Day
+  week: Week
+  month: Month
+  focus_time: Focus Time
+  sessions: Sessions
+  activity: Activity
+  categories: Categories
+  top_tasks: Top Tasks
+  no_activity_data: No activity data
+  no_category_data: No category data
+  no_task_data: "No task data available"
+  concentration_score: "Concentration Score"
+  most_productive: "Most Productive"
+  least_productive: "Least Productive"
+  average_session: "Avg Session"
+  break_time: "Break Time"
+  morning: "Morning"
+  afternoon: "Afternoon"
 # Navigation
 navigation:
   focus: Focus
