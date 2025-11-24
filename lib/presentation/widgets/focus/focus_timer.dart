@@ -97,6 +97,11 @@ class FocusTimerWidget extends StatelessWidget {
           remainingSeconds = totalSeconds;
         }
         final colorScheme = Theme.of(context).colorScheme;
+        // Restore dynamic category color (primary) but keep Figma style
+        final accentColor = colorScheme.primary; 
+        final trackColor = Colors.grey.shade200;
+        final textColor = const Color(0xFF2D3142); // Dark grey/blue for text
+
         final progress =
             totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
         String formatTime(int seconds) {
@@ -106,17 +111,19 @@ class FocusTimerWidget extends StatelessWidget {
         }
 
         return Card(
-          elevation: 0,
-          color: colorScheme.surfaceContainerHighest,
+          elevation: 4, // Added elevation for a card look
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          color: Colors.white, // White background as per Figma
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
               children: [
                 Text(
                   _getTitle(context, sessionType),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
@@ -129,17 +136,17 @@ class FocusTimerWidget extends StatelessWidget {
                         size: const Size(280, 280),
                         painter: _TimerPainter(
                           progress: 1.0,
-                          color: colorScheme.outlineVariant.withAlpha(
-                            (255 * 0.3).round(),
-                          ),
+                          color: trackColor,
+                          strokeWidth: 12, // Thicker track
                         ),
                       ),
                       CustomPaint(
                         size: const Size(280, 280),
                         painter: _TimerPainter(
                           progress: progress,
-                          color: colorScheme.primary,
+                          color: accentColor,
                           strokeWidth: 12,
+                          strokeCap: StrokeCap.round,
                         ),
                       ),
                       Column(
@@ -147,90 +154,136 @@ class FocusTimerWidget extends StatelessWidget {
                         children: [
                           Text(
                             formatTime(remainingSeconds),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.displayLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 56,
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              fontWeight: FontWeight.w900, // Bolder font
+                              fontSize: 64, // Larger font
+                              color: textColor,
+                              letterSpacing: -1.0,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _getStatusText(context, sessionType),
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: textColor.withOpacity(0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 48), // More spacing
 
                 if (!isRunning)
-                  FilledButton.icon(
-                    onPressed: onStart,
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text(context.tr('focus.start')),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: FilledButton(
+                      onPressed: onStart,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: accentColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      child: Text(context.tr('focus.start').toUpperCase()),
                     ),
                   )
                 else if (sessionType == SessionTypeEnum.shortBreak ||
                     sessionType == SessionTypeEnum.longBreak)
-                  Column(
+                  Row(
                     children: [
-                      FilledButton.icon(
-                        onPressed: onStart,
-                        icon: const Icon(Icons.play_arrow),
-                        label: Text(context.tr('focus.start')),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: FilledButton(
+                            onPressed: onStart,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: accentColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Text(context.tr('focus.start').toUpperCase()),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: onTerminate,
-                        icon: const Icon(Icons.stop),
-                        label: Text(context.tr('focus.terminate')),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: OutlinedButton(
+                            onPressed: onTerminate,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: textColor.withOpacity(0.7),
+                              side: BorderSide(color: textColor.withOpacity(0.3)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Text(context.tr('focus.terminate')),
                           ),
                         ),
                       ),
                     ],
                   )
                 else
-                  Column(
+                  Row(
                     children: [
-                      FilledButton.icon(
-                        onPressed: onBreak,
-                        icon: const Icon(Icons.pause),
-                        label: Text(context.tr('focus.break')),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: FilledButton(
+                            onPressed: onBreak,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: accentColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Text(context.tr('focus.break').toUpperCase()),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      OutlinedButton.icon(
-                        onPressed: onTerminate,
-                        icon: const Icon(Icons.stop),
-                        label: Text(context.tr('focus.terminate')),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: OutlinedButton(
+                            onPressed: onTerminate,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: textColor.withOpacity(0.7),
+                              side: BorderSide(color: textColor.withOpacity(0.3)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Text(context.tr('focus.terminate')),
                           ),
                         ),
                       ),
@@ -250,11 +303,13 @@ class _TimerPainter extends CustomPainter {
   final double progress;
   final Color color;
   final double strokeWidth;
+  final StrokeCap strokeCap;
 
   _TimerPainter({
     required this.progress,
     required this.color,
     this.strokeWidth = 8,
+    this.strokeCap = StrokeCap.butt,
   });
 
   @override
@@ -263,7 +318,7 @@ class _TimerPainter extends CustomPainter {
         Paint()
           ..color = color
           ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round
+          ..strokeCap = strokeCap
           ..style = PaintingStyle.stroke;
 
     final center = Offset(size.width / 2, size.height / 2);
@@ -280,6 +335,8 @@ class _TimerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TimerPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
