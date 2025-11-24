@@ -4,6 +4,7 @@ import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
+import 'package:focus_flow_app/presentation/widgets/focus/session_details_modal.dart';
 
 class FocusTimelineWidget extends StatelessWidget {
   final List<FocusSession> sessions;
@@ -91,49 +92,66 @@ class FocusTimelineWidget extends StatelessWidget {
 
                   Category? category;
                   Task? task;
+                  String title;
+                  Color color;
+                  IconData icon;
 
-                  if (session.categoryId != null) {
-                    try {
-                      category =
-                          categories
+                  if (session.sessionType == SessionType.work) {
+                    if (session.categoryId != null) {
+                      try {
+                        category =
+                            categories
+                                .firstWhere(
+                                  (c) => c.category.id == session.categoryId,
+                                )
+                                .category;
+                      } catch (e) {
+                        category = null;
+                      }
+                    }
+
+                    if (session.taskId != null) {
+                      if (category != null) {
+                        try {
+                          task = categories
                               .firstWhere(
                                 (c) => c.category.id == session.categoryId,
                               )
-                              .category;
-                    } catch (e) {
-                      category = null;
+                              .tasks
+                              .firstWhere((t) => t.id == session.taskId);
+                        } catch (e) {
+                          task = null;
+                        }
+                      } else {
+                        try {
+                          task = orphanTasks.firstWhere(
+                            (t) => t.id == session.taskId,
+                          );
+                        } catch (e) {
+                          task = null;
+                        }
+                      }
                     }
-                  }
 
-                  if (session.taskId != null) {
-                    if (category != null) {
-                      try {
-                        task = categories
-                            .firstWhere(
-                              (c) => c.category.id == session.categoryId,
+                    title = category?.name ?? 'Uncategorized';
+                    color =
+                        category != null
+                            ? Color(
+                              int.parse(
+                                category.color.replaceFirst('#', '0xFF'),
+                              ),
                             )
-                            .tasks
-                            .firstWhere((t) => t.id == session.taskId);
-                      } catch (e) {
-                        task = null;
-                      }
-                    } else {
-                      try {
-                        task = orphanTasks.firstWhere(
-                          (t) => t.id == session.taskId,
-                        );
-                      } catch (e) {
-                        task = null;
-                      }
-                    }
+                            : Colors.grey;
+                    icon = Icons.work;
+                  } else if (session.sessionType == SessionType.shortBreak) {
+                    title = context.tr('focus.short_break_title');
+                    color = Colors.green;
+                    icon = Icons.coffee;
+                  } else {
+                    title = context.tr('focus.long_break_title');
+                    color = Colors.blue;
+                    icon = Icons.weekend;
                   }
-
-                  final color =
-                      category != null
-                          ? Color(
-                            int.parse(category.color.replaceFirst('#', '0xFF')),
-                          )
-                          : Colors.grey;
 
                   return IntrinsicHeight(
                     child: Row(
@@ -153,6 +171,13 @@ class FocusTimelineWidget extends StatelessWidget {
                                   width: 3,
                                 ),
                               ),
+                              child: Center(
+                                child: Icon(
+                                  icon,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                             if (!isLast)
                               Expanded(
@@ -170,79 +195,99 @@ class FocusTimelineWidget extends StatelessWidget {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 16),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: colorScheme.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: color.withAlpha((255 * 0.3).round()),
-                                  width: 2,
-                                ),
-                              ),
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.access_time,
-                                        size: 16,
-                                        color: colorScheme.onSurfaceVariant,
+                            child: InkWell(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder:
+                                      (context) => SessionDetailsModal(
+                                        session: session,
+                                        category: category,
+                                        task: task,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        time,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelSmall?.copyWith(
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHigh,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: color.withAlpha((255 * 0.3).round()),
+                                    width: 2,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 16,
                                           color: colorScheme.onSurfaceVariant,
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      if (session.concentrationScore != null)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: color.withAlpha(
-                                              (255 * 0.2).round(),
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            '${context.tr('focus.level_badge')} ${session.concentrationScore}',
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.labelSmall?.copyWith(
-                                              color: color,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          time,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    category?.name ?? 'Uncategorized',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: color,
+                                        const Spacer(),
+                                        if (session.concentrationScore != null)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: color.withAlpha(
+                                                (255 * 0.2).round(),
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                8,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              '${context.tr('focus.level_badge')} ${session.concentrationScore}',
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelSmall?.copyWith(
+                                                color: color,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    task?.name ?? 'Unknown Task',
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      title,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: color,
+                                      ),
+                                    ),
+                                    if (task != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        task.name,
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium,
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),

@@ -45,13 +45,6 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
         orElse: () => widget.categories.first,
       );
       tasks = category.tasks;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        widget.onCategoryChanged?.call(_getCategoryById(selectedCategory!));
-        if (selectedTask != null) {
-          widget.onTaskChanged?.call(_getTaskById(selectedTask!));
-        }
-      });
     } else {
       tasks = widget.orphanTasks;
     }

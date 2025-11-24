@@ -70,6 +70,8 @@ focus:
   task_label: Attività
   orphan_tasks_label: Attività Orfane
   orphan_tasks_helper: Attività senza una categoria
+  duration_label: Durata
+  time_range_label: Orario
 
 # Sezione Impostazioni
 settings:

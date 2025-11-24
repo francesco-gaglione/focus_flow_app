@@ -70,6 +70,8 @@ focus:
   task_label: Task
   orphan_tasks_label: Orphan Tasks
   orphan_tasks_helper: Tasks without a category
+  duration_label: Duration
+  time_range_label: Time Range
 
 # Settings Section
 settings:
