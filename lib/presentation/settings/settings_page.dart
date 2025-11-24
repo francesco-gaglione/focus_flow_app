@@ -60,65 +60,6 @@ class SettingsPage extends StatelessWidget {
                               color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          Text(
-                            context.tr('settings.accent_color'),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children:
-                                _accentPalette.map((value) {
-                                  final color = Color(value);
-                                  final isSelected = state.accentColor == value;
-                                  return GestureDetector(
-                                    onTap:
-                                        state.isLoading
-                                            ? null
-                                            : () => context
-                                                .read<ThemeCubit>()
-                                                .updateAccentColor(value),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 200,
-                                      ),
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color:
-                                              isSelected
-                                                  ? Theme.of(
-                                                    context,
-                                                  ).colorScheme.onPrimary
-                                                  : Colors.transparent,
-                                          width: 3,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withAlpha(
-                                              (255 * 0.1).round(),
-                                            ),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child:
-                                          isSelected
-                                              ? const Icon(
-                                                Icons.check,
-                                                color: Colors.white,
-                                              )
-                                              : null,
-                                    ),
-                                  );
-                                }).toList(),
-                          ),
                         ],
                       );
                     },
@@ -150,7 +91,7 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   ListTile(
                     title: Text(context.tr('settings.version')),
-                    subtitle: const Text('1.0.0'),
+                    subtitle: const Text('0.0.1-alpha.1'),
                     leading: const Icon(Icons.code),
                   ),
                   ListTile(
@@ -167,13 +108,3 @@ class SettingsPage extends StatelessWidget {
     );
   }
 }
-
-const List<int> _accentPalette = [
-  0xFF6750A4,
-  0xFF625B71,
-  0xFFB3261E,
-  0xFF386A20,
-  0xFF006874,
-  0xFF4F378B,
-  0xFF7D5260,
-];
