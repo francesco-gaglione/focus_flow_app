@@ -40,3 +40,5 @@ class PomodoroStateUpdated extends FocusEvent {
 
   PomodoroStateUpdated(this.pomodoroState);
 }
+
+class ReloadTodaySessions extends FocusEvent {}

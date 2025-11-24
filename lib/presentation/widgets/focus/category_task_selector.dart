@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
-import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 
 class CategoryTaskSelector extends StatefulWidget {
   final List<CategoryWithTasks> categories;
@@ -169,7 +169,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Category dropdown
             DropdownButtonFormField<String>(
-              initialValue: selectedCategory,
+              value: selectedCategory,
               decoration: InputDecoration(
                 labelText: context.tr('focus.category_label'),
                 border: OutlineInputBorder(
@@ -185,7 +185,9 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                         : null,
               ),
               items:
-                  widget.categories.map<DropdownMenuItem<String>>((cat) {
+                  widget.categories.map<DropdownMenuItem<String>>((
+                    CategoryWithTasks cat,
+                  ) {
                     return DropdownMenuItem<String>(
                       value: cat.category.id,
                       child: Row(
@@ -229,7 +231,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Task dropdown
             DropdownButtonFormField<String>(
-              initialValue: selectedTask,
+              value: selectedTask,
               decoration: InputDecoration(
                 labelText:
                     selectedCategory == null
@@ -245,7 +247,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                         : null,
               ),
               items:
-                  tasks.map<DropdownMenuItem<String>>((task) {
+                  tasks.map<DropdownMenuItem<String>>((Task task) {
                     return DropdownMenuItem<String>(
                       value: task.id,
                       child: Text(task.name),

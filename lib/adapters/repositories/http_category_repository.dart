@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:logger/web.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/task.dart';
@@ -16,21 +17,33 @@ class HttpCategoryRepository implements CategoryRepository {
   }) : _dio = dio;
 
   @override
-  Future<List<Category>> getAllCategories() async {
+  Future<List<CategoryWithTasks>> getAllCategories() async {
     final response = await _dio.get('$baseUrl/api/categories');
     final dto = GetCategoriesResponseDto.fromJson(response.data);
-    return dto.categories
-        .map(
-          (cat) => Category(
-            id: cat.id,
-            name: cat.name,
-            color: cat.color,
-            description: cat.description,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
-        )
-        .toList();
+    return dto.categories.map((catDto) {
+      final category = Category(
+        id: catDto.id,
+        name: catDto.name,
+        color: catDto.color,
+        description: catDto.description,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      final tasks =
+          catDto.tasks.map((taskDto) {
+            return Task(
+              id: taskDto.id,
+              name: taskDto.name,
+              description: taskDto.description,
+              categoryId: taskDto.categoryId,
+              scheduledDate: taskDto.scheduledDate,
+              completedAt: taskDto.completedAt,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+          }).toList();
+      return CategoryWithTasks(category: category, tasks: tasks);
+    }).toList();
   }
 
   @override
@@ -53,27 +66,6 @@ class HttpCategoryRepository implements CategoryRepository {
       if (e.response?.statusCode == 404) return null;
       rethrow;
     }
-  }
-
-  @override
-  Future<List<Task>> getTasksByCategoryId(String categoryId) async {
-    final response = await _dio.get('$baseUrl/api/categories');
-    final dto = GetCategoriesResponseDto.fromJson(response.data);
-    final category = dto.categories.firstWhere((cat) => cat.id == categoryId);
-    return category.tasks
-        .map(
-          (task) => Task(
-            id: task.id,
-            name: task.name,
-            description: task.description,
-            categoryId: task.categoryId,
-            scheduledDate: task.scheduledDate,
-            completedAt: task.completedAt,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
-        )
-        .toList();
   }
 
   @override
@@ -136,11 +128,10 @@ class HttpCategoryRepository implements CategoryRepository {
     }
   }
 
-  @override
   Future<bool> categoryExistsByName(String name) async {
-    final categories = await getAllCategories();
-    return categories.any(
-      (cat) => cat.name.toLowerCase() == name.toLowerCase(),
+    final categoriesWithTasks = await getAllCategories();
+    return categoriesWithTasks.any(
+      (cat) => cat.category.name.toLowerCase() == name.toLowerCase(),
     );
   }
 

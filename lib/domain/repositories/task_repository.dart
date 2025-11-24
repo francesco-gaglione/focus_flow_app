@@ -7,9 +7,6 @@ abstract class TaskRepository {
   /// Get a task by ID
   Future<Task?> getTaskById(String id);
 
-  /// Get tasks by category ID
-  Future<List<Task>> getTasksByCategoryId(String categoryId);
-
   /// Get orphan tasks (tasks without a category)
   Future<List<Task>> getOrphanTasks();
 

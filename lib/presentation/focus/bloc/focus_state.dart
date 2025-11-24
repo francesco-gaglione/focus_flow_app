@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
-import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 
 class FocusState extends Equatable {
   final bool isLoading;

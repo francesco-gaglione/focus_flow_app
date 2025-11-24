@@ -57,25 +57,24 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     InitState event,
     Emitter<CategoryState> emit,
   ) async {
+    logger.d('Initializing category state...');
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
-      final result = await _getCategoriesAndTasks.execute();
-      if (result.success && result.categoriesWithTasks != null) {
-        final categories =
-            result.categoriesWithTasks!
-                .map(
-                  (cat) => CategoryWithTasksModel(
-                    category: cat.category,
-                    tasks: cat.tasks,
-                  ),
-                )
-                .toList();
+      final results = await Future.wait([
+        _getCategoriesAndTasks.execute(),
+        _fetchOrphanTasks.execute(),
+      ]);
 
-        final tasksResult = await _fetchOrphanTasks.execute();
+      final categoriesResult = results[0] as GetCategoriesAndTasksResult;
+      final orphanTasksResult = results[1] as FetchOrphanTasksResult;
+
+      if (categoriesResult.success &&
+          orphanTasksResult.success &&
+          categoriesResult.categoriesWithTasks != null) {
         emit(
           CategoryState(
-            categories: categories,
-            tasks: tasksResult.orphanTasks ?? [],
+            categories: categoriesResult.categoriesWithTasks!,
+            orphanTasks: orphanTasksResult.orphanTasks ?? [],
             isLoading: false,
             errorMessage: null,
           ),
@@ -84,7 +83,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         emit(
           state.copyWith(
             isLoading: false,
-            errorMessage: result.error ?? 'Unknown error',
+            errorMessage:
+                categoriesResult.error ??
+                orphanTasksResult.error ??
+                'Unknown error',
           ),
         );
       }
@@ -97,22 +99,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     LoadCategories event,
     Emitter<CategoryState> emit,
   ) async {
+    logger.d('Loading categories...');
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {
       final result = await _getCategoriesAndTasks.execute();
       if (result.success && result.categoriesWithTasks != null) {
-        final categories =
-            result.categoriesWithTasks!
-                .map(
-                  (cat) => CategoryWithTasksModel(
-                    category: cat.category,
-                    tasks: cat.tasks,
-                  ),
-                )
-                .toList();
         emit(
-          CategoryState(
-            categories: categories,
+          state.copyWith(
+            categories: result.categoriesWithTasks,
             isLoading: false,
             errorMessage: null,
           ),
@@ -139,8 +133,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       final result = await _fetchOrphanTasks.execute();
       if (result.success && result.orphanTasks != null) {
         emit(
-          CategoryState(
-            tasks: result.orphanTasks ?? [],
+          state.copyWith(
+            orphanTasks: result.orphanTasks,
             isLoading: false,
             errorMessage: null,
           ),

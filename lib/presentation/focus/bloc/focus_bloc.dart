@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
@@ -10,6 +11,13 @@ import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks
 import 'package:focus_flow_app/presentation/focus/bloc/focus_event.dart';
 import 'package:focus_flow_app/presentation/focus/bloc/focus_state.dart';
 import 'package:logger/logger.dart';
+import 'package:rxdart/rxdart.dart';
+
+EventTransformer<E> debounce<E>(Duration duration) {
+  return (events, mapper) {
+    return events.debounceTime(duration).asyncExpand(mapper);
+  };
+}
 
 class FocusBloc extends Bloc<FocusEvent, FocusState> {
   final Logger logger = Logger();
@@ -40,6 +48,10 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     on<StartFocus>(_onStartFocus);
     on<BreakFocus>(_onBreakFocus);
     on<TerminateFocus>(_onTerminateFocus);
+    on<ReloadTodaySessions>(
+      _onReloadTodaySessions,
+      transformer: debounce(const Duration(milliseconds: 500)),
+    );
   }
 
   @override
@@ -58,38 +70,16 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       final result = await _getCategoriesAndTasks.execute();
 
       if (result.success && result.categoriesWithTasks != null) {
-        final categories =
-            result.categoriesWithTasks!
-                .map(
-                  (cat) => CategoryWithTasks(
-                    category: cat.category,
-                    tasks: cat.tasks,
-                  ),
-                )
-                .toList();
-
         final tasksResult = await _fetchOrphanTasks.execute();
-
-        final now = DateTime.now();
-        final startOfDay = DateTime(now.year, now.month, now.day);
-        final endOfDay = startOfDay.add(const Duration(days: 1));
-
-        final todaySessionsResult = await _getSessionsWithFilters.execute(
-          startDate: startOfDay.millisecondsSinceEpoch ~/ 1000,
-          endDate: endOfDay.millisecondsSinceEpoch ~/ 1000,
-        );
-
-        logger.d('Today sessions: ${todaySessionsResult.sessions}');
 
         emit(
           state.copyWith(
-            categories: categories,
+            categories: result.categoriesWithTasks,
             orphanTasks: tasksResult.orphanTasks ?? [],
-            todaySessions: todaySessionsResult.sessions ?? [],
-            isLoading: false,
-            errorMessage: null,
           ),
         );
+
+        add(ReloadTodaySessions());
 
         // Initialize WebSocket AFTER loading data to ensure state is ready for syncData
         logger.d('Checking WebSocket connection...');
@@ -112,6 +102,35 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
           ),
         );
       }
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onReloadTodaySessions(
+    ReloadTodaySessions event,
+    Emitter<FocusState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true, errorMessage: null));
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final todaySessionsResult = await _getSessionsWithFilters.execute(
+        startDate: startOfDay.millisecondsSinceEpoch ~/ 1000,
+        endDate: endOfDay.millisecondsSinceEpoch ~/ 1000,
+      );
+
+      logger.d('Today sessions: ${todaySessionsResult.sessions}');
+
+      emit(
+        state.copyWith(
+          todaySessions: todaySessionsResult.sessions ?? [],
+          isLoading: false,
+          errorMessage: null,
+        ),
+      );
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
@@ -182,13 +201,13 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   Future<void> _onStartFocus(StartFocus event, Emitter<FocusState> emit) async {
     logger.d('Focus started');
     _websocketRepository.sendStartEvent();
-    add(InitState());
+    add(ReloadTodaySessions());
   }
 
   Future<void> _onBreakFocus(BreakFocus event, Emitter<FocusState> emit) async {
     logger.d('Focus broken');
     _websocketRepository.sendBreakEvent();
-    add(InitState());
+    add(ReloadTodaySessions());
   }
 
   Future<void> _onTerminateFocus(
@@ -197,7 +216,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   ) async {
     logger.d('Focus terminated');
     _websocketRepository.sendTerminateEvent();
-    add(InitState());
+    add(ReloadTodaySessions());
   }
 
   /// Handle WebSocket messages from the repository
@@ -302,6 +321,8 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         note: pomodoroState.currentSession!.note,
         selectedFocusLevel: pomodoroState.currentSession!.concentrationScore,
       );
+    } else {
+      add(ReloadTodaySessions());
     }
 
     logger.d(

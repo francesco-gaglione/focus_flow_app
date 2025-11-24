@@ -39,7 +39,7 @@ class CategoryView extends StatelessWidget {
           }
 
           final categories = state.categories;
-          final orphanTasks = state.tasks;
+          final orphanTasks = state.orphanTasks;
 
           if (categories.isEmpty && orphanTasks.isEmpty) {
             return EmptyState(

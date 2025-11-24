@@ -1,15 +1,12 @@
 import '../entities/category.dart';
-import '../entities/task.dart';
+import '../entities/category_with_tasks.dart';
 
 abstract class CategoryRepository {
   /// Get all categories with their tasks
-  Future<List<Category>> getAllCategories();
+  Future<List<CategoryWithTasks>> getAllCategories();
 
   /// Get a category by ID
   Future<Category?> getCategoryById(String id);
-
-  /// Get tasks for a specific category
-  Future<List<Task>> getTasksByCategoryId(String categoryId);
 
   /// Create a new category
   Future<Category> createCategory({

@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
+import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
-import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/session_details_modal.dart';
 
 class FocusTimelineWidget extends StatelessWidget {
@@ -102,7 +102,8 @@ class FocusTimelineWidget extends StatelessWidget {
                         category =
                             categories
                                 .firstWhere(
-                                  (c) => c.category.id == session.categoryId,
+                                  (CategoryWithTasks c) =>
+                                      c.category.id == session.categoryId,
                                 )
                                 .category;
                       } catch (e) {
@@ -115,7 +116,8 @@ class FocusTimelineWidget extends StatelessWidget {
                         try {
                           task = categories
                               .firstWhere(
-                                (c) => c.category.id == session.categoryId,
+                                (CategoryWithTasks c) =>
+                                    c.category.id == session.categoryId,
                               )
                               .tasks
                               .firstWhere((t) => t.id == session.taskId);
@@ -250,9 +252,8 @@ class FocusTimelineWidget extends StatelessWidget {
                                               color: color.withAlpha(
                                                 (255 * 0.2).round(),
                                               ),
-                                              borderRadius: BorderRadius.circular(
-                                                8,
-                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: Text(
                                               '${context.tr('focus.level_badge')} ${session.concentrationScore}',

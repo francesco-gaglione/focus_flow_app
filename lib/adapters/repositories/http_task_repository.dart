@@ -96,34 +96,6 @@ class HttpTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<List<Task>> getTasksByCategoryId(String categoryId) async {
-    try {
-      if (kDebugMode) {
-        _logger.d('Fetching tasks for category: $categoryId');
-      }
-
-      final allTasks = await getAllTasks();
-      final categoryTasks =
-          allTasks.where((task) => task.categoryId == categoryId).toList();
-
-      if (kDebugMode) {
-        _logger.d(
-          'Found ${categoryTasks.length} tasks for category $categoryId',
-        );
-      }
-
-      return categoryTasks;
-    } catch (e, stackTrace) {
-      _logger.e(
-        'Failed getTasksByCategoryId: $categoryId',
-        error: e,
-        stackTrace: kDebugMode ? stackTrace : null,
-      );
-      rethrow;
-    }
-  }
-
-  @override
   Future<List<Task>> getOrphanTasks() async {
     try {
       if (kDebugMode) {
