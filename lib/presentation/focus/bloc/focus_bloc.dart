@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
-import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
@@ -67,43 +66,48 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     logger.d('Initializing FocusBloc');
     try {
       // Load categories and tasks
-      final result = await _getCategoriesAndTasks.execute();
+      final results = await Future.wait([
+        _getCategoriesAndTasks.execute(),
+        _fetchOrphanTasks.execute(),
+      ]);
 
-      if (result.success && result.categoriesWithTasks != null) {
-        final tasksResult = await _fetchOrphanTasks.execute();
+      final categoriesResult = results[0] as GetCategoriesAndTasksResult;
+      final orphanTasksResult = results[1] as FetchOrphanTasksResult;
 
-        emit(
-          state.copyWith(
-            categories: result.categoriesWithTasks,
-            orphanTasks: tasksResult.orphanTasks ?? [],
-          ),
-        );
-
-        add(ReloadTodaySessions());
-
-        // Initialize WebSocket AFTER loading data to ensure state is ready for syncData
-        logger.d('Checking WebSocket connection...');
-        if (!_websocketRepository.isConnected()) {
-          logger.d('Connecting to WebSocket...');
-          await _websocketRepository.connect();
-          logger.d('WebSocket connected');
-        }
-
-        // Setup WebSocket message handlers
-        _handleWsMessage();
-
-        // Request initial sync
-        _websocketRepository.requestSync();
-      } else {
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: result.error ?? 'Unknown error',
-          ),
-        );
+      if (categoriesResult.error != null || orphanTasksResult.error != null) {
+        final errorMessage =
+            '${categoriesResult.error ?? ''} ${orphanTasksResult.error ?? ''}'
+                .trim();
+        emit(state.copyWith(isLoading: false, errorMessage: errorMessage));
+        return;
       }
+
+      emit(
+        state.copyWith(
+          categories: categoriesResult.categoriesWithTasks,
+          orphanTasks: orphanTasksResult.orphanTasks ?? [],
+        ),
+      );
+
+      add(ReloadTodaySessions());
+
+      // Initialize WebSocket AFTER loading data to ensure state is ready for syncData
+      logger.d('Checking WebSocket connection...');
+      if (!_websocketRepository.isConnected()) {
+        logger.d('Connecting to WebSocket...');
+        await _websocketRepository.connect();
+        logger.d('WebSocket connected');
+      }
+
+      // Setup WebSocket message handlers
+      _handleWsMessage();
+
+      // Request initial sync
+      _websocketRepository.requestSync();
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    } finally {
+      emit(state.copyWith(isLoading: false));
     }
   }
 
@@ -111,7 +115,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     ReloadTodaySessions event,
     Emitter<FocusState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, errorMessage: null));
+    emit(state.copyWith(isLoading: false, errorMessage: null));
     try {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
@@ -122,7 +126,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         endDate: endOfDay.millisecondsSinceEpoch ~/ 1000,
       );
 
-      logger.d('Today sessions: ${todaySessionsResult.sessions}');
+      logger.d('Today sessions: ${todaySessionsResult.sessions?.length}');
 
       emit(
         state.copyWith(
