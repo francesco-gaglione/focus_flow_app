@@ -54,19 +54,6 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     emit(state.copyWith(isLoading: true, errorMessage: null));
     logger.d('Initializing FocusBloc');
     try {
-      logger.d('Checking WebSocket connection...');
-      if (!_websocketRepository.isConnected()) {
-        logger.d('Connecting to WebSocket...');
-        await _websocketRepository.connect();
-        logger.d('WebSocket connected');
-      }
-
-      // Setup WebSocket message handlers
-      _handleWsMessage();
-
-      // Request initial sync
-      _websocketRepository.requestSync();
-
       // Load categories and tasks
       final result = await _getCategoriesAndTasks.execute();
 
@@ -103,6 +90,20 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
             errorMessage: null,
           ),
         );
+
+        // Initialize WebSocket AFTER loading data to ensure state is ready for syncData
+        logger.d('Checking WebSocket connection...');
+        if (!_websocketRepository.isConnected()) {
+          logger.d('Connecting to WebSocket...');
+          await _websocketRepository.connect();
+          logger.d('WebSocket connected');
+        }
+
+        // Setup WebSocket message handlers
+        _handleWsMessage();
+
+        // Request initial sync
+        _websocketRepository.requestSync();
       } else {
         emit(
           state.copyWith(
