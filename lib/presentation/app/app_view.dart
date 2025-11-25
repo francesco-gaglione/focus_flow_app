@@ -8,6 +8,7 @@ import '../focus/focus_page.dart';
 import '../category/category_page.dart';
 import '../statistics/statistics_page.dart';
 import '../settings/settings_page.dart';
+import 'locale_cubit.dart';
 import 'main_layout.dart';
 import 'theme_cubit.dart';
 
@@ -16,21 +17,28 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeCubit, ThemeState>(
-      builder: (_, state) {
-        final lightTheme = AppTheme.light(state.accentColor);
-        final darkTheme = AppTheme.dark(state.accentColor);
-
-        return MaterialApp.router(
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          routerConfig: _router,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-        );
+    return BlocListener<LocaleCubit, LocaleState>(
+      listener: (context, state) {
+        if (state.locale != null && state.locale != context.locale) {
+          context.setLocale(state.locale!);
+        }
       },
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (_, state) {
+          final lightTheme = AppTheme.light(state.accentColor);
+          final darkTheme = AppTheme.dark(state.accentColor);
+
+          return MaterialApp.router(
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            routerConfig: _router,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+          );
+        },
+      ),
     );
   }
 }

@@ -80,6 +80,11 @@ settings:
   dark_mode: Dark Mode
   switch_to_light: Switch to light theme
   switch_to_dark: Switch to dark theme
+
+  language: Language
+  english: English
+  italian: Italian
+  select_language: Select Language
   accent_color: Accent color
   about: About
   version: Version

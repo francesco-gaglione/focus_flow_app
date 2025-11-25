@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/di/service_locator.dart';
 import '../../domain/usecases/get_theme_settings.dart';
 import '../../domain/usecases/toggle_theme.dart';
 import '../../domain/usecases/update_accent_color.dart';
 import 'app_view.dart';
+import 'locale_cubit.dart';
 import 'theme_cubit.dart';
 
 class App extends StatelessWidget {
@@ -28,7 +30,10 @@ class App extends StatelessWidget {
             toggleTheme: toggleTheme,
             updateAccentColor: updateAccentColor,
           )..loadTheme(),
-      child: const AppView(),
+      child: BlocProvider(
+        create: (_) => sl<LocaleCubit>()..loadLocale(),
+        child: const AppView(),
+      ),
     );
   }
 }

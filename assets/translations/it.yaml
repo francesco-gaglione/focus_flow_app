@@ -80,6 +80,11 @@ settings:
   dark_mode: Modalità Scura
   switch_to_light: Passa al tema chiaro
   switch_to_dark: Passa al tema scuro
+
+  language: Lingua
+  english: Inglese
+  italian: Italiano
+  select_language: Seleziona Lingua
   accent_color: Colore principale
   about: Informazioni
   version: Versione

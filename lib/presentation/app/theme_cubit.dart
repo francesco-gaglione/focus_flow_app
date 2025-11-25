@@ -39,22 +39,31 @@ class ThemeCubit extends Cubit<ThemeState> {
        );
 
   Future<void> loadTheme() async {
+    if (isClosed) return;
     emit(state.copyWith(isLoading: true));
     final settings = await _getThemeSettings();
-    emit(ThemeState(settings: settings, isLoading: false));
+    if (!isClosed) {
+      emit(ThemeState(settings: settings, isLoading: false));
+    }
   }
 
   Future<void> toggleTheme() async {
+    if (isClosed) return;
     emit(state.copyWith(isLoading: true));
     final updated = await _toggleTheme(state.settings);
-    emit(state.copyWith(settings: updated, isLoading: false));
+    if (!isClosed) {
+      emit(state.copyWith(settings: updated, isLoading: false));
+    }
   }
 
   Future<void> updateAccentColor(int color) async {
     if (color == state.accentColor) return;
+    if (isClosed) return;
 
     emit(state.copyWith(isLoading: true));
     final updated = await _updateAccentColor(state.settings, color);
-    emit(state.copyWith(settings: updated, isLoading: false));
+    if (!isClosed) {
+      emit(state.copyWith(settings: updated, isLoading: false));
+    }
   }
 }

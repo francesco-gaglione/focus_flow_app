@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../app/locale_cubit.dart';
 import '../app/theme_cubit.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -59,6 +60,55 @@ class SettingsPage extends StatelessWidget {
                                   : Icons.light_mode,
                               color: Theme.of(context).colorScheme.primary,
                             ),
+                          ),
+                          ListTile(
+                            title: Text(context.tr('settings.language')),
+                            subtitle: Text(
+                              context.locale.languageCode == 'en'
+                                  ? context.tr('settings.english')
+                                  : context.tr('settings.italian'),
+                            ),
+                            leading: Icon(
+                              Icons.language,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => SimpleDialog(
+                                      title: Text(
+                                        context.tr('settings.select_language'),
+                                      ),
+                                      children: [
+                                        SimpleDialogOption(
+                                          onPressed: () {
+                                            const locale = Locale('en');
+                                            context
+                                                .read<LocaleCubit>()
+                                                .setLocale(locale);
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text(
+                                            context.tr('settings.english'),
+                                          ),
+                                        ),
+                                        SimpleDialogOption(
+                                          onPressed: () {
+                                            const locale = Locale('it');
+                                            context
+                                                .read<LocaleCubit>()
+                                                .setLocale(locale);
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text(
+                                            context.tr('settings.italian'),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            },
                           ),
                         ],
                       );

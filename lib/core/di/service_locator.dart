@@ -3,11 +3,13 @@ import 'package:focus_flow_app/adapters/repositories/http_category_repository.da
 import 'package:focus_flow_app/adapters/repositories/http_session_repository.dart';
 import 'package:focus_flow_app/adapters/repositories/http_statistics_repository.dart';
 import 'package:focus_flow_app/adapters/repositories/http_task_repository.dart';
+import 'package:focus_flow_app/adapters/repositories/http_user_settings_repository.dart';
 import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/repositories/category_repository.dart';
 import 'package:focus_flow_app/domain/repositories/session_repository.dart';
 import 'package:focus_flow_app/domain/repositories/statistics_repository.dart';
 import 'package:focus_flow_app/domain/repositories/task_repository.dart';
+import 'package:focus_flow_app/domain/repositories/user_settings_repository.dart';
 import 'package:focus_flow_app/domain/usecases/calculate_stats_by_period.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/create_category.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/delete_category.dart';
@@ -21,11 +23,14 @@ import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/update_task.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../adapters/theme/theme_repository_impl.dart';
+import '../../adapters/theme/user_settings_theme_repository.dart';
 import '../../domain/repositories/theme_repository.dart';
+import '../../domain/usecases/get_saved_locale.dart';
 import '../../domain/usecases/get_theme_settings.dart';
+import '../../domain/usecases/save_locale.dart';
 import '../../domain/usecases/toggle_theme.dart';
 import '../../domain/usecases/update_accent_color.dart';
+import '../../presentation/app/locale_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -41,9 +46,14 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
     ),
   );
 
+  // Repositories - User Settings
+  sl.registerLazySingleton<UserSettingsRepository>(
+    () => HttpUserSettingsRepository(dio: sl(), baseUrl: baseUrl),
+  );
+
   // Repositories - Theme
   sl.registerLazySingleton<ThemeRepository>(
-    () => InMemoryThemeRepositoryImpl(),
+    () => UserSettingsThemeRepository(sl()),
   );
 
   // Repositories - HTTP
@@ -81,6 +91,18 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<UpdateAccentColor>(
     () => UpdateAccentColor(sl<ThemeRepository>()),
   );
+
+  // Use Cases - Locale
+  sl.registerLazySingleton<GetSavedLocale>(
+    () => GetSavedLocale(sl<UserSettingsRepository>()),
+  );
+
+  sl.registerLazySingleton<SaveLocale>(
+    () => SaveLocale(sl<UserSettingsRepository>()),
+  );
+
+  // Cubits
+  sl.registerFactory(() => LocaleCubit(getSavedLocale: sl(), saveLocale: sl()));
 
   // Use Cases - Category
   sl.registerLazySingleton<GetCategoriesAndTasks>(
