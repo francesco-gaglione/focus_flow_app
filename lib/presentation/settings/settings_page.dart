@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../app/locale_cubit.dart';
 import '../app/theme_cubit.dart';
+import '../../domain/usecases/get_app_version.dart';
+import '../../core/di/service_locator.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -139,10 +141,15 @@ class SettingsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  ListTile(
-                    title: Text(context.tr('settings.version')),
-                    subtitle: const Text('0.0.1-alpha.1'),
-                    leading: const Icon(Icons.code),
+                  FutureBuilder<String>(
+                    future: sl<GetAppVersion>()(),
+                    builder: (context, snapshot) {
+                      return ListTile(
+                        title: Text(context.tr('settings.version')),
+                        subtitle: Text(snapshot.data ?? '...'),
+                        leading: const Icon(Icons.code),
+                      );
+                    },
                   ),
                   ListTile(
                     title: Text(context.tr('settings.app_name')),

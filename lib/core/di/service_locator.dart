@@ -25,6 +25,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../adapters/theme/user_settings_theme_repository.dart';
 import '../../domain/repositories/theme_repository.dart';
+import '../../domain/usecases/get_app_version.dart';
 import '../../domain/usecases/get_saved_locale.dart';
 import '../../domain/usecases/get_theme_settings.dart';
 import '../../domain/usecases/save_locale.dart';
@@ -99,6 +100,10 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
 
   sl.registerLazySingleton<SaveLocale>(
     () => SaveLocale(sl<UserSettingsRepository>()),
+  );
+
+  sl.registerLazySingleton<GetAppVersion>(
+    () => GetAppVersion(),
   );
 
   // Cubits
