@@ -174,7 +174,7 @@ class FocusTimerWidget extends StatelessWidget {
                             style: Theme.of(
                               context,
                             ).textTheme.bodyLarge?.copyWith(
-                              color: textColor.withOpacity(0.7),
+                              color: textColor.withValues(alpha: 0.7),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -240,9 +240,9 @@ class FocusTimerWidget extends StatelessWidget {
                           child: OutlinedButton(
                             onPressed: onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withOpacity(0.7),
+                              foregroundColor: textColor.withValues(alpha: 0.7),
                               side: BorderSide(
-                                color: colorScheme.outline.withOpacity(0.5),
+                                color: colorScheme.outline.withValues(alpha: 0.5),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -291,9 +291,9 @@ class FocusTimerWidget extends StatelessWidget {
                           child: OutlinedButton(
                             onPressed: onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withOpacity(0.7),
+                              foregroundColor: textColor.withValues(alpha: 0.7),
                               side: BorderSide(
-                                color: colorScheme.outline.withOpacity(0.5),
+                                color: colorScheme.outline.withValues(alpha: 0.5),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),

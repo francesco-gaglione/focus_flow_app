@@ -128,6 +128,7 @@ class HttpCategoryRepository implements CategoryRepository {
     }
   }
 
+  @override
   Future<bool> categoryExistsByName(String name) async {
     final categoriesWithTasks = await getAllCategories();
     return categoriesWithTasks.any(

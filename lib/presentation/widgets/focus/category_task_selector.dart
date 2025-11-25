@@ -169,6 +169,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Category dropdown
             DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
               value: selectedCategory,
               decoration: InputDecoration(
                 labelText: context.tr('focus.category_label'),
@@ -231,6 +232,7 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
             // Task dropdown
             DropdownButtonFormField<String>(
+              // ignore: deprecated_member_use
               value: selectedTask,
               decoration: InputDecoration(
                 labelText:

@@ -115,6 +115,7 @@ class UpdateCategoryResponseDto with _$UpdateCategoryResponseDto {
 @freezed
 class DeleteCategoriesResponseDto with _$DeleteCategoriesResponseDto {
   const factory DeleteCategoriesResponseDto({
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'deleted_ids') required List<String> deletedIds,
   }) = _DeleteCategoriesResponseDto;
 

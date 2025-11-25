@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
 class UserSetting extends Equatable {
-  String key;
-  String value;
+  final String key;
+  final String value;
 
-  UserSetting({required this.key, required this.value});
+  const UserSetting({required this.key, required this.value});
 
   UserSetting copyWith({String? key, String? value}) {
     return UserSetting(key: key ?? this.key, value: value ?? this.value);

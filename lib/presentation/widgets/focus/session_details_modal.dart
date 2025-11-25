@@ -124,14 +124,14 @@ class SessionDetailsModal extends StatelessWidget {
           _buildDetailRow(
             context,
             Icons.timer_outlined,
-            context.tr('focus.duration_label') ?? 'Duration', // Fallback if key missing
+            context.tr('focus.duration_label'),
             durationString,
           ),
           const SizedBox(height: 16),
           _buildDetailRow(
             context,
             Icons.access_time,
-            context.tr('focus.time_range_label') ?? 'Time', // Fallback
+            context.tr('focus.time_range_label'),
             '$startTime - $endTime',
           ),
           if (session.concentrationScore != null) ...[

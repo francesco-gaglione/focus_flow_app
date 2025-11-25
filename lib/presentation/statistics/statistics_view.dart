@@ -25,7 +25,7 @@ class _StatisticsViewState extends State<StatisticsView> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+
 
     return Scaffold(
       body: BlocBuilder<StatisticsBloc, StatisticsState>(
@@ -380,7 +380,7 @@ class _StatisticsViewState extends State<StatisticsView> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: category.percentage / 100,
-                  backgroundColor: color.withOpacity(0.2),
+                  backgroundColor: color.withValues(alpha: 0.2),
                   color: color,
                   minHeight: 8,
                 ),

@@ -91,6 +91,7 @@ class UpdateTaskResponseDto with _$UpdateTaskResponseDto {
 @freezed
 class DeleteTasksResponseDto with _$DeleteTasksResponseDto {
   const factory DeleteTasksResponseDto({
+    // ignore: invalid_annotation_target
     @JsonKey(name: 'deleted_ids') required List<String> deletedIds,
   }) = _DeleteTasksResponseDto;
 

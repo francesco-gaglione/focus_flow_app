@@ -38,7 +38,7 @@ class ColorPickerAdvanced extends StatelessWidget {
   Widget build(BuildContext context) {
     // Debug: print the selected color value
     debugPrint(
-      'ColorPickerAdvanced - selectedColor: ${selectedColor.value.toRadixString(16)}',
+      'ColorPickerAdvanced - selectedColor: ${selectedColor.toARGB32().toRadixString(16)}',
     );
 
     return Column(
@@ -64,11 +64,11 @@ class ColorPickerAdvanced extends StatelessWidget {
   /// Builds an individual color option with selection state and animations
   Widget _buildColorOption(BuildContext context, Color color) {
     // Compare color values directly
-    final isSelected = selectedColor.value == color.value;
+    final isSelected = selectedColor.toARGB32() == color.toARGB32();
 
     // Debug: print comparison
     if (isSelected) {
-      debugPrint('Color matched! ${color.value.toRadixString(16)}');
+      debugPrint('Color matched! ${color.toARGB32().toRadixString(16)}');
     }
 
     return InkWell(
