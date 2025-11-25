@@ -22,12 +22,10 @@ This is the app I use daily to manage my own focus time, and it's designed to be
 
 ## 📸 Screenshots
 
-_(This section can be updated with screenshots of the application)_
-
 |         Light Mode         |         Dark Mode         |
 | :------------------------: | :-----------------------: |
-| _App Screenshot 1 (Light)_ | _App Screenshot 1 (Dark)_ |
-| _App Screenshot 2 (Light)_ | _App Screenshot 2 (Dark)_ |
+| ![Light Mode 1](screenshot/screen1_light.png) | ![Dark Mode 1](screenshot/screen1_dark.png) |
+| ![Light Mode 2](screenshot/screen2_light.png) | ![Dark Mode 2](screenshot/screen2_dark.png) |
 
 ## 🛠️ Tech Stack
 
