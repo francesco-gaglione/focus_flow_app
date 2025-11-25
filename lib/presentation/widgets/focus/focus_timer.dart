@@ -80,6 +80,14 @@ class FocusTimerWidget extends StatelessWidget {
     logger.i('Building FocusTimerWidget, startDate: $startDate');
 
     final bool isRunning = startDate != null;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Use theme colors instead of hardcoded values
+    final accentColor = colorScheme.primary;
+    final trackColor = colorScheme.surfaceContainerHighest;
+    final textColor = colorScheme.onSurface;
+    final cardColor = colorScheme.surface;
+    final onPrimaryColor = colorScheme.onPrimary;
 
     return StreamBuilder<int>(
       stream:
@@ -96,11 +104,6 @@ class FocusTimerWidget extends StatelessWidget {
         } else {
           remainingSeconds = totalSeconds;
         }
-        final colorScheme = Theme.of(context).colorScheme;
-        // Restore dynamic category color (primary) but keep Figma style
-        final accentColor = colorScheme.primary; 
-        final trackColor = Colors.grey.shade200;
-        final textColor = const Color(0xFF2D3142); // Dark grey/blue for text
 
         final progress =
             totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
@@ -111,9 +114,11 @@ class FocusTimerWidget extends StatelessWidget {
         }
 
         return Card(
-          elevation: 4, // Added elevation for a card look
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          color: Colors.white, // White background as per Figma
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          color: cardColor, // Use theme-based card color
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -122,7 +127,7 @@ class FocusTimerWidget extends StatelessWidget {
                   _getTitle(context, sessionType),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: textColor,
+                    color: textColor, // Use theme-based text color
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -136,8 +141,8 @@ class FocusTimerWidget extends StatelessWidget {
                         size: const Size(280, 280),
                         painter: _TimerPainter(
                           progress: 1.0,
-                          color: trackColor,
-                          strokeWidth: 12, // Thicker track
+                          color: trackColor, // Use theme-based track color
+                          strokeWidth: 12,
                         ),
                       ),
                       CustomPaint(
@@ -154,17 +159,21 @@ class FocusTimerWidget extends StatelessWidget {
                         children: [
                           Text(
                             formatTime(remainingSeconds),
-                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              fontWeight: FontWeight.w900, // Bolder font
-                              fontSize: 64, // Larger font
-                              color: textColor,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.displayLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 64,
+                              color: textColor, // Use theme-based text color
                               letterSpacing: -1.0,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             _getStatusText(context, sessionType),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
                               color: textColor.withOpacity(0.7),
                               fontWeight: FontWeight.w500,
                             ),
@@ -174,7 +183,7 @@ class FocusTimerWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 48), // More spacing
+                const SizedBox(height: 48),
 
                 if (!isRunning)
                   SizedBox(
@@ -184,7 +193,8 @@ class FocusTimerWidget extends StatelessWidget {
                       onPressed: onStart,
                       style: FilledButton.styleFrom(
                         backgroundColor: accentColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor:
+                            onPrimaryColor, // Use theme-based onPrimary
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -207,7 +217,8 @@ class FocusTimerWidget extends StatelessWidget {
                             onPressed: onStart,
                             style: FilledButton.styleFrom(
                               backgroundColor: accentColor,
-                              foregroundColor: Colors.white,
+                              foregroundColor:
+                                  onPrimaryColor, // Use theme-based onPrimary
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -216,7 +227,9 @@ class FocusTimerWidget extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: Text(context.tr('focus.start').toUpperCase()),
+                            child: Text(
+                              context.tr('focus.start').toUpperCase(),
+                            ),
                           ),
                         ),
                       ),
@@ -228,7 +241,9 @@ class FocusTimerWidget extends StatelessWidget {
                             onPressed: onTerminate,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: textColor.withOpacity(0.7),
-                              side: BorderSide(color: textColor.withOpacity(0.3)),
+                              side: BorderSide(
+                                color: colorScheme.outline.withOpacity(0.5),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -253,7 +268,8 @@ class FocusTimerWidget extends StatelessWidget {
                             onPressed: onBreak,
                             style: FilledButton.styleFrom(
                               backgroundColor: accentColor,
-                              foregroundColor: Colors.white,
+                              foregroundColor:
+                                  onPrimaryColor, // Use theme-based onPrimary
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -262,7 +278,9 @@ class FocusTimerWidget extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: Text(context.tr('focus.break').toUpperCase()),
+                            child: Text(
+                              context.tr('focus.break').toUpperCase(),
+                            ),
                           ),
                         ),
                       ),
@@ -274,7 +292,9 @@ class FocusTimerWidget extends StatelessWidget {
                             onPressed: onTerminate,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: textColor.withOpacity(0.7),
-                              side: BorderSide(color: textColor.withOpacity(0.3)),
+                              side: BorderSide(
+                                color: colorScheme.outline.withOpacity(0.5),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
