@@ -266,6 +266,8 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
           logger.d('Received pomodoro state update: $pomodoroState');
           _handlePomodoroStateUpdate(pomodoroState);
         });
+
+    add(ReloadTodaySessions());
   }
 
   /// Handle pomodoro state updates
@@ -328,9 +330,8 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         note: pomodoroState.currentSession!.note,
         selectedFocusLevel: pomodoroState.currentSession!.concentrationScore,
       );
-    } else {
-      add(ReloadTodaySessions());
     }
+    add(ReloadTodaySessions());
 
     logger.d(
       'Updating state - Category: ${selectedCategory?.name}, Task: ${selectedTask?.name}',
