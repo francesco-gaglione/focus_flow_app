@@ -55,7 +55,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
               spacing: 12,
               runSpacing: 12,
               children: List.generate(5, (index) {
-                final level = index + 1;
+                final level = index;
                 final isSelected = selectedLevel == level;
 
                 return InkWell(

@@ -17,64 +17,7 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
   }) : _statisticsRepository = statisticsRepository,
        _getCategoriesAndTasks = getCategoriesAndTasks,
        super(StatisticsInitial()) {
-    on<LoadStatistics>(_onLoadStatistics);
     on<ChangeTimeRange>(_onChangeTimeRange);
-  }
-
-  Future<void> _onLoadStatistics(
-    LoadStatistics event,
-    Emitter<StatisticsState> emit,
-  ) async {
-    emit(StatisticsLoading());
-    try {
-      final now = DateTime.now();
-      int startDate;
-      int? endDate;
-      StatisticsTimeRange timeRange = StatisticsTimeRange.day;
-
-      if (event.startDate == null) {
-        final startOfDay = DateTime(now.year, now.month, now.day);
-        startDate = startOfDay.millisecondsSinceEpoch ~/ 1000;
-        endDate =
-            startOfDay.add(const Duration(days: 1)).millisecondsSinceEpoch ~/
-            1000;
-      } else {
-        startDate = event.startDate!;
-        endDate = event.endDate;
-      }
-
-      final stats = await _statisticsRepository.calculateStatsByPeriod(
-        startDate: startDate,
-        endDate: endDate,
-      );
-
-
-      final categoriesResult = await _getCategoriesAndTasks.execute();
-      final categoryColors = <String, Color>{};
-      
-      if (categoriesResult.success && categoriesResult.categoriesWithTasks != null) {
-        for (final item in categoriesResult.categoriesWithTasks!) {
-          final category = item.category;
-          try {
-             categoryColors[category.id] = Color(int.parse(category.color.replaceFirst('#', '0xFF')));
-          } catch (e) {
-             // Fallback or ignore invalid color
-             _logger.w('Invalid color for category ${category.name}: ${category.color}');
-          }
-        }
-      }
-
-      emit(
-        StatisticsLoaded(
-          statistics: stats,
-          timeRange: timeRange,
-          categoryColors: categoryColors,
-        ),
-      );
-    } catch (e) {
-      _logger.e('Error loading statistics', error: e);
-      emit(StatisticsError(e.toString()));
-    }
   }
 
   Future<void> _onChangeTimeRange(
@@ -122,15 +65,19 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
       final categoriesResult = await _getCategoriesAndTasks.execute();
       final categoryColors = <String, Color>{};
 
-      
-      if (categoriesResult.success && categoriesResult.categoriesWithTasks != null) {
+      if (categoriesResult.success &&
+          categoriesResult.categoriesWithTasks != null) {
         for (final item in categoriesResult.categoriesWithTasks!) {
           final category = item.category;
           try {
-             categoryColors[category.id] = Color(int.parse(category.color.replaceFirst('#', '0xFF')));
+            categoryColors[category.id] = Color(
+              int.parse(category.color.replaceFirst('#', '0xFF')),
+            );
           } catch (e) {
-             // Fallback or ignore invalid color
-             _logger.w('Invalid color for category ${category.name}: ${category.color}');
+            // Fallback or ignore invalid color
+            _logger.w(
+              'Invalid color for category ${category.name}: ${category.color}',
+            );
           }
         }
       }
