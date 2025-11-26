@@ -11,6 +11,7 @@ import 'package:focus_flow_app/presentation/widgets/focus/focus_level_selector.d
 import 'package:focus_flow_app/presentation/widgets/focus/focus_notes.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timeline.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timer.dart';
+import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:logger/logger.dart';
 
 class FocusView extends StatefulWidget {
@@ -91,8 +92,12 @@ class FocusViewState extends State<FocusView> {
           final isDesktop =
               MediaQuery.of(context).size.width >= desktopBreakpoint;
 
+          final isWorkSession =
+              state.sessionState?.sessionType == SessionTypeEnum.focus ||
+                  state.sessionState?.sessionType == SessionTypeEnum.work;
+
           final focusLevelSelector =
-              state.sessionState != null
+              state.sessionState != null && isWorkSession
                   ? FocusLevelSelector(
                     initialLevel: state.sessionState?.selectedFocusLevel,
                     onFocusLevelChanged:
@@ -101,7 +106,7 @@ class FocusViewState extends State<FocusView> {
                   : SizedBox(height: 0);
 
           final notesWidget =
-              state.sessionState != null
+              state.sessionState != null && isWorkSession
                   ? FocusNotesWidget(
                     initialNotes: state.sessionState?.note,
                     onNotesChanged: (notes) => _onNoteChanged(context, notes),
