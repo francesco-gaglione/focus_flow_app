@@ -87,7 +87,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                     ),
                     child: Center(
                       child: Text(
-                        '$level',
+                        '${level + 1}',
                         style: Theme.of(
                           context,
                         ).textTheme.titleMedium?.copyWith(
@@ -120,9 +120,9 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
   }
 
   String _getLevelDescription(int level) {
-    if (level <= 3) return context.tr('focus.level_low');
-    if (level <= 6) return context.tr('focus.level_medium');
-    if (level <= 8) return context.tr('focus.level_high');
+    if (level <= 1) return context.tr('focus.level_low');
+    if (level <= 3) return context.tr('focus.level_medium');
+    if (level <= 4) return context.tr('focus.level_high');
     return context.tr('focus.level_maximum');
   }
 }
