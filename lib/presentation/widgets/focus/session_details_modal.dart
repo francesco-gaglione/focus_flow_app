@@ -56,12 +56,12 @@ class SessionDetailsModal extends StatelessWidget {
         '${duration.inMinutes}m ${duration.inSeconds % 60}s';
 
     final startTime = DateFormat('HH:mm').format(
-      DateTime.fromMillisecondsSinceEpoch(session.startedAt),
+      DateTime.fromMillisecondsSinceEpoch(session.startedAt * 1000),
     );
     final endTime =
         session.endedAt != null
             ? DateFormat('HH:mm').format(
-              DateTime.fromMillisecondsSinceEpoch(session.endedAt!),
+              DateTime.fromMillisecondsSinceEpoch(session.endedAt! * 1000),
             )
             : '...';
 

@@ -78,13 +78,13 @@ class FocusTimelineWidget extends StatelessWidget {
                   final isLast = index == sessions.length - 1;
 
                   final startTime = DateFormat('HH:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(session.startedAt),
+                    DateTime.fromMillisecondsSinceEpoch(session.startedAt * 1000),
                   );
                   final endTime =
                       session.endedAt != null
                           ? DateFormat('HH:mm').format(
                             DateTime.fromMillisecondsSinceEpoch(
-                              session.endedAt!,
+                              session.endedAt! * 1000,
                             ),
                           )
                           : '';
