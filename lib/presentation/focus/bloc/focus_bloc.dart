@@ -43,7 +43,10 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     on<TaskSelected>(_onTaskSelected);
     on<PomodoroStateUpdated>(_onPomodoroStateUpdated);
     on<FocusLevelSelected>(_onFocusLevelSelected);
-    on<UpdateNote>(_onUpdateNote);
+    on<UpdateNote>(
+      _onUpdateNote,
+      transformer: debounce(const Duration(milliseconds: 1000)),
+    );
     on<StartFocus>(_onStartFocus);
     on<BreakFocus>(_onBreakFocus);
     on<TerminateFocus>(_onTerminateFocus);
