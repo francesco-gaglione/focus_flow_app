@@ -55,8 +55,14 @@ class FocusTimerWidget extends StatelessWidget {
   }
 
   String _getStatusText(BuildContext context, SessionTypeEnum? sessionType) {
-    if (startDate == null) {
-      return context.tr('focus.ready_to_focus');
+    int elapsed = 0;
+    if (startDate != null) {
+      final now = DateTime.now();
+      elapsed = now.difference(startDate!).inSeconds;
+    }
+
+    if (startDate != null && elapsed > _getTotalSeconds(sessionType)) {
+      return context.tr('focus.overtime');
     }
 
     switch (sessionType) {
@@ -88,6 +94,7 @@ class FocusTimerWidget extends StatelessWidget {
     final textColor = colorScheme.onSurface;
     final cardColor = colorScheme.surface;
     final onPrimaryColor = colorScheme.onPrimary;
+    final errorColor = colorScheme.error;
 
     return StreamBuilder<int>(
       stream:
@@ -97,21 +104,38 @@ class FocusTimerWidget extends StatelessWidget {
       builder: (context, snapshot) {
         final totalSeconds = _getTotalSeconds(sessionType);
         int remainingSeconds;
+        int overtimeSeconds = 0;
+        bool isOvertime = false;
+
         if (isRunning) {
           final now = DateTime.now();
           final elapsed = now.difference(startDate!).inSeconds;
-          remainingSeconds = (totalSeconds - elapsed).clamp(0, totalSeconds);
+          if (elapsed > totalSeconds) {
+            remainingSeconds = 0;
+            overtimeSeconds = elapsed - totalSeconds;
+            isOvertime = true;
+          } else {
+            remainingSeconds = totalSeconds - elapsed;
+          }
         } else {
           remainingSeconds = totalSeconds;
         }
 
         final progress =
             totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
+        
         String formatTime(int seconds) {
           final minutes = seconds ~/ 60;
           final secs = seconds % 60;
           return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
         }
+
+        final displayTime = isOvertime 
+            ? formatTime(totalSeconds + overtimeSeconds) 
+            : formatTime(remainingSeconds);
+            
+        final timerColor = isOvertime ? errorColor : textColor;
+        final statusColor = isOvertime ? errorColor : textColor.withValues(alpha: 0.7);
 
         return Card(
           elevation: 4,
@@ -148,8 +172,8 @@ class FocusTimerWidget extends StatelessWidget {
                       CustomPaint(
                         size: const Size(280, 280),
                         painter: _TimerPainter(
-                          progress: progress,
-                          color: accentColor,
+                          progress: isOvertime ? 1.0 : progress,
+                          color: isOvertime ? errorColor : accentColor,
                           strokeWidth: 12,
                           strokeCap: StrokeCap.round,
                         ),
@@ -158,13 +182,13 @@ class FocusTimerWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            formatTime(remainingSeconds),
+                            displayTime,
                             style: Theme.of(
                               context,
                             ).textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.w900,
                               fontSize: 64,
-                              color: textColor, // Use theme-based text color
+                              color: timerColor,
                               letterSpacing: -1.0,
                             ),
                           ),
@@ -174,7 +198,7 @@ class FocusTimerWidget extends StatelessWidget {
                             style: Theme.of(
                               context,
                             ).textTheme.bodyLarge?.copyWith(
-                              color: textColor.withValues(alpha: 0.7),
+                              color: statusColor,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

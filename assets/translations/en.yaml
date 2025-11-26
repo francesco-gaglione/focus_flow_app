@@ -49,6 +49,7 @@ focus:
   long_break_status: On a long break...
   focusing: Focusing...
   ready_to_focus: Ready to focus
+  overtime: Overtime
   start: Start
   pause: Pause
   break: Break
