@@ -98,6 +98,16 @@ class _StatisticsViewState extends State<StatisticsView> {
     );
   }
 
+  String _formatDuration(Duration duration) {
+    if (duration.inMinutes <= 60) {
+      return '${duration.inMinutes}m';
+    } else {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes.remainder(60);
+      return '${hours}h ${minutes}m';
+    }
+  }
+
   Widget _buildTimeRangeSelector(
     BuildContext context,
     StatisticsTimeRange currentRange,
@@ -131,13 +141,7 @@ class _StatisticsViewState extends State<StatisticsView> {
 
   Widget _buildSummaryCards(BuildContext context, PeriodStatistics stats) {
     final duration = Duration(seconds: stats.totalFocusTime);
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-
     final breakDuration = Duration(seconds: stats.totalBreakTime);
-    final breakHours = breakDuration.inHours;
-    final breakMinutes = breakDuration.inMinutes.remainder(60);
-
     final avgSession = stats.totalSessions > 0 
         ? Duration(seconds: stats.totalFocusTime ~/ stats.totalSessions) 
         : Duration.zero;
@@ -150,7 +154,7 @@ class _StatisticsViewState extends State<StatisticsView> {
               child: _buildSummaryCard(
                 context,
                 context.tr('statistics.focus_time'),
-                '${hours}h ${minutes}m',
+                _formatDuration(duration),
                 Icons.timer,
                 Colors.blue,
               ),
@@ -174,7 +178,7 @@ class _StatisticsViewState extends State<StatisticsView> {
               child: _buildSummaryCard(
                 context,
                 context.tr('statistics.break_time'),
-                '${breakHours}h ${breakMinutes}m',
+                _formatDuration(breakDuration),
                 Icons.coffee,
                 Colors.orange,
               ),
@@ -184,7 +188,7 @@ class _StatisticsViewState extends State<StatisticsView> {
               child: _buildSummaryCard(
                 context,
                 context.tr('statistics.average_session'),
-                '${avgSession.inMinutes}m',
+                _formatDuration(avgSession),
                 Icons.timelapse,
                 Colors.purple,
               ),
@@ -477,7 +481,7 @@ class _StatisticsViewState extends State<StatisticsView> {
               ),
               title: Text(task.taskName),
               subtitle: Text(task.categoryName ?? 'Uncategorized'),
-              trailing: Text('${duration.inMinutes}m'),
+              trailing: Text(_formatDuration(duration)),
             );
           }).toList(),
     );
