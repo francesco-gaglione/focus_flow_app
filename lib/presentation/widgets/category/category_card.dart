@@ -185,7 +185,21 @@ class CategoryCard extends StatelessWidget {
                     ),
                   ),
                 ]
-                : taskWidgets,
+                : [
+                    ...taskWidgets,
+                    if (onAddTask != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: FilledButton.tonalIcon(
+                          onPressed: onAddTask,
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Task'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 48),
+                          ),
+                        ),
+                      ),
+                  ],
       ),
     );
   }
