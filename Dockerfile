@@ -1,5 +1,5 @@
-# Stage 1: Build the Flutter web app using a native ARM64 base image for Apple Silicon
-FROM --platform=linux/arm64 dart:stable AS builder
+# Stage 1: Build the Flutter web app
+FROM dart:stable AS builder
 
 # Install necessary tools
 RUN apt-get update && apt-get install -y curl git unzip xz-utils
