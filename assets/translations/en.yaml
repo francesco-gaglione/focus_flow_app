@@ -65,7 +65,7 @@ focus:
   timeline_title: Today's Focus Sessions
   timeline_empty: No sessions completed yet
   level_badge: Level
-  select_category_task: Select Category & Task
+  select_category_task: Select Category & Task to Work On
   clear_selection: Clear selection
   category_label: Category
   task_label: Task

@@ -27,71 +27,38 @@ class CategoryTaskSelector extends StatefulWidget {
 }
 
 class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
-  String? selectedCategory;
-  String? selectedTask;
-
-  List<Task> tasks = [];
+  String? selectedCategoryId;
+  String? selectedTaskId;
+  final Set<String> _expandedCategories = {};
+  bool _isOrphanExpanded = false;
 
   @override
   void initState() {
     super.initState();
-
-    selectedCategory = widget.initialCategoryId;
-    selectedTask = widget.initialTaskId;
-
-    if (selectedCategory != null) {
-      final category = widget.categories.firstWhere(
-        (cat) => cat.category.id == selectedCategory,
-        orElse: () => widget.categories.first,
-      );
-      tasks = category.tasks;
-    } else {
-      tasks = widget.orphanTasks;
-    }
+    selectedCategoryId = widget.initialCategoryId;
+    selectedTaskId = widget.initialTaskId;
+    _expandSelected();
   }
 
   @override
   void didUpdateWidget(CategoryTaskSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.initialCategoryId != widget.initialCategoryId ||
         oldWidget.initialTaskId != widget.initialTaskId) {
       setState(() {
-        selectedCategory = widget.initialCategoryId;
-        selectedTask = widget.initialTaskId;
-
-        if (selectedCategory != null) {
-          CategoryWithTasks? category;
-          try {
-            category = widget.categories.firstWhere(
-              (cat) => cat.category.id == selectedCategory,
-            );
-          } catch (e) {
-            // Not found
-            category = null;
-          }
-
-          if (category != null) {
-            tasks = category.tasks;
-            // Also, validate if the selectedTask is in the new list of tasks
-            if (selectedTask != null &&
-                !tasks.any((t) => t.id == selectedTask)) {
-              selectedTask = null;
-            }
-          } else {
-            // Category from websocket not found in the list.
-            tasks = [];
-            selectedCategory = null; // This will make the dropdown empty.
-            selectedTask = null;
-          }
-        } else {
-          tasks = widget.orphanTasks;
-          // Also, validate if the selectedTask is in the new list of orphan tasks
-          if (selectedTask != null && !tasks.any((t) => t.id == selectedTask)) {
-            selectedTask = null;
-          }
-        }
+        selectedCategoryId = widget.initialCategoryId;
+        selectedTaskId = widget.initialTaskId;
+        _expandSelected();
       });
+    }
+  }
+
+  void _expandSelected() {
+    if (selectedCategoryId != null) {
+      _expandedCategories.add(selectedCategoryId!);
+    }
+    if (selectedTaskId != null && selectedCategoryId == null) {
+      _isOrphanExpanded = true;
     }
   }
 
@@ -103,33 +70,52 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
     }
   }
 
-  void _clearCategory() {
+  void _handleCategorySelect(Category category) {
     setState(() {
-      selectedCategory = null;
-      selectedTask = null;
-      tasks = widget.orphanTasks;
+      if (selectedCategoryId == category.id && selectedTaskId == null) {
+        // Already selected, maybe deselect? Or do nothing.
+        // Let's keep it selected.
+      } else {
+        selectedCategoryId = category.id;
+        selectedTaskId = null;
+      }
     });
-
-    widget.onCategoryChanged?.call(null);
+    widget.onCategoryChanged?.call(category);
     widget.onTaskChanged?.call(null);
   }
 
-  Category? _getCategoryById(String id) {
-    try {
-      return widget.categories
-          .firstWhere((cat) => cat.category.id == id)
-          .category;
-    } catch (e) {
-      return null;
+  void _handleTaskSelect(Task task, Category? category) {
+    setState(() {
+      selectedTaskId = task.id;
+      if (category != null) {
+        selectedCategoryId = category.id;
+      } else {
+        selectedCategoryId = null;
+      }
+    });
+
+    if (category != null) {
+      widget.onCategoryChanged?.call(category);
+    } else {
+      widget.onCategoryChanged?.call(null);
     }
+    widget.onTaskChanged?.call(task);
   }
 
-  Task? _getTaskById(String id) {
-    try {
-      return tasks.firstWhere((task) => task.id == id);
-    } catch (e) {
-      return null;
-    }
+  void _toggleCategoryExpansion(String categoryId) {
+    setState(() {
+      if (_expandedCategories.contains(categoryId)) {
+        _expandedCategories.remove(categoryId);
+      } else {
+        _expandedCategories.add(categoryId);
+      }
+    });
+  }
+
+  void _toggleOrphanExpansion() {
+    setState(() {
+      _isOrphanExpanded = !_isOrphanExpanded;
+    });
   }
 
   @override
@@ -139,132 +125,224 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
     return Card(
       elevation: 0,
       color: colorScheme.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
                 Icon(Icons.category_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   context.tr('focus.select_category_task'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-                const Spacer(),
-                if (selectedCategory != null)
-                  IconButton(
-                    onPressed: _clearCategory,
-                    icon: const Icon(Icons.clear),
-                    tooltip: context.tr('focus.clear_selection'),
-                    iconSize: 20,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
               ],
             ),
-            const SizedBox(height: 16),
+          ),
+          const Divider(height: 1),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: widget.categories.length +
+                (widget.orphanTasks.isNotEmpty ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index < widget.categories.length) {
+                final catWithTasks = widget.categories[index];
+                final category = catWithTasks.category;
+                final tasks = catWithTasks.tasks;
+                final isCategorySelected = selectedCategoryId == category.id;
+                final isExpanded = _expandedCategories.contains(category.id);
 
-            // Category dropdown
-            DropdownButtonFormField<String>(
-              // ignore: deprecated_member_use
-              value: selectedCategory,
-              decoration: InputDecoration(
-                labelText: context.tr('focus.category_label'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.folder_outlined),
-                suffixIcon:
-                    selectedCategory != null
-                        ? IconButton(
-                          icon: const Icon(Icons.close, size: 20),
-                          onPressed: _clearCategory,
-                        )
-                        : null,
-              ),
-              items:
-                  widget.categories.map<DropdownMenuItem<String>>((
-                    CategoryWithTasks cat,
-                  ) {
-                    return DropdownMenuItem<String>(
-                      value: cat.category.id,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 16,
-                            height: 16,
-                            decoration: BoxDecoration(
-                              color: _parseColor(cat.category.color),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(cat.category.name),
-                        ],
+                return Column(
+                  children: [
+                    _buildCategoryItem(
+                      context,
+                      category,
+                      isCategorySelected,
+                      isExpanded,
+                    ),
+                    if (isExpanded)
+                      ...tasks.map(
+                        (task) => _buildTaskItem(
+                          context,
+                          task,
+                          category,
+                          selectedTaskId == task.id,
+                        ),
                       ),
-                    );
-                  }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedCategory = value;
-                  selectedTask = null;
+                  ],
+                );
+              } else {
+                // Orphan tasks section
+                return Column(
+                  children: [
+                    _buildOrphanHeader(context),
+                    if (_isOrphanExpanded)
+                      ...widget.orphanTasks.map(
+                        (task) => _buildTaskItem(
+                          context,
+                          task,
+                          null,
+                          selectedTaskId == task.id,
+                        ),
+                      ),
+                  ],
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
-                  if (value != null) {
-                    final category = widget.categories.firstWhere(
-                      (cat) => cat.category.id == value,
-                    );
-                    tasks = category.tasks;
-                  } else {
-                    tasks = widget.orphanTasks;
-                  }
-                });
-
-                final category = value != null ? _getCategoryById(value) : null;
-                widget.onCategoryChanged?.call(category);
-                widget.onTaskChanged?.call(null);
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // Task dropdown
-            DropdownButtonFormField<String>(
-              // ignore: deprecated_member_use
-              value: selectedTask,
-              decoration: InputDecoration(
-                labelText:
-                    selectedCategory == null
-                        ? context.tr('focus.orphan_tasks_label')
-                        : context.tr('focus.task_label'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+  Widget _buildCategoryItem(
+    BuildContext context,
+    Category category,
+    bool isSelected,
+    bool isExpanded,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: isSelected
+          ? colorScheme.primaryContainer.withOpacity(0.4)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleCategorySelect(category),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_down
+                      : Icons.keyboard_arrow_right,
+                  color: colorScheme.onSurfaceVariant,
                 ),
-                prefixIcon: const Icon(Icons.task_outlined),
-                helperText:
-                    selectedCategory == null
-                        ? context.tr('focus.orphan_tasks_helper')
-                        : null,
+                onPressed: () => _toggleCategoryExpansion(category.id),
+                visualDensity: VisualDensity.compact,
               ),
-              items:
-                  tasks.map<DropdownMenuItem<String>>((Task task) {
-                    return DropdownMenuItem<String>(
-                      value: task.id,
-                      child: Text(task.name),
-                    );
-                  }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedTask = value;
-                });
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: _parseColor(category.color),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  category.name,
+                  style: TextStyle(
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              if (isSelected && selectedTaskId == null)
+                 Padding(
+                   padding: const EdgeInsets.only(right: 16.0),
+                   child: Icon(Icons.check, size: 16, color: colorScheme.primary),
+                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                final task = value != null ? _getTaskById(value) : null;
-                widget.onTaskChanged?.call(task);
-              },
-            ),
-          ],
+  Widget _buildOrphanHeader(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = selectedCategoryId == null && selectedTaskId == null; 
+    // Orphan header is not really selectable as a category, but maybe we want to show it?
+    // Actually, "Orphan Tasks" is just a container. You can't "select" the container itself 
+    // in the same way you select a category, unless "No Category" is a valid selection?
+    // The requirement is to select category OR task. 
+    // If I select a task in orphan list, category is null.
+    // If I want to select "No Category" explicitly? Usually that means clearing selection?
+    // Let's assume the header is just for expansion for now, unless user wants to filter by "No Category".
+    // But let's keep it simple: just expansion.
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _toggleOrphanExpansion, // Tapping header toggles expansion
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  _isOrphanExpanded
+                      ? Icons.keyboard_arrow_down
+                      : Icons.keyboard_arrow_right,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                onPressed: _toggleOrphanExpansion,
+                visualDensity: VisualDensity.compact,
+              ),
+              const SizedBox(width: 12), // Align with text
+              Icon(Icons.folder_off_outlined, size: 20, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  context.tr('focus.orphan_tasks_label'),
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskItem(
+    BuildContext context,
+    Task task,
+    Category? category,
+    bool isSelected,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: isSelected
+          ? colorScheme.primaryContainer.withOpacity(0.4)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleTaskSelect(task, category),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(56, 12, 16, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  task.name,
+                  style: TextStyle(
+                    color:
+                        isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Icon(Icons.check, size: 16, color: colorScheme.primary),
+            ],
+          ),
         ),
       ),
     );
