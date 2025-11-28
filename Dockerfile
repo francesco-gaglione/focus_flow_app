@@ -35,8 +35,12 @@ RUN flutter pub get
 # Copy the rest of the source code
 COPY --chown=appuser:appuser . .
 
+# Pass build arguments
+ARG BASE_URL
+ARG WS_URL
+
 # Build the web application
-RUN flutter build web --release
+RUN flutter build web --release --dart-define=BASE_URL=${BASE_URL} --dart-define=WS_URL=${WS_URL}
 
 # Stage 2: Create the final production image with Nginx
 FROM nginx:alpine

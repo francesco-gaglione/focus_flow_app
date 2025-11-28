@@ -22,8 +22,8 @@ This is the app I use daily to manage my own focus time, and it's designed to be
 
 ## 📸 Screenshots
 
-|         Light Mode         |         Dark Mode         |
-| :------------------------: | :-----------------------: |
+|                  Light Mode                   |                  Dark Mode                  |
+| :-------------------------------------------: | :-----------------------------------------: |
 | ![Light Mode 1](screenshot/screen1_light.png) | ![Dark Mode 1](screenshot/screen1_dark.png) |
 | ![Light Mode 2](screenshot/screen2_light.png) | ![Dark Mode 2](screenshot/screen2_dark.png) |
 
@@ -92,6 +92,37 @@ lib/
     ```bash
     flutter run
     ```
+
+## 🐳 Docker Compose
+
+You can run the web application using Docker Compose for a consistent and isolated environment.
+
+1.  **Set up environment variables**:
+    Create a `.env` file in the root of the project. This file is used to configure the application at build time. Point the `BASE_URL` and `WS_URL` to your FocusFlow Cloud backend instance.
+
+    For example, if your backend is running on the same machine and accessible at port 8080, you would use:
+
+    ```env
+    BASE_URL=http://<your-ip>:8080
+    WS_URL=ws://<your-ip>:8080/ws/workspace/session
+    ```
+
+    If you are running the backend in a Docker container on the same Docker network, you can use the container name as the hostname:
+
+    ```env
+    # Example for backend container named 'focus_flow_cloud'
+    BASE_URL=http://focus_flow_cloud:8080
+    WS_URL=ws://focus_flow_cloud:8080/ws/workspace/session
+    ```
+
+2.  **Build and run the container**:
+    Use Docker Compose to build and start the service in detached mode:
+
+    ```bash
+    docker-compose up -d --build
+    ```
+
+    The application will be built with the specified environment variables and will be accessible at `http://localhost:8080`.
 
 ## 🤝 Contributing
 

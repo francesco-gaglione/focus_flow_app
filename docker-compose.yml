@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BASE_URL=${BASE_URL}
+        - WS_URL=${WS_URL}
     container_name: focus_flow_web
     ports:
       - "8080:80"
