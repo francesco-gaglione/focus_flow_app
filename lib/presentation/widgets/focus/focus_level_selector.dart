@@ -30,10 +30,12 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withAlpha(
+          (255 * 0.3).round(),
+        ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
         ),
       ),
       child: Padding(
@@ -46,7 +48,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withAlpha((255 * 0.1).round()),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.psychology, color: colorScheme.primary),
@@ -85,34 +87,45 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                       width: isSelected ? 56 : 48,
                       height: isSelected ? 56 : 48,
                       decoration: BoxDecoration(
-                        gradient: isSelected 
-                            ? LinearGradient(
-                                colors: [colorScheme.primary, colorScheme.tertiary],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
+                        gradient:
+                            isSelected
+                                ? LinearGradient(
+                                  colors: [
+                                    colorScheme.primary,
+                                    colorScheme.tertiary,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                : null,
                         color:
                             isSelected
                                 ? null
-                                : colorScheme.surfaceContainerHigh.withOpacity(0.5),
+                                : colorScheme.surfaceContainerHigh.withAlpha(
+                                  (255 * 0.5).round(),
+                                ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color:
                               isSelected
                                   ? Colors.transparent
-                                  : colorScheme.outline.withOpacity(0.2),
+                                  : colorScheme.outline.withAlpha(
+                                    (255 * 0.2).round(),
+                                  ),
                           width: 1,
                         ),
-                        boxShadow: isSelected 
-                            ? [
-                                BoxShadow(
-                                  color: colorScheme.primary.withOpacity(0.4),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
+                        boxShadow:
+                            isSelected
+                                ? [
+                                  BoxShadow(
+                                    color: colorScheme.primary.withAlpha(
+                                      (255 * 0.4).round(),
+                                    ),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                                : [],
                       ),
                       child: Center(
                         child: Text(
@@ -140,10 +153,12 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.surface.withOpacity(0.5),
+                  color: colorScheme.surface.withAlpha((255 * 0.5).round()),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.2),
+                    color: colorScheme.outlineVariant.withAlpha(
+                      (255 * 0.2).round(),
+                    ),
                   ),
                 ),
                 child: Text(

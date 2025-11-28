@@ -138,8 +138,8 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                 Text(
                   context.tr('focus.select_category_task'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -148,7 +148,8 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: widget.categories.length +
+            itemCount:
+                widget.categories.length +
                 (widget.orphanTasks.isNotEmpty ? 1 : 0),
             itemBuilder: (context, index) {
               if (index < widget.categories.length) {
@@ -209,9 +210,10 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: isSelected
-          ? colorScheme.primaryContainer.withOpacity(0.4)
-          : Colors.transparent,
+      color:
+          isSelected
+              ? colorScheme.primaryContainer.withAlpha((255 * 0.4).round())
+              : Colors.transparent,
       child: InkWell(
         onTap: () => _handleCategorySelect(category),
         child: Padding(
@@ -251,10 +253,14 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                 ),
               ),
               if (isSelected && selectedTaskId == null)
-                 Padding(
-                   padding: const EdgeInsets.only(right: 16.0),
-                   child: Icon(Icons.check, size: 16, color: colorScheme.primary),
-                 ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    Icons.check,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                ),
             ],
           ),
         ),
@@ -264,11 +270,11 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
 
   Widget _buildOrphanHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isSelected = selectedCategoryId == null && selectedTaskId == null; 
+
     // Orphan header is not really selectable as a category, but maybe we want to show it?
-    // Actually, "Orphan Tasks" is just a container. You can't "select" the container itself 
+    // Actually, "Orphan Tasks" is just a container. You can't "select" the container itself
     // in the same way you select a category, unless "No Category" is a valid selection?
-    // The requirement is to select category OR task. 
+    // The requirement is to select category OR task.
     // If I select a task in orphan list, category is null.
     // If I want to select "No Category" explicitly? Usually that means clearing selection?
     // Let's assume the header is just for expansion for now, unless user wants to filter by "No Category".
@@ -293,14 +299,16 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                 visualDensity: VisualDensity.compact,
               ),
               const SizedBox(width: 12), // Align with text
-              Icon(Icons.folder_off_outlined, size: 20, color: colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.folder_off_outlined,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   context.tr('focus.orphan_tasks_label'),
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                  ),
+                  style: TextStyle(color: colorScheme.onSurface),
                 ),
               ),
             ],
@@ -318,9 +326,10 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: isSelected
-          ? colorScheme.primaryContainer.withOpacity(0.4)
-          : Colors.transparent,
+      color:
+          isSelected
+              ? colorScheme.primaryContainer.withAlpha((255 * 0.4).round())
+              : Colors.transparent,
       child: InkWell(
         onTap: () => _handleTaskSelect(task, category),
         child: Padding(
@@ -335,7 +344,8 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
                         isSelected
                             ? colorScheme.primary
                             : colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.w500 : FontWeight.normal,
                   ),
                 ),
               ),

@@ -25,8 +25,6 @@ class _StatisticsViewState extends State<StatisticsView> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       body: BlocBuilder<StatisticsBloc, StatisticsState>(
         builder: (context, state) {
@@ -55,11 +53,22 @@ class _StatisticsViewState extends State<StatisticsView> {
                         const SizedBox(height: 24),
                         _buildSummaryCards(context, state.statistics),
                         const SizedBox(height: 32),
-                        _buildSectionTitle(context, context.tr('statistics.activity')),
+                        _buildSectionTitle(
+                          context,
+                          context.tr('statistics.activity'),
+                        ),
                         const SizedBox(height: 16),
-                        _buildActivityChart(context, state.statistics, state.categoryColors, state.timeRange),
+                        _buildActivityChart(
+                          context,
+                          state.statistics,
+                          state.categoryColors,
+                          state.timeRange,
+                        ),
                         const SizedBox(height: 32),
-                        _buildSectionTitle(context, context.tr('statistics.categories')),
+                        _buildSectionTitle(
+                          context,
+                          context.tr('statistics.categories'),
+                        ),
                         const SizedBox(height: 16),
                         _buildCategoryDistributionChart(
                           context,
@@ -67,11 +76,17 @@ class _StatisticsViewState extends State<StatisticsView> {
                           state.categoryColors,
                         ),
                         const SizedBox(height: 32),
-                        _buildSectionTitle(context, context.tr('statistics.top_tasks')),
+                        _buildSectionTitle(
+                          context,
+                          context.tr('statistics.top_tasks'),
+                        ),
                         const SizedBox(height: 16),
                         _buildTopTasksList(context, state.statistics),
                         const SizedBox(height: 32),
-                        _buildSectionTitle(context, context.tr('statistics.concentration_score')),
+                        _buildSectionTitle(
+                          context,
+                          context.tr('statistics.concentration_score'),
+                        ),
                         const SizedBox(height: 16),
                         _buildConcentrationChart(context, state.statistics),
                         const SizedBox(height: 32),
@@ -92,9 +107,9 @@ class _StatisticsViewState extends State<StatisticsView> {
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
@@ -116,29 +131,64 @@ class _StatisticsViewState extends State<StatisticsView> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildTimeRangeChip(context, StatisticsTimeRange.day, context.tr('statistics.day'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.day,
+            context.tr('statistics.day'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.yesterday, context.tr('statistics.yesterday'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.yesterday,
+            context.tr('statistics.yesterday'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.week, context.tr('statistics.week'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.week,
+            context.tr('statistics.week'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.lastWeek, context.tr('statistics.last_week'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.lastWeek,
+            context.tr('statistics.last_week'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.last7Days, context.tr('statistics.last_7_days'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.last7Days,
+            context.tr('statistics.last_7_days'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.month, context.tr('statistics.month'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.month,
+            context.tr('statistics.month'),
+            currentRange,
+          ),
           const SizedBox(width: 8),
-          _buildTimeRangeChip(context, StatisticsTimeRange.last30Days, context.tr('statistics.last_30_days'), currentRange),
+          _buildTimeRangeChip(
+            context,
+            StatisticsTimeRange.last30Days,
+            context.tr('statistics.last_30_days'),
+            currentRange,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildTimeRangeChip(
-    BuildContext context, 
-    StatisticsTimeRange range, 
-    String label, 
-    StatisticsTimeRange currentRange
+    BuildContext context,
+    StatisticsTimeRange range,
+    String label,
+    StatisticsTimeRange currentRange,
   ) {
     final isSelected = range == currentRange;
     return ChoiceChip(
@@ -151,19 +201,25 @@ class _StatisticsViewState extends State<StatisticsView> {
       },
       showCheckmark: false,
       labelStyle: TextStyle(
-        color: isSelected 
-            ? Theme.of(context).colorScheme.onPrimary 
-            : Theme.of(context).colorScheme.onSurface,
+        color:
+            isSelected
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurface,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       selectedColor: Theme.of(context).colorScheme.primary,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: isSelected 
-              ? Colors.transparent 
-              : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+          color:
+              isSelected
+                  ? Colors.transparent
+                  : Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withAlpha((255 * 0.5).round()),
         ),
       ),
     );
@@ -172,9 +228,10 @@ class _StatisticsViewState extends State<StatisticsView> {
   Widget _buildSummaryCards(BuildContext context, PeriodStatistics stats) {
     final duration = Duration(seconds: stats.totalFocusTime);
     final breakDuration = Duration(seconds: stats.totalBreakTime);
-    final avgSession = stats.totalSessions > 0 
-        ? Duration(seconds: stats.totalFocusTime ~/ stats.totalSessions) 
-        : Duration.zero;
+    final avgSession =
+        stats.totalSessions > 0
+            ? Duration(seconds: stats.totalFocusTime ~/ stats.totalSessions)
+            : Duration.zero;
 
     final items = [
       _SummaryItem(
@@ -203,17 +260,19 @@ class _StatisticsViewState extends State<StatisticsView> {
       ),
       _SummaryItem(
         title: context.tr('statistics.most_productive'),
-        value: stats.mostConcentratedPeriod == ConcentrationPeriod.morning 
-            ? context.tr('statistics.morning') 
-            : context.tr('statistics.afternoon'),
+        value:
+            stats.mostConcentratedPeriod == ConcentrationPeriod.morning
+                ? context.tr('statistics.morning')
+                : context.tr('statistics.afternoon'),
         icon: Icons.wb_sunny_outlined,
         color: Colors.amber,
       ),
       _SummaryItem(
         title: context.tr('statistics.least_productive'),
-        value: stats.lessConcentratedPeriod == ConcentrationPeriod.morning 
-            ? context.tr('statistics.morning') 
-            : context.tr('statistics.afternoon'),
+        value:
+            stats.lessConcentratedPeriod == ConcentrationPeriod.morning
+                ? context.tr('statistics.morning')
+                : context.tr('statistics.afternoon'),
         icon: Icons.nightlight_outlined,
         color: Colors.indigo,
       ),
@@ -246,10 +305,12 @@ class _StatisticsViewState extends State<StatisticsView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.5), // Glass-like opacity
+        color: colorScheme.surfaceContainerHighest.withAlpha(
+          (255 * 0.5).round(),
+        ), // Glass-like opacity
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
         ),
       ),
       child: Column(
@@ -259,7 +320,7 @@ class _StatisticsViewState extends State<StatisticsView> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: item.color.withOpacity(0.1),
+              color: item.color.withAlpha((255 * 0.1).round()),
               shape: BoxShape.circle,
             ),
             child: Icon(item.icon, color: item.color, size: 24),
@@ -293,12 +354,18 @@ class _StatisticsViewState extends State<StatisticsView> {
     );
   }
 
-  Widget _buildNoDataWidget(BuildContext context, String message, IconData icon) {
+  Widget _buildNoDataWidget(
+    BuildContext context,
+    String message,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(24),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -307,7 +374,9 @@ class _StatisticsViewState extends State<StatisticsView> {
           Icon(
             icon,
             size: 48,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outline.withAlpha((255 * 0.5).round()),
           ),
           const SizedBox(height: 16),
           Text(
@@ -329,30 +398,32 @@ class _StatisticsViewState extends State<StatisticsView> {
     StatisticsTimeRange timeRange,
   ) {
     final dailyActivity = _fillMissingDates(stats.dailyActivity, timeRange);
-    
-    // Check if there is any actual activity in the filled list (excluding placeholders if needed, 
-    // but _fillMissingDates returns placeholders with empty distribution. 
-    // If the original list was empty, we might still want to show the chart with empty bars 
-    // OR show the no data widget. 
+
+    // Check if there is any actual activity in the filled list (excluding placeholders if needed,
+    // but _fillMissingDates returns placeholders with empty distribution.
+    // If the original list was empty, we might still want to show the chart with empty bars
+    // OR show the no data widget.
     // However, usually "No Data" is better if there's absolutely nothing.
     // Let's check if the original stats.dailyActivity is empty AND we are not just showing empty days.
     // Actually, if stats.dailyActivity is empty, it means no data for the period.
     if (stats.dailyActivity.isEmpty) {
-       return SizedBox(
-         height: 240,
-         child: _buildNoDataWidget(
-           context, 
-           context.tr('statistics.no_activity_data'),
-           Icons.bar_chart_outlined,
-         ),
-       );
+      return SizedBox(
+        height: 240,
+        child: _buildNoDataWidget(
+          context,
+          context.tr('statistics.no_activity_data'),
+          Icons.bar_chart_outlined,
+        ),
+      );
     }
 
     return Container(
       height: 240,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
         borderRadius: BorderRadius.circular(24),
       ),
       child: BarChart(
@@ -361,14 +432,18 @@ class _StatisticsViewState extends State<StatisticsView> {
           maxY: _calculateMaxY(dailyActivity),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => Theme.of(context).colorScheme.surfaceContainerHighest,
+              getTooltipColor:
+                  (group) =>
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 if (groupIndex >= dailyActivity.length) return null;
                 final activity = dailyActivity[groupIndex];
-                final date = DateTime.fromMillisecondsSinceEpoch(activity.date * 1000);
-                
+                final date = DateTime.fromMillisecondsSinceEpoch(
+                  activity.date * 1000,
+                );
+
                 final textStyles = Theme.of(context).textTheme;
-                
+
                 return BarTooltipItem(
                   DateFormat('EEE, d MMM').format(date),
                   textStyles.titleSmall!.copyWith(fontWeight: FontWeight.bold),
@@ -377,7 +452,8 @@ class _StatisticsViewState extends State<StatisticsView> {
                     ...activity.categoryDistribution.map((dist) {
                       final duration = Duration(seconds: dist.totalFocusTime);
                       return TextSpan(
-                        text: '\n${dist.categoryName}: ${_formatDuration(duration)}',
+                        text:
+                            '\n${dist.categoryName}: ${_formatDuration(duration)}',
                         style: textStyles.bodySmall,
                       );
                     }),
@@ -397,50 +473,83 @@ class _StatisticsViewState extends State<StatisticsView> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (double value, TitleMeta meta) {
-                  if (value.toInt() >= 0 && value.toInt() < dailyActivity.length) {
-                     final date = DateTime.fromMillisecondsSinceEpoch(dailyActivity[value.toInt()].date * 1000);
-                     
-                     if (timeRange == StatisticsTimeRange.month || timeRange == StatisticsTimeRange.last30Days) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('${date.day}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
-                        );
-                     }
-                     
-                     return Padding(
-                       padding: const EdgeInsets.only(top: 8.0),
-                       child: Text(DateFormat('E').format(date), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
-                     );
+                  if (value.toInt() >= 0 &&
+                      value.toInt() < dailyActivity.length) {
+                    final date = DateTime.fromMillisecondsSinceEpoch(
+                      dailyActivity[value.toInt()].date * 1000,
+                    );
+
+                    if (timeRange == StatisticsTimeRange.month ||
+                        timeRange == StatisticsTimeRange.last30Days) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          '${date.day}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        DateFormat('E').format(date),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
                   }
                   return const SizedBox.shrink();
                 },
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
             horizontalInterval: _calculateMaxY(dailyActivity) / 4,
-            getDrawingHorizontalLine: (value) => FlLine(
-              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
-              strokeWidth: 1,
-            ),
+            getDrawingHorizontalLine:
+                (value) => FlLine(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
+                  strokeWidth: 1,
+                ),
           ),
           borderData: FlBorderData(show: false),
           barGroups:
               dailyActivity.asMap().entries.map((entry) {
                 final index = entry.key;
                 final activity = entry.value;
-                
+
                 final rods = <BarChartRodStackItem>[];
                 double currentY = 0;
-                
+
                 for (final dist in activity.categoryDistribution) {
-                  final color = categoryColors[dist.categoryId] ?? Theme.of(context).colorScheme.primary;
-                  rods.add(BarChartRodStackItem(currentY, currentY + dist.totalFocusTime, color));
+                  final color =
+                      categoryColors[dist.categoryId] ??
+                      Theme.of(context).colorScheme.primary;
+                  rods.add(
+                    BarChartRodStackItem(
+                      currentY,
+                      currentY + dist.totalFocusTime,
+                      color,
+                    ),
+                  );
                   currentY += dist.totalFocusTime;
                 }
 
@@ -449,7 +558,11 @@ class _StatisticsViewState extends State<StatisticsView> {
                   barRods: [
                     BarChartRodData(
                       toY: currentY,
-                      width: (timeRange == StatisticsTimeRange.month || timeRange == StatisticsTimeRange.last30Days) ? 6 : 12,
+                      width:
+                          (timeRange == StatisticsTimeRange.month ||
+                                  timeRange == StatisticsTimeRange.last30Days)
+                              ? 6
+                              : 12,
                       borderRadius: BorderRadius.circular(6),
                       rodStackItems: rods,
                       color: Colors.transparent,
@@ -464,17 +577,23 @@ class _StatisticsViewState extends State<StatisticsView> {
 
   double _calculateMaxY(List<DailyActivity> activities) {
     if (activities.isEmpty) return 100;
-    final maxVal = activities
-        .map((e) => e.categoryDistribution.fold(
-          0,
-          (sum, item) => sum + item.totalFocusTime,
-        ))
-        .reduce((a, b) => a > b ? a : b)
-        .toDouble();
+    final maxVal =
+        activities
+            .map(
+              (e) => e.categoryDistribution.fold(
+                0,
+                (sum, item) => sum + item.totalFocusTime,
+              ),
+            )
+            .reduce((a, b) => a > b ? a : b)
+            .toDouble();
     return maxVal > 0 ? maxVal * 1.2 : 100;
   }
 
-  List<DailyActivity> _fillMissingDates(List<DailyActivity> rawActivity, StatisticsTimeRange timeRange) {
+  List<DailyActivity> _fillMissingDates(
+    List<DailyActivity> rawActivity,
+    StatisticsTimeRange timeRange,
+  ) {
     final now = DateTime.now();
     DateTime startDate;
     int daysCount;
@@ -487,7 +606,11 @@ class _StatisticsViewState extends State<StatisticsView> {
       startDate = DateTime(now.year, now.month, now.day - (now.weekday - 1));
       daysCount = 7;
     } else if (timeRange == StatisticsTimeRange.lastWeek) {
-      startDate = DateTime(now.year, now.month, now.day - (now.weekday - 1) - 7);
+      startDate = DateTime(
+        now.year,
+        now.month,
+        now.day - (now.weekday - 1) - 7,
+      );
       daysCount = 7;
     } else if (timeRange == StatisticsTimeRange.last7Days) {
       startDate = DateTime(now.year, now.month, now.day - 6);
@@ -505,22 +628,28 @@ class _StatisticsViewState extends State<StatisticsView> {
     final filledList = <DailyActivity>[];
     for (int i = 0; i < daysCount; i++) {
       final currentDate = startDate.add(Duration(days: i));
-      final startOfDay = DateTime(currentDate.year, currentDate.month, currentDate.day);
-      
+      final startOfDay = DateTime(
+        currentDate.year,
+        currentDate.month,
+        currentDate.day,
+      );
+
       final existingIndex = rawActivity.indexWhere((element) {
-          final date = DateTime.fromMillisecondsSinceEpoch(element.date * 1000);
-          return date.year == currentDate.year && 
-                 date.month == currentDate.month && 
-                 date.day == currentDate.day;
+        final date = DateTime.fromMillisecondsSinceEpoch(element.date * 1000);
+        return date.year == currentDate.year &&
+            date.month == currentDate.month &&
+            date.day == currentDate.day;
       });
 
       if (existingIndex != -1) {
         filledList.add(rawActivity[existingIndex]);
       } else {
-        filledList.add(DailyActivity(
-          date: startOfDay.millisecondsSinceEpoch ~/ 1000,
-          categoryDistribution: [],
-        ));
+        filledList.add(
+          DailyActivity(
+            date: startOfDay.millisecondsSinceEpoch ~/ 1000,
+            categoryDistribution: [],
+          ),
+        );
       }
     }
     return filledList;
@@ -534,7 +663,7 @@ class _StatisticsViewState extends State<StatisticsView> {
     final categories = stats.categoryDistribution;
     if (categories.isEmpty) {
       return _buildNoDataWidget(
-        context, 
+        context,
         context.tr('statistics.no_category_data'),
         Icons.pie_chart_outline,
       );
@@ -546,82 +675,96 @@ class _StatisticsViewState extends State<StatisticsView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
-        children: sortedCategories.map((category) {
-          final color = categoryColors[category.categoryId] ?? Theme.of(context).colorScheme.primary;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children:
+            sortedCategories.map((category) {
+              final color =
+                  categoryColors[category.categoryId] ??
+                  Theme.of(context).colorScheme.primary;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              category.categoryName,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
                         Text(
-                          category.categoryName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                          '${category.percentage.toStringAsFixed(1)}% - ${_formatDuration(Duration(seconds: category.totalFocusTime))}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
-                    Text(
-                      '${category.percentage.toStringAsFixed(1)}% - ${_formatDuration(Duration(seconds: category.totalFocusTime))}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: category.percentage / 100,
+                        backgroundColor: color.withAlpha((255 * 0.1).round()),
+                        color: color,
+                        minHeight: 12,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: category.percentage / 100,
-                    backgroundColor: color.withOpacity(0.1),
-                    color: color,
-                    minHeight: 12,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
 
-  Widget _buildConcentrationChart(BuildContext context, PeriodStatistics stats) {
+  Widget _buildConcentrationChart(
+    BuildContext context,
+    PeriodStatistics stats,
+  ) {
     final distribution = stats.concentrationDistribution;
-    
+
     if (distribution.every((element) => element == 0)) {
-       return SizedBox(
-         height: 240,
-         child: _buildNoDataWidget(
-           context, 
-           context.tr('statistics.no_activity_data'),
-           Icons.show_chart_outlined,
-         ),
-       );
+      return SizedBox(
+        height: 240,
+        child: _buildNoDataWidget(
+          context,
+          context.tr('statistics.no_activity_data'),
+          Icons.show_chart_outlined,
+        ),
+      );
     }
 
     return Container(
       height: 240,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
         borderRadius: BorderRadius.circular(24),
       ),
       child: BarChart(
@@ -630,7 +773,9 @@ class _StatisticsViewState extends State<StatisticsView> {
           maxY: distribution.reduce((a, b) => a > b ? a : b).toDouble() * 1.2,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => Theme.of(context).colorScheme.surfaceContainerHighest,
+              getTooltipColor:
+                  (group) =>
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           titlesData: FlTitlesData(
@@ -639,45 +784,64 @@ class _StatisticsViewState extends State<StatisticsView> {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (double value, TitleMeta meta) {
-                  if (value.toInt() >= 0 && value.toInt() < distribution.length) {
-                     return Padding(
-                       padding: const EdgeInsets.only(top: 8.0),
-                       child: Text('${value.toInt() + 1}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                     );
+                  if (value.toInt() >= 0 &&
+                      value.toInt() < distribution.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        '${value.toInt() + 1}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
                   }
                   return const SizedBox.shrink();
                 },
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: FlGridData(show: false),
           borderData: FlBorderData(show: false),
-          barGroups: distribution.asMap().entries.map((entry) {
-            final index = entry.key;
-            final count = entry.value;
-            
-            final color = HSVColor.fromAHSV(1.0, index * 30.0, 0.8, 0.9).toColor();
+          barGroups:
+              distribution.asMap().entries.map((entry) {
+                final index = entry.key;
+                final count = entry.value;
 
-            return BarChartGroupData(
-              x: index,
-              barRods: [
-                BarChartRodData(
-                  toY: count.toDouble(),
-                  color: color,
-                  width: 32,
-                  borderRadius: BorderRadius.circular(8),
-                  backDrawRodData: BackgroundBarChartRodData(
-                    show: true,
-                    toY: distribution.reduce((a, b) => a > b ? a : b).toDouble() * 1.2,
-                    color: color.withOpacity(0.1),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
+                final color =
+                    HSVColor.fromAHSV(1.0, index * 30.0, 0.8, 0.9).toColor();
+
+                return BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: count.toDouble(),
+                      color: color,
+                      width: 32,
+                      borderRadius: BorderRadius.circular(8),
+                      backDrawRodData: BackgroundBarChartRodData(
+                        show: true,
+                        toY:
+                            distribution
+                                .reduce((a, b) => a > b ? a : b)
+                                .toDouble() *
+                            1.2,
+                        color: color.withAlpha((255 * 0.1).round()),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
         ),
       ),
     );
@@ -687,7 +851,7 @@ class _StatisticsViewState extends State<StatisticsView> {
     final tasks = stats.taskDistribution;
     if (tasks.isEmpty) {
       return _buildNoDataWidget(
-        context, 
+        context,
         context.tr('statistics.no_task_data'),
         Icons.list_alt_outlined,
       );
@@ -696,7 +860,9 @@ class _StatisticsViewState extends State<StatisticsView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withAlpha((255 * 0.3).round()),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -711,7 +877,7 @@ class _StatisticsViewState extends State<StatisticsView> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withAlpha((255 * 0.05).round()),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -720,11 +886,15 @@ class _StatisticsViewState extends State<StatisticsView> {
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
                       child: Text(
-                        task.taskName.isNotEmpty ? task.taskName[0].toUpperCase() : '?',
+                        task.taskName.isNotEmpty
+                            ? task.taskName[0].toUpperCase()
+                            : '?',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -736,16 +906,20 @@ class _StatisticsViewState extends State<StatisticsView> {
                         children: [
                           Text(
                             task.taskName,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             task.categoryName ?? 'Uncategorized',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -753,18 +927,27 @@ class _StatisticsViewState extends State<StatisticsView> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.secondaryContainer,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                          color: Theme.of(context).colorScheme.outlineVariant
+                              .withAlpha((255 * 0.2).round()),
                         ),
                       ),
                       child: Text(
                         _formatDuration(duration),
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelMedium?.copyWith(
+                          color:
+                              Theme.of(
+                                context,
+                              ).colorScheme.onSecondaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

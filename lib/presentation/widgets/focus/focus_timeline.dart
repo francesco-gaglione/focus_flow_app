@@ -24,10 +24,12 @@ class FocusTimelineWidget extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withAlpha(
+          (255 * 0.3).round(),
+        ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
         ),
       ),
       child: Padding(
@@ -40,7 +42,7 @@ class FocusTimelineWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withAlpha((255 * 0.1).round()),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.timeline, color: colorScheme.primary),
@@ -66,7 +68,9 @@ class FocusTimelineWidget extends StatelessWidget {
                       Icon(
                         Icons.event_available_outlined,
                         size: 64,
-                        color: colorScheme.outline.withOpacity(0.3),
+                        color: colorScheme.outline.withAlpha(
+                          (255 * 0.3).round(),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -90,7 +94,9 @@ class FocusTimelineWidget extends StatelessWidget {
                   final isLast = index == sessions.length - 1;
 
                   final startTime = DateFormat('HH:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(session.startedAt * 1000),
+                    DateTime.fromMillisecondsSinceEpoch(
+                      session.startedAt * 1000,
+                    ),
                   );
                   final endTime =
                       session.endedAt != null
@@ -178,12 +184,9 @@ class FocusTimelineWidget extends StatelessWidget {
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.2),
+                                color: color.withAlpha((255 * 0.2).round()),
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: color,
-                                  width: 2,
-                                ),
+                                border: Border.all(color: color, width: 2),
                               ),
                               child: Center(
                                 child: Container(
@@ -200,26 +203,45 @@ class FocusTimelineWidget extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   width: 2,
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        color.withOpacity(0.5),
+                                        color.withAlpha((255 * 0.5).round()),
                                         () {
-                                          if (sessions[index + 1].sessionType == SessionType.work) {
+                                          if (sessions[index + 1].sessionType ==
+                                              SessionType.work) {
                                             try {
-                                              final nextCategory = categories.firstWhere(
-                                                (c) => c.category.id == sessions[index + 1].categoryId,
-                                              ).category;
-                                              if (nextCategory.color.startsWith('#')) {
-                                                return Color(int.parse(nextCategory.color.replaceFirst('#', '0xFF')));
+                                              final nextCategory =
+                                                  categories
+                                                      .firstWhere(
+                                                        (c) =>
+                                                            c.category.id ==
+                                                            sessions[index + 1]
+                                                                .categoryId,
+                                                      )
+                                                      .category;
+                                              if (nextCategory.color.startsWith(
+                                                '#',
+                                              )) {
+                                                return Color(
+                                                  int.parse(
+                                                    nextCategory.color
+                                                        .replaceFirst(
+                                                          '#',
+                                                          '0xFF',
+                                                        ),
+                                                  ),
+                                                );
                                               }
                                             } catch (_) {}
                                           }
                                           return Colors.grey;
-                                        }().withOpacity(0.5),
+                                        }().withAlpha((255 * 0.5).round()),
                                       ],
                                     ),
                                   ),
@@ -251,15 +273,19 @@ class FocusTimelineWidget extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: colorScheme.surface.withOpacity(0.5),
+                                  color: colorScheme.surface.withAlpha(
+                                    (255 * 0.5).round(),
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: color.withOpacity(0.3),
+                                    color: color.withAlpha((255 * 0.3).round()),
                                     width: 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: color.withOpacity(0.05),
+                                      color: color.withAlpha(
+                                        (255 * 0.05).round(),
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -294,11 +320,15 @@ class FocusTimelineWidget extends StatelessWidget {
                                               vertical: 4,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: color.withOpacity(0.1),
+                                              color: color.withAlpha(
+                                                (255 * 0.1).round(),
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                               border: Border.all(
-                                                color: color.withOpacity(0.2),
+                                                color: color.withAlpha(
+                                                  (255 * 0.2).round(),
+                                                ),
                                               ),
                                             ),
                                             child: Row(
@@ -312,12 +342,14 @@ class FocusTimelineWidget extends StatelessWidget {
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   '${session.concentrationScore}',
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.labelSmall?.copyWith(
-                                                    color: color,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: color,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                 ),
                                               ],
                                             ),
@@ -330,7 +362,9 @@ class FocusTimelineWidget extends StatelessWidget {
                                         Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: color.withOpacity(0.1),
+                                            color: color.withAlpha(
+                                              (255 * 0.1).round(),
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
@@ -342,29 +376,35 @@ class FocusTimelineWidget extends StatelessWidget {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 title,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleSmall?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: colorScheme.onSurface,
-                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          colorScheme.onSurface,
+                                                    ),
                                               ),
                                               if (task != null) ...[
                                                 const SizedBox(height: 2),
                                                 Text(
                                                   task.name,
-                                                  style:
-                                                      Theme.of(
-                                                        context,
-                                                      ).textTheme.bodySmall?.copyWith(
-                                                        color: colorScheme.onSurfaceVariant,
-                                                      ),
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodySmall?.copyWith(
+                                                    color:
+                                                        colorScheme
+                                                            .onSurfaceVariant,
+                                                  ),
                                                   maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ],

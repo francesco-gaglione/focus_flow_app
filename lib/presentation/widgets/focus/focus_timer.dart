@@ -112,7 +112,9 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
 
     // Use theme colors instead of hardcoded values
     final accentColor = colorScheme.primary;
-    final trackColor = colorScheme.surfaceContainerHighest.withOpacity(0.3);
+    final trackColor = colorScheme.surfaceContainerHighest.withAlpha(
+      (255 * 0.3).round(),
+    );
     final textColor = colorScheme.onSurface;
     final errorColor = colorScheme.error;
 
@@ -159,14 +161,16 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
 
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withAlpha(
+              (255 * 0.3).round(),
+            ),
             borderRadius: BorderRadius.circular(32),
             border: Border.all(
-              color: colorScheme.outlineVariant.withOpacity(0.2),
+              color: colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha((255 * 0.05).round()),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -213,7 +217,12 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               strokeCap: StrokeCap.round,
                               gradientColors:
                                   isOvertime
-                                      ? [errorColor, errorColor.withOpacity(0.7)]
+                                      ? [
+                                        errorColor,
+                                        errorColor.withAlpha(
+                                          (255 * 0.7).round(),
+                                        ),
+                                      ]
                                       : [accentColor, colorScheme.tertiary],
                               withGlow: true,
                               rotation: _controller.value * 2 * math.pi,
@@ -250,7 +259,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                             ),
                             decoration: BoxDecoration(
                               color: (isOvertime ? errorColor : accentColor)
-                                  .withOpacity(0.1),
+                                  .withAlpha((255 * 0.1).round()),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -280,7 +289,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                         backgroundColor: accentColor,
                         foregroundColor: colorScheme.onPrimary,
                         elevation: 8,
-                        shadowColor: accentColor.withOpacity(0.4),
+                        shadowColor: accentColor.withAlpha((255 * 0.4).round()),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
@@ -306,7 +315,9 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               backgroundColor: accentColor,
                               foregroundColor: colorScheme.onPrimary,
                               elevation: 8,
-                              shadowColor: accentColor.withOpacity(0.4),
+                              shadowColor: accentColor.withAlpha(
+                                (255 * 0.4).round(),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -328,9 +339,13 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                           child: OutlinedButton(
                             onPressed: widget.onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withOpacity(0.8),
+                              foregroundColor: textColor.withAlpha(
+                                (255 * 0.8).round(),
+                              ),
                               side: BorderSide(
-                                color: colorScheme.outline.withOpacity(0.3),
+                                color: colorScheme.outline.withAlpha(
+                                  (255 * 0.3).round(),
+                                ),
                                 width: 2,
                               ),
                               shape: RoundedRectangleBorder(
@@ -359,7 +374,9 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               backgroundColor: accentColor,
                               foregroundColor: colorScheme.onPrimary,
                               elevation: 8,
-                              shadowColor: accentColor.withOpacity(0.4),
+                              shadowColor: accentColor.withAlpha(
+                                (255 * 0.4).round(),
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -381,9 +398,13 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                           child: OutlinedButton(
                             onPressed: widget.onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withOpacity(0.8),
+                              foregroundColor: textColor.withAlpha(
+                                (255 * 0.8).round(),
+                              ),
                               side: BorderSide(
-                                color: colorScheme.outline.withOpacity(0.3),
+                                color: colorScheme.outline.withAlpha(
+                                  (255 * 0.3).round(),
+                                ),
                                 width: 2,
                               ),
                               shape: RoundedRectangleBorder(
@@ -437,10 +458,11 @@ class _TimerPainter extends CustomPainter {
     final radius = (size.width - strokeWidth) / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    final paint = Paint()
-      ..strokeWidth = strokeWidth
-      ..strokeCap = strokeCap
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..strokeWidth = strokeWidth
+          ..strokeCap = strokeCap
+          ..style = PaintingStyle.stroke;
 
     if (gradientColors != null && gradientColors!.isNotEmpty) {
       paint.shader = SweepGradient(
@@ -455,12 +477,15 @@ class _TimerPainter extends CustomPainter {
     }
 
     if (withGlow) {
-      final glowPaint = Paint()
-        ..strokeWidth = strokeWidth
-        ..strokeCap = strokeCap
-        ..style = PaintingStyle.stroke
-        ..color = (gradientColors?.first ?? color).withOpacity(glowOpacity)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+      final glowPaint =
+          Paint()
+            ..strokeWidth = strokeWidth
+            ..strokeCap = strokeCap
+            ..style = PaintingStyle.stroke
+            ..color = (gradientColors?.first ?? color).withAlpha(
+              (glowOpacity * 255).round(),
+            )
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
       canvas.drawArc(
         rect,
@@ -471,13 +496,7 @@ class _TimerPainter extends CustomPainter {
       );
     }
 
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      paint,
-    );
+    canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * progress, false, paint);
   }
 
   @override

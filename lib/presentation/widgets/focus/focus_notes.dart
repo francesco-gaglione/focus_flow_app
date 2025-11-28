@@ -49,10 +49,12 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withAlpha(
+          (255 * 0.3).round(),
+        ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withAlpha((255 * 0.2).round()),
         ),
       ),
       child: Padding(
@@ -65,7 +67,7 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
+                    color: colorScheme.primary.withAlpha((255 * 0.1).round()),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.edit_note, color: colorScheme.primary),
@@ -88,7 +90,9 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
               decoration: InputDecoration(
                 hintText: context.tr('focus.notes_hint'),
                 hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  color: colorScheme.onSurfaceVariant.withAlpha(
+                    (255 * 0.5).round(),
+                  ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -97,18 +101,20 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: colorScheme.outlineVariant.withOpacity(0.2),
+                    color: colorScheme.outlineVariant.withAlpha(
+                      (255 * 0.2).round(),
+                    ),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: colorScheme.primary.withOpacity(0.5),
+                    color: colorScheme.primary.withAlpha((255 * 0.5).round()),
                     width: 2,
                   ),
                 ),
                 filled: true,
-                fillColor: colorScheme.surface.withOpacity(0.5),
+                fillColor: colorScheme.surface.withAlpha((255 * 0.5).round()),
                 contentPadding: const EdgeInsets.all(16),
               ),
             ),
