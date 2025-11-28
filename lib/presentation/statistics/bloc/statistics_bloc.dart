@@ -34,26 +34,50 @@ class StatisticsBloc extends Bloc<StatisticsEvent, StatisticsState> {
         case StatisticsTimeRange.day:
           final startOfDay = DateTime(now.year, now.month, now.day);
           startDate = startOfDay.millisecondsSinceEpoch ~/ 1000;
-          endDate =
-              startOfDay.add(const Duration(days: 1)).millisecondsSinceEpoch ~/
-              1000;
+          final endOfDay = startOfDay.add(const Duration(days: 1));
+          endDate = endOfDay.millisecondsSinceEpoch ~/ 1000;
+          break;
+        case StatisticsTimeRange.yesterday:
+          final startOfYesterday = DateTime(now.year, now.month, now.day - 1);
+          startDate = startOfYesterday.millisecondsSinceEpoch ~/ 1000;
+          final endOfYesterday = DateTime(now.year, now.month, now.day);
+          endDate = endOfYesterday.millisecondsSinceEpoch ~/ 1000;
           break;
         case StatisticsTimeRange.week:
-          final startOfWeek = DateTime(
-            now.year,
-            now.month,
-            now.day - (now.weekday - 1),
-          );
+          // Start of current week (Monday)
+          final startOfWeek = DateTime(now.year, now.month, now.day - (now.weekday - 1));
           startDate = startOfWeek.millisecondsSinceEpoch ~/ 1000;
-          endDate =
-              startOfWeek.add(const Duration(days: 7)).millisecondsSinceEpoch ~/
-              1000;
+          // End of current week (Next Monday)
+          final endOfWeek = startOfWeek.add(const Duration(days: 7));
+          endDate = endOfWeek.millisecondsSinceEpoch ~/ 1000;
+          break;
+        case StatisticsTimeRange.lastWeek:
+          // Start of last week (Monday)
+          final startOfLastWeek = DateTime(now.year, now.month, now.day - (now.weekday - 1) - 7);
+          startDate = startOfLastWeek.millisecondsSinceEpoch ~/ 1000;
+          // End of last week (Sunday end / Next Monday start)
+          final endOfLastWeek = startOfLastWeek.add(const Duration(days: 7));
+          endDate = endOfLastWeek.millisecondsSinceEpoch ~/ 1000;
+          break;
+        case StatisticsTimeRange.last7Days:
+          // Last 7 days including today
+          final startOf7Days = DateTime(now.year, now.month, now.day - 6);
+          startDate = startOf7Days.millisecondsSinceEpoch ~/ 1000;
+          final endOf7Days = DateTime(now.year, now.month, now.day + 1);
+          endDate = endOf7Days.millisecondsSinceEpoch ~/ 1000;
           break;
         case StatisticsTimeRange.month:
           final startOfMonth = DateTime(now.year, now.month, 1);
           startDate = startOfMonth.millisecondsSinceEpoch ~/ 1000;
           final nextMonth = DateTime(now.year, now.month + 1, 1);
           endDate = nextMonth.millisecondsSinceEpoch ~/ 1000;
+          break;
+        case StatisticsTimeRange.last30Days:
+          // Last 30 days including today
+          final startOf30Days = DateTime(now.year, now.month, now.day - 29);
+          startDate = startOf30Days.millisecondsSinceEpoch ~/ 1000;
+          final endOf30Days = DateTime(now.year, now.month, now.day + 1);
+          endDate = endOf30Days.millisecondsSinceEpoch ~/ 1000;
           break;
       }
 

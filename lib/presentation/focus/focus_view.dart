@@ -64,99 +64,104 @@ class FocusViewState extends State<FocusView> {
         title: Text(context.tr('focus.title')),
         centerTitle: false,
       ),
-      body: BlocConsumer<FocusBloc, FocusState>(
-        listener: (context, state) {
-          if (state.selectedCategory != null) {
-            try {
-              int colorInt = int.parse(
-                state.selectedCategory!.color.replaceFirst('#', '0xFF'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surfaceContainerLowest,
+              Theme.of(context).colorScheme.surfaceContainerLow,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: BlocConsumer<FocusBloc, FocusState>(
+          listener: (context, state) {
+            if (state.selectedCategory != null) {
+              try {
+                int colorInt = int.parse(
+                  state.selectedCategory!.color.replaceFirst('#', '0xFF'),
+                );
+                context.read<ThemeCubit>().updateAccentColor(colorInt);
+              } catch (e) {
+                // Handle error
+              }
+            } else {
+              context.read<ThemeCubit>().updateAccentColor(
+                ThemeSettings.defaultAccentColor,
               );
-              context.read<ThemeCubit>().updateAccentColor(colorInt);
-            } catch (e) {
-              // Handle error
             }
-          } else {
-            context.read<ThemeCubit>().updateAccentColor(
-              ThemeSettings.defaultAccentColor,
+          },
+          builder: (context, state) {
+            logger.d(
+              'Building FocusView with sessionState: ${state.sessionState}',
             );
-          }
-        },
-        builder: (context, state) {
-          logger.d(
-            'Building FocusView with sessionState: ${state.sessionState}',
-          );
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (state.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final isDesktop =
-              MediaQuery.of(context).size.width >= desktopBreakpoint;
+            final isDesktop =
+                MediaQuery.of(context).size.width >= desktopBreakpoint;
 
-          final isWorkSession =
-              state.sessionState?.sessionType == SessionTypeEnum.focus ||
-                  state.sessionState?.sessionType == SessionTypeEnum.work;
+            final isWorkSession =
+                state.sessionState?.sessionType == SessionTypeEnum.focus ||
+                    state.sessionState?.sessionType == SessionTypeEnum.work;
 
-          final focusLevelSelector =
-              state.sessionState != null && isWorkSession
-                  ? FocusLevelSelector(
-                    initialLevel: state.sessionState?.selectedFocusLevel,
-                    onFocusLevelChanged:
-                        (level) => _onFocusLevelChanged(context, level),
-                  )
-                  : SizedBox(height: 0);
-
-          final notesWidget =
-              state.sessionState != null && isWorkSession
-                  ? FocusNotesWidget(
-                    initialNotes: state.sessionState?.note,
-                    onNotesChanged: (notes) => _onNoteChanged(context, notes),
-                  )
-                  : SizedBox(height: 0);
-
-          final categoryTaskSelector = CategoryTaskSelector(
-            categories: state.categories,
-            orphanTasks: state.orphanTasks,
-            initialCategoryId: state.selectedCategory?.id,
-            initialTaskId: state.selectedTask?.id,
-            onCategoryChanged: (cat) => _onCategoryChanged(context, cat),
-            onTaskChanged: (task) => _onTaskChanged(context, task),
-          );
-
-          final timelineWidget = FocusTimelineWidget(
-            sessions: state.todaySessions,
-            categories: state.categories,
-            orphanTasks: state.orphanTasks,
-          );
-
-          final focusTimerWidget = FocusTimerWidget(
-            startDate:
-                state.sessionState != null
-                    ? DateTime.fromMillisecondsSinceEpoch(
-                      state.sessionState!.startDate * 1000,
+            final focusLevelSelector =
+                state.sessionState != null && isWorkSession
+                    ? FocusLevelSelector(
+                      initialLevel: state.sessionState?.selectedFocusLevel,
+                      onFocusLevelChanged:
+                          (level) => _onFocusLevelChanged(context, level),
                     )
-                    : null,
-            sessionType: state.sessionState?.sessionType,
-            onStart: _onStart,
-            onBreak: _onBreak,
-            onTerminate: _onTerminate,
-          );
+                    : SizedBox(height: 0);
 
-          if (isDesktop) {
-            return Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                          width: 1,
-                        ),
-                      ),
-                    ),
+            final notesWidget =
+                state.sessionState != null && isWorkSession
+                    ? FocusNotesWidget(
+                      initialNotes: state.sessionState?.note,
+                      onNotesChanged: (notes) => _onNoteChanged(context, notes),
+                    )
+                    : SizedBox(height: 0);
+
+            final categoryTaskSelector = CategoryTaskSelector(
+              categories: state.categories,
+              orphanTasks: state.orphanTasks,
+              initialCategoryId: state.selectedCategory?.id,
+              initialTaskId: state.selectedTask?.id,
+              onCategoryChanged: (cat) => _onCategoryChanged(context, cat),
+              onTaskChanged: (task) => _onTaskChanged(context, task),
+            );
+
+            final timelineWidget = FocusTimelineWidget(
+              sessions: state.todaySessions,
+              categories: state.categories,
+              orphanTasks: state.orphanTasks,
+            );
+
+            final focusTimerWidget = FocusTimerWidget(
+              startDate:
+                  state.sessionState != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                        state.sessionState!.startDate * 1000,
+                      )
+                      : null,
+              sessionType: state.sessionState?.sessionType,
+              onStart: _onStart,
+              onBreak: _onBreak,
+              onTerminate: _onTerminate,
+            );
+
+            if (isDesktop) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 4,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -169,43 +174,44 @@ class FocusViewState extends State<FocusView> {
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        categoryTaskSelector,
-                        const SizedBox(height: 32),
-                        timelineWidget,
-                      ],
+                  Expanded(
+                    flex: 5,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          categoryTaskSelector,
+                          const SizedBox(height: 32),
+                          timelineWidget,
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          } else {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  focusTimerWidget,
-                  const SizedBox(height: 24),
-                  categoryTaskSelector,
-                  const SizedBox(height: 24),
-                  focusLevelSelector,
-                  const SizedBox(height: 24),
-                  notesWidget,
-                  const SizedBox(height: 24),
-                  timelineWidget,
                 ],
-              ),
-            );
-          }
-        },
+              );
+            } else {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    focusTimerWidget,
+                    const SizedBox(height: 24),
+                    categoryTaskSelector,
+                    const SizedBox(height: 24),
+                    focusLevelSelector,
+                    const SizedBox(height: 24),
+                    notesWidget,
+                    const SizedBox(height: 24),
+                    timelineWidget,
+                    const SizedBox(height: 80), // Bottom padding for FAB or navigation
+                  ],
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

@@ -57,7 +57,7 @@ class _StatisticsViewState extends State<StatisticsView> {
                         const SizedBox(height: 32),
                         _buildSectionTitle(context, context.tr('statistics.activity')),
                         const SizedBox(height: 16),
-                        _buildActivityChart(context, state.statistics, state.categoryColors),
+                        _buildActivityChart(context, state.statistics, state.categoryColors, state.timeRange),
                         const SizedBox(height: 32),
                         _buildSectionTitle(context, context.tr('statistics.categories')),
                         const SizedBox(height: 16),
@@ -112,30 +112,60 @@ class _StatisticsViewState extends State<StatisticsView> {
     BuildContext context,
     StatisticsTimeRange currentRange,
   ) {
-    return SegmentedButton<StatisticsTimeRange>(
-      segments: [
-        ButtonSegment(
-          value: StatisticsTimeRange.day,
-          label: Text(context.tr('statistics.day')),
-          icon: const Icon(Icons.calendar_view_day),
-        ),
-        ButtonSegment(
-          value: StatisticsTimeRange.week,
-          label: Text(context.tr('statistics.week')),
-          icon: const Icon(Icons.calendar_view_week),
-        ),
-        ButtonSegment(
-          value: StatisticsTimeRange.month,
-          label: Text(context.tr('statistics.month')),
-          icon: const Icon(Icons.calendar_month),
-        ),
-      ],
-      selected: {currentRange},
-      onSelectionChanged: (Set<StatisticsTimeRange> newSelection) {
-        context.read<StatisticsBloc>().add(
-          ChangeTimeRange(newSelection.first),
-        );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildTimeRangeChip(context, StatisticsTimeRange.day, context.tr('statistics.day'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.yesterday, context.tr('statistics.yesterday'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.week, context.tr('statistics.week'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.lastWeek, context.tr('statistics.last_week'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.last7Days, context.tr('statistics.last_7_days'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.month, context.tr('statistics.month'), currentRange),
+          const SizedBox(width: 8),
+          _buildTimeRangeChip(context, StatisticsTimeRange.last30Days, context.tr('statistics.last_30_days'), currentRange),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeRangeChip(
+    BuildContext context, 
+    StatisticsTimeRange range, 
+    String label, 
+    StatisticsTimeRange currentRange
+  ) {
+    final isSelected = range == currentRange;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (bool selected) {
+        if (selected) {
+          context.read<StatisticsBloc>().add(ChangeTimeRange(range));
+        }
       },
+      showCheckmark: false,
+      labelStyle: TextStyle(
+        color: isSelected 
+            ? Theme.of(context).colorScheme.onPrimary 
+            : Theme.of(context).colorScheme.onSurface,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      selectedColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected 
+              ? Colors.transparent 
+              : Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+        ),
+      ),
     );
   }
 
@@ -146,116 +176,145 @@ class _StatisticsViewState extends State<StatisticsView> {
         ? Duration(seconds: stats.totalFocusTime ~/ stats.totalSessions) 
         : Duration.zero;
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.focus_time'),
-                _formatDuration(duration),
-                Icons.timer,
-                Colors.blue,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.sessions'),
-                stats.totalSessions.toString(),
-                Icons.check_circle_outline,
-                Colors.green,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.break_time'),
-                _formatDuration(breakDuration),
-                Icons.coffee,
-                Colors.orange,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.average_session'),
-                _formatDuration(avgSession),
-                Icons.timelapse,
-                Colors.purple,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.most_productive'),
-                stats.mostConcentratedPeriod == ConcentrationPeriod.morning 
-                    ? context.tr('statistics.morning') 
-                    : context.tr('statistics.afternoon'),
-                Icons.wb_sunny,
-                Colors.amber,
-              ),
-            ),
-            const SizedBox(width: 16),
-             Expanded(
-              child: _buildSummaryCard(
-                context,
-                context.tr('statistics.least_productive'),
-                stats.lessConcentratedPeriod == ConcentrationPeriod.morning 
-                    ? context.tr('statistics.morning') 
-                    : context.tr('statistics.afternoon'),
-                Icons.nightlight_round,
-                Colors.indigo,
-              ),
-            ),
-          ],
-        ),
-      ],
+    final items = [
+      _SummaryItem(
+        title: context.tr('statistics.focus_time'),
+        value: _formatDuration(duration),
+        icon: Icons.timer_outlined,
+        color: Colors.blue,
+      ),
+      _SummaryItem(
+        title: context.tr('statistics.sessions'),
+        value: stats.totalSessions.toString(),
+        icon: Icons.check_circle_outline,
+        color: Colors.green,
+      ),
+      _SummaryItem(
+        title: context.tr('statistics.break_time'),
+        value: _formatDuration(breakDuration),
+        icon: Icons.coffee_outlined,
+        color: Colors.orange,
+      ),
+      _SummaryItem(
+        title: context.tr('statistics.average_session'),
+        value: _formatDuration(avgSession),
+        icon: Icons.timelapse_outlined,
+        color: Colors.purple,
+      ),
+      _SummaryItem(
+        title: context.tr('statistics.most_productive'),
+        value: stats.mostConcentratedPeriod == ConcentrationPeriod.morning 
+            ? context.tr('statistics.morning') 
+            : context.tr('statistics.afternoon'),
+        icon: Icons.wb_sunny_outlined,
+        color: Colors.amber,
+      ),
+      _SummaryItem(
+        title: context.tr('statistics.least_productive'),
+        value: stats.lessConcentratedPeriod == ConcentrationPeriod.morning 
+            ? context.tr('statistics.morning') 
+            : context.tr('statistics.afternoon'),
+        icon: Icons.nightlight_outlined,
+        color: Colors.indigo,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Simple responsive logic: 2 columns on narrow screens, 3 on wider
+        final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.5, // Adjust aspect ratio for card shape
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            return _buildSummaryCard(context, items[index]);
+          },
+        );
+      },
     );
   }
 
-  Widget _buildSummaryCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildSummaryCard(BuildContext context, _SummaryItem item) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.5), // Glass-like opacity
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withOpacity(0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: color),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: item.color.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
+            child: Icon(item.icon, color: item.color, size: 24),
           ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20, // Slightly smaller headline for grid
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoDataWidget(BuildContext context, String message, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 48,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
           Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+            message,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -263,29 +322,73 @@ class _StatisticsViewState extends State<StatisticsView> {
     );
   }
 
-  Widget _buildActivityChart(BuildContext context, PeriodStatistics stats, Map<String, Color> categoryColors) {
-    final dailyActivity = stats.dailyActivity;
-    if (dailyActivity.isEmpty) {
-      return Center(child: Text(context.tr('statistics.no_activity_data')));
+  Widget _buildActivityChart(
+    BuildContext context,
+    PeriodStatistics stats,
+    Map<String, Color> categoryColors,
+    StatisticsTimeRange timeRange,
+  ) {
+    final dailyActivity = _fillMissingDates(stats.dailyActivity, timeRange);
+    
+    // Check if there is any actual activity in the filled list (excluding placeholders if needed, 
+    // but _fillMissingDates returns placeholders with empty distribution. 
+    // If the original list was empty, we might still want to show the chart with empty bars 
+    // OR show the no data widget. 
+    // However, usually "No Data" is better if there's absolutely nothing.
+    // Let's check if the original stats.dailyActivity is empty AND we are not just showing empty days.
+    // Actually, if stats.dailyActivity is empty, it means no data for the period.
+    if (stats.dailyActivity.isEmpty) {
+       return SizedBox(
+         height: 240,
+         child: _buildNoDataWidget(
+           context, 
+           context.tr('statistics.no_activity_data'),
+           Icons.bar_chart_outlined,
+         ),
+       );
     }
 
-    return SizedBox(
-      height: 200,
+    return Container(
+      height: 240,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
-          maxY:
-              dailyActivity
-                  .map((e) => e.categoryDistribution.fold(
-                    0,
-                    (sum, item) => sum + item.totalFocusTime,
-                  ))
-                  .reduce((a, b) => a > b ? a : b)
-                  .toDouble() *
-              1.2,
+          maxY: _calculateMaxY(dailyActivity),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
               getTooltipColor: (group) => Theme.of(context).colorScheme.surfaceContainerHighest,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                if (groupIndex >= dailyActivity.length) return null;
+                final activity = dailyActivity[groupIndex];
+                final date = DateTime.fromMillisecondsSinceEpoch(activity.date * 1000);
+                
+                final textStyles = Theme.of(context).textTheme;
+                
+                return BarTooltipItem(
+                  DateFormat('EEE, d MMM').format(date),
+                  textStyles.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+                  children: [
+                    const TextSpan(text: '\n'),
+                    ...activity.categoryDistribution.map((dist) {
+                      final duration = Duration(seconds: dist.totalFocusTime);
+                      return TextSpan(
+                        text: '\n${dist.categoryName}: ${_formatDuration(duration)}',
+                        style: textStyles.bodySmall,
+                      );
+                    }),
+                    if (activity.categoryDistribution.isEmpty)
+                      TextSpan(
+                        text: '\n${context.tr('statistics.no_activity')}',
+                        style: textStyles.bodySmall,
+                      ),
+                  ],
+                );
+              },
             ),
           ),
           titlesData: FlTitlesData(
@@ -296,9 +399,17 @@ class _StatisticsViewState extends State<StatisticsView> {
                 getTitlesWidget: (double value, TitleMeta meta) {
                   if (value.toInt() >= 0 && value.toInt() < dailyActivity.length) {
                      final date = DateTime.fromMillisecondsSinceEpoch(dailyActivity[value.toInt()].date * 1000);
+                     
+                     if (timeRange == StatisticsTimeRange.month || timeRange == StatisticsTimeRange.last30Days) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text('${date.day}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
+                        );
+                     }
+                     
                      return Padding(
                        padding: const EdgeInsets.only(top: 8.0),
-                       child: Text(DateFormat('E').format(date), style: const TextStyle(fontSize: 10)),
+                       child: Text(DateFormat('E').format(date), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
                      );
                   }
                   return const SizedBox.shrink();
@@ -309,14 +420,21 @@ class _StatisticsViewState extends State<StatisticsView> {
             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: const FlGridData(show: false),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: _calculateMaxY(dailyActivity) / 4,
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+              strokeWidth: 1,
+            ),
+          ),
           borderData: FlBorderData(show: false),
           barGroups:
               dailyActivity.asMap().entries.map((entry) {
                 final index = entry.key;
                 final activity = entry.value;
                 
-                // Stacked bar rods
                 final rods = <BarChartRodStackItem>[];
                 double currentY = 0;
                 
@@ -331,10 +449,10 @@ class _StatisticsViewState extends State<StatisticsView> {
                   barRods: [
                     BarChartRodData(
                       toY: currentY,
-                      width: 16,
-                      borderRadius: BorderRadius.circular(4),
+                      width: (timeRange == StatisticsTimeRange.month || timeRange == StatisticsTimeRange.last30Days) ? 6 : 12,
+                      borderRadius: BorderRadius.circular(6),
                       rodStackItems: rods,
-                      color: Colors.transparent, // Color is handled by stack items
+                      color: Colors.transparent,
                     ),
                   ],
                 );
@@ -344,6 +462,70 @@ class _StatisticsViewState extends State<StatisticsView> {
     );
   }
 
+  double _calculateMaxY(List<DailyActivity> activities) {
+    if (activities.isEmpty) return 100;
+    final maxVal = activities
+        .map((e) => e.categoryDistribution.fold(
+          0,
+          (sum, item) => sum + item.totalFocusTime,
+        ))
+        .reduce((a, b) => a > b ? a : b)
+        .toDouble();
+    return maxVal > 0 ? maxVal * 1.2 : 100;
+  }
+
+  List<DailyActivity> _fillMissingDates(List<DailyActivity> rawActivity, StatisticsTimeRange timeRange) {
+    final now = DateTime.now();
+    DateTime startDate;
+    int daysCount;
+
+    if (timeRange == StatisticsTimeRange.day) {
+      return rawActivity;
+    } else if (timeRange == StatisticsTimeRange.yesterday) {
+      return rawActivity;
+    } else if (timeRange == StatisticsTimeRange.week) {
+      startDate = DateTime(now.year, now.month, now.day - (now.weekday - 1));
+      daysCount = 7;
+    } else if (timeRange == StatisticsTimeRange.lastWeek) {
+      startDate = DateTime(now.year, now.month, now.day - (now.weekday - 1) - 7);
+      daysCount = 7;
+    } else if (timeRange == StatisticsTimeRange.last7Days) {
+      startDate = DateTime(now.year, now.month, now.day - 6);
+      daysCount = 7;
+    } else if (timeRange == StatisticsTimeRange.month) {
+      startDate = DateTime(now.year, now.month, 1);
+      daysCount = DateTime(now.year, now.month + 1, 0).day;
+    } else if (timeRange == StatisticsTimeRange.last30Days) {
+      startDate = DateTime(now.year, now.month, now.day - 29);
+      daysCount = 30;
+    } else {
+      return rawActivity;
+    }
+
+    final filledList = <DailyActivity>[];
+    for (int i = 0; i < daysCount; i++) {
+      final currentDate = startDate.add(Duration(days: i));
+      final startOfDay = DateTime(currentDate.year, currentDate.month, currentDate.day);
+      
+      final existingIndex = rawActivity.indexWhere((element) {
+          final date = DateTime.fromMillisecondsSinceEpoch(element.date * 1000);
+          return date.year == currentDate.year && 
+                 date.month == currentDate.month && 
+                 date.day == currentDate.day;
+      });
+
+      if (existingIndex != -1) {
+        filledList.add(rawActivity[existingIndex]);
+      } else {
+        filledList.add(DailyActivity(
+          date: startOfDay.millisecondsSinceEpoch ~/ 1000,
+          categoryDistribution: [],
+        ));
+      }
+    }
+    return filledList;
+  }
+
   Widget _buildCategoryDistributionChart(
     BuildContext context,
     PeriodStatistics stats,
@@ -351,61 +533,97 @@ class _StatisticsViewState extends State<StatisticsView> {
   ) {
     final categories = stats.categoryDistribution;
     if (categories.isEmpty) {
-      return Center(child: Text(context.tr('statistics.no_category_data')));
+      return _buildNoDataWidget(
+        context, 
+        context.tr('statistics.no_category_data'),
+        Icons.pie_chart_outline,
+      );
     }
 
-    // Sort categories by percentage descending
     final sortedCategories = List<CategoryDistribution>.from(categories)
       ..sort((a, b) => b.percentage.compareTo(a.percentage));
 
-    return Column(
-      children: sortedCategories.map((category) {
-        final color = categoryColors[category.categoryId] ?? Theme.of(context).colorScheme.primary;
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    category.categoryName,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '${category.percentage.toStringAsFixed(1)}%',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: category.percentage / 100,
-                  backgroundColor: color.withValues(alpha: 0.2),
-                  color: color,
-                  minHeight: 8,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: sortedCategories.map((category) {
+          final color = categoryColors[category.categoryId] ?? Theme.of(context).colorScheme.primary;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          category.categoryName,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${category.percentage.toStringAsFixed(1)}% - ${_formatDuration(Duration(seconds: category.totalFocusTime))}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: category.percentage / 100,
+                    backgroundColor: color.withOpacity(0.1),
+                    color: color,
+                    minHeight: 12,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildConcentrationChart(BuildContext context, PeriodStatistics stats) {
     final distribution = stats.concentrationDistribution;
-    // distribution is a list of 5 integers representing count for scores 1-5
     
     if (distribution.every((element) => element == 0)) {
-       return Center(child: Text(context.tr('statistics.no_activity_data')));
+       return SizedBox(
+         height: 240,
+         child: _buildNoDataWidget(
+           context, 
+           context.tr('statistics.no_activity_data'),
+           Icons.show_chart_outlined,
+         ),
+       );
     }
 
-    return SizedBox(
-      height: 200,
+    return Container(
+      height: 240,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
@@ -424,7 +642,7 @@ class _StatisticsViewState extends State<StatisticsView> {
                   if (value.toInt() >= 0 && value.toInt() < distribution.length) {
                      return Padding(
                        padding: const EdgeInsets.only(top: 8.0),
-                       child: Text('${value.toInt() + 1}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                       child: Text('${value.toInt() + 1}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                      );
                   }
                   return const SizedBox.shrink();
@@ -435,13 +653,12 @@ class _StatisticsViewState extends State<StatisticsView> {
             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: const FlGridData(show: false),
+          gridData: FlGridData(show: false),
           borderData: FlBorderData(show: false),
           barGroups: distribution.asMap().entries.map((entry) {
             final index = entry.key;
             final count = entry.value;
             
-            // Color gradient from red (1) to green (5)
             final color = HSVColor.fromAHSV(1.0, index * 30.0, 0.8, 0.9).toColor();
 
             return BarChartGroupData(
@@ -450,8 +667,13 @@ class _StatisticsViewState extends State<StatisticsView> {
                 BarChartRodData(
                   toY: count.toDouble(),
                   color: color,
-                  width: 24,
-                  borderRadius: BorderRadius.circular(4),
+                  width: 32,
+                  borderRadius: BorderRadius.circular(8),
+                  backDrawRodData: BackgroundBarChartRodData(
+                    show: true,
+                    toY: distribution.reduce((a, b) => a > b ? a : b).toDouble() * 1.2,
+                    color: color.withOpacity(0.1),
+                  ),
                 ),
               ],
             );
@@ -464,26 +686,108 @@ class _StatisticsViewState extends State<StatisticsView> {
   Widget _buildTopTasksList(BuildContext context, PeriodStatistics stats) {
     final tasks = stats.taskDistribution;
     if (tasks.isEmpty) {
-      return Center(child: Text(context.tr('statistics.no_task_data')));
+      return _buildNoDataWidget(
+        context, 
+        context.tr('statistics.no_task_data'),
+        Icons.list_alt_outlined,
+      );
     }
 
-    return Column(
-      children:
-          tasks.take(5).map((task) {
-            final duration = Duration(seconds: task.totalFocusTime);
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer,
-                child: Text(task.taskName.isNotEmpty ? task.taskName[0].toUpperCase() : '?'),
-              ),
-              title: Text(task.taskName),
-              subtitle: Text(task.categoryName ?? 'Uncategorized'),
-              trailing: Text(_formatDuration(duration)),
-            );
-          }).toList(),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children:
+            tasks.take(5).map((task) {
+              final duration = Duration(seconds: task.totalFocusTime);
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      child: Text(
+                        task.taskName.isNotEmpty ? task.taskName[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.taskName,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            task.categoryName ?? 'Uncategorized',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Text(
+                        _formatDuration(duration),
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+      ),
     );
   }
+}
+
+class _SummaryItem {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  _SummaryItem({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 }

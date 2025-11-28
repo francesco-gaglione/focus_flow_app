@@ -47,9 +47,14 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerHighest,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withOpacity(0.2),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -57,12 +62,20 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
           children: [
             Row(
               children: [
-                Icon(Icons.note_outlined, color: colorScheme.primary),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.edit_note, color: colorScheme.primary),
+                ),
+                const SizedBox(width: 12),
                 Text(
                   context.tr('focus.notes_title'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ],
@@ -71,13 +84,32 @@ class _FocusNotesWidgetState extends State<FocusNotesWidget> {
             TextField(
               controller: _notesController,
               maxLines: 8,
+              style: Theme.of(context).textTheme.bodyMedium,
               decoration: InputDecoration(
                 hintText: context.tr('focus.notes_hint'),
+                hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: colorScheme.outlineVariant.withOpacity(0.2),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary.withOpacity(0.5),
+                    width: 2,
+                  ),
                 ),
                 filled: true,
-                fillColor: colorScheme.surface,
+                fillColor: colorScheme.surface.withOpacity(0.5),
+                contentPadding: const EdgeInsets.all(16),
               ),
             ),
           ],

@@ -104,6 +104,7 @@ statistics:
   activity: Attività
   categories: Categorie
   top_tasks: Attività Principali
+  no_activity: Nessuna attività
   no_activity_data: Nessun dato di attività
   no_category_data: Nessun dato di categoria
   no_task_data: "Nessun dato di attività"
@@ -114,6 +115,10 @@ statistics:
   break_time: "Tempo di Pausa"
   morning: "Mattina"
   afternoon: "Pomeriggio"
+  yesterday: "Ieri"
+  last_week: "Ultima Settimana"
+  last_7_days: "Ultimi 7 giorni"
+  last_30_days: "Ultimi 30 Giorni"
 
 # Navigazione
 navigation:

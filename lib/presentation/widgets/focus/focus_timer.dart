@@ -8,16 +8,14 @@ import 'package:logger/logger.dart';
 
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 
-class FocusTimerWidget extends StatelessWidget {
-  final Logger logger = Logger();
-
+class FocusTimerWidget extends StatefulWidget {
   final DateTime? startDate;
   final VoidCallback onStart;
   final VoidCallback onBreak;
   final VoidCallback onTerminate;
   final SessionTypeEnum? sessionType;
 
-  FocusTimerWidget({
+  const FocusTimerWidget({
     super.key,
     this.startDate,
     required this.onStart,
@@ -25,6 +23,30 @@ class FocusTimerWidget extends StatelessWidget {
     required this.onTerminate,
     this.sessionType,
   });
+
+  @override
+  State<FocusTimerWidget> createState() => _FocusTimerWidgetState();
+}
+
+class _FocusTimerWidgetState extends State<FocusTimerWidget>
+    with SingleTickerProviderStateMixin {
+  final Logger logger = Logger();
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   int _getTotalSeconds(SessionTypeEnum? sessionType) {
     switch (sessionType) {
@@ -56,12 +78,12 @@ class FocusTimerWidget extends StatelessWidget {
 
   String _getStatusText(BuildContext context, SessionTypeEnum? sessionType) {
     int elapsed = 0;
-    if (startDate != null) {
+    if (widget.startDate != null) {
       final now = DateTime.now();
-      elapsed = now.difference(startDate!).inSeconds;
+      elapsed = now.difference(widget.startDate!).inSeconds;
     }
 
-    if (startDate != null && elapsed > _getTotalSeconds(sessionType)) {
+    if (widget.startDate != null && elapsed > _getTotalSeconds(sessionType)) {
       return context.tr('focus.overtime');
     }
 
@@ -83,17 +105,15 @@ class FocusTimerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logger.i('Building FocusTimerWidget, startDate: $startDate');
+    // logger.i('Building FocusTimerWidget, startDate: ${widget.startDate}');
 
-    final bool isRunning = startDate != null;
+    final bool isRunning = widget.startDate != null;
     final colorScheme = Theme.of(context).colorScheme;
 
     // Use theme colors instead of hardcoded values
     final accentColor = colorScheme.primary;
-    final trackColor = colorScheme.surfaceContainerHighest;
+    final trackColor = colorScheme.surfaceContainerHighest.withOpacity(0.3);
     final textColor = colorScheme.onSurface;
-    final cardColor = colorScheme.surface;
-    final onPrimaryColor = colorScheme.onPrimary;
     final errorColor = colorScheme.error;
 
     return StreamBuilder<int>(
@@ -102,14 +122,14 @@ class FocusTimerWidget extends StatelessWidget {
               ? Stream.periodic(const Duration(seconds: 1), (i) => i)
               : null,
       builder: (context, snapshot) {
-        final totalSeconds = _getTotalSeconds(sessionType);
+        final totalSeconds = _getTotalSeconds(widget.sessionType);
         int remainingSeconds;
         int overtimeSeconds = 0;
         bool isOvertime = false;
 
         if (isRunning) {
           final now = DateTime.now();
-          final elapsed = now.difference(startDate!).inSeconds;
+          final elapsed = now.difference(widget.startDate!).inSeconds;
           if (elapsed > totalSeconds) {
             remainingSeconds = 0;
             overtimeSeconds = elapsed - totalSeconds;
@@ -123,60 +143,89 @@ class FocusTimerWidget extends StatelessWidget {
 
         final progress =
             totalSeconds > 0 ? remainingSeconds / totalSeconds : 0.0;
-        
+
         String formatTime(int seconds) {
           final minutes = seconds ~/ 60;
           final secs = seconds % 60;
           return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
         }
 
-        final displayTime = isOvertime 
-            ? formatTime(totalSeconds + overtimeSeconds) 
-            : formatTime(remainingSeconds);
-            
-        final timerColor = isOvertime ? errorColor : textColor;
-        final statusColor = isOvertime ? errorColor : textColor.withValues(alpha: 0.7);
+        final displayTime =
+            isOvertime
+                ? formatTime(totalSeconds + overtimeSeconds)
+                : formatTime(remainingSeconds);
 
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+        final timerColor = isOvertime ? errorColor : textColor;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withOpacity(0.2),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          color: cardColor, // Use theme-based card color
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
               children: [
                 Text(
-                  _getTitle(context, sessionType),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  _getTitle(context, widget.sessionType),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: textColor, // Use theme-based text color
+                    color: textColor,
+                    letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 40),
                 SizedBox(
-                  width: 280,
-                  height: 280,
+                  width: 300,
+                  height: 300,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
+                      // Background Track
                       CustomPaint(
-                        size: const Size(280, 280),
+                        size: const Size(300, 300),
                         painter: _TimerPainter(
                           progress: 1.0,
-                          color: trackColor, // Use theme-based track color
-                          strokeWidth: 12,
+                          color: trackColor,
+                          strokeWidth: 20,
                         ),
                       ),
-                      CustomPaint(
-                        size: const Size(280, 280),
-                        painter: _TimerPainter(
-                          progress: isOvertime ? 1.0 : progress,
-                          color: isOvertime ? errorColor : accentColor,
-                          strokeWidth: 12,
-                          strokeCap: StrokeCap.round,
-                        ),
+                      // Progress Arc with Gradient and Glow
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            size: const Size(300, 300),
+                            painter: _TimerPainter(
+                              progress: isOvertime ? 1.0 : progress,
+                              color: isOvertime ? errorColor : accentColor,
+                              strokeWidth: 20,
+                              strokeCap: StrokeCap.round,
+                              gradientColors:
+                                  isOvertime
+                                      ? [errorColor, errorColor.withOpacity(0.7)]
+                                      : [accentColor, colorScheme.tertiary],
+                              withGlow: true,
+                              rotation: _controller.value * 2 * math.pi,
+                              glowOpacity:
+                                  0.3 +
+                                  0.2 *
+                                      math.sin(
+                                        _controller.value * 2 * math.pi,
+                                      ), // Pulse between 0.3 and 0.5
+                            ),
+                          );
+                        },
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -187,19 +236,31 @@ class FocusTimerWidget extends StatelessWidget {
                               context,
                             ).textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.w900,
-                              fontSize: 64,
+                              fontSize: 72,
                               color: timerColor,
-                              letterSpacing: -1.0,
+                              letterSpacing: -2.0,
+                              height: 1.0,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _getStatusText(context, sessionType),
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyLarge?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w500,
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (isOvertime ? errorColor : accentColor)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _getStatusText(context, widget.sessionType),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: isOvertime ? errorColor : accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
@@ -212,39 +273,42 @@ class FocusTimerWidget extends StatelessWidget {
                 if (!isRunning)
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 64,
                     child: FilledButton(
-                      onPressed: onStart,
+                      onPressed: widget.onStart,
                       style: FilledButton.styleFrom(
                         backgroundColor: accentColor,
-                        foregroundColor:
-                            onPrimaryColor, // Use theme-based onPrimary
+                        foregroundColor: colorScheme.onPrimary,
+                        elevation: 8,
+                        shadowColor: accentColor.withOpacity(0.4),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         textStyle: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
                         ),
                       ),
                       child: Text(context.tr('focus.start').toUpperCase()),
                     ),
                   )
-                else if (sessionType == SessionTypeEnum.shortBreak ||
-                    sessionType == SessionTypeEnum.longBreak)
+                else if (widget.sessionType == SessionTypeEnum.shortBreak ||
+                    widget.sessionType == SessionTypeEnum.longBreak)
                   Row(
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 64,
                           child: FilledButton(
-                            onPressed: onStart,
+                            onPressed: widget.onStart,
                             style: FilledButton.styleFrom(
                               backgroundColor: accentColor,
-                              foregroundColor:
-                                  onPrimaryColor, // Use theme-based onPrimary
+                              foregroundColor: colorScheme.onPrimary,
+                              elevation: 8,
+                              shadowColor: accentColor.withOpacity(0.4),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                               textStyle: const TextStyle(
                                 fontSize: 18,
@@ -260,16 +324,17 @@ class FocusTimerWidget extends StatelessWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 64,
                           child: OutlinedButton(
-                            onPressed: onTerminate,
+                            onPressed: widget.onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withValues(alpha: 0.7),
+                              foregroundColor: textColor.withOpacity(0.8),
                               side: BorderSide(
-                                color: colorScheme.outline.withValues(alpha: 0.5),
+                                color: colorScheme.outline.withOpacity(0.3),
+                                width: 2,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                               textStyle: const TextStyle(
                                 fontSize: 18,
@@ -287,15 +352,16 @@ class FocusTimerWidget extends StatelessWidget {
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 64,
                           child: FilledButton(
-                            onPressed: onBreak,
+                            onPressed: widget.onBreak,
                             style: FilledButton.styleFrom(
                               backgroundColor: accentColor,
-                              foregroundColor:
-                                  onPrimaryColor, // Use theme-based onPrimary
+                              foregroundColor: colorScheme.onPrimary,
+                              elevation: 8,
+                              shadowColor: accentColor.withOpacity(0.4),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                               textStyle: const TextStyle(
                                 fontSize: 18,
@@ -311,16 +377,17 @@ class FocusTimerWidget extends StatelessWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: SizedBox(
-                          height: 56,
+                          height: 64,
                           child: OutlinedButton(
-                            onPressed: onTerminate,
+                            onPressed: widget.onTerminate,
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: textColor.withValues(alpha: 0.7),
+                              foregroundColor: textColor.withOpacity(0.8),
                               side: BorderSide(
-                                color: colorScheme.outline.withValues(alpha: 0.5),
+                                color: colorScheme.outline.withOpacity(0.3),
+                                width: 2,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                               textStyle: const TextStyle(
                                 fontSize: 18,
@@ -348,28 +415,64 @@ class _TimerPainter extends CustomPainter {
   final Color color;
   final double strokeWidth;
   final StrokeCap strokeCap;
+  final List<Color>? gradientColors;
+  final bool withGlow;
+  final double rotation;
+  final double glowOpacity;
 
   _TimerPainter({
     required this.progress,
     required this.color,
     this.strokeWidth = 8,
     this.strokeCap = StrokeCap.butt,
+    this.gradientColors,
+    this.withGlow = false,
+    this.rotation = 0.0,
+    this.glowOpacity = 0.4,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..strokeCap = strokeCap
-          ..style = PaintingStyle.stroke;
-
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final paint = Paint()
+      ..strokeWidth = strokeWidth
+      ..strokeCap = strokeCap
+      ..style = PaintingStyle.stroke;
+
+    if (gradientColors != null && gradientColors!.isNotEmpty) {
+      paint.shader = SweepGradient(
+        colors: gradientColors!,
+        startAngle: -math.pi / 2 + rotation,
+        endAngle: 2 * math.pi - math.pi / 2 + rotation,
+        tileMode: TileMode.repeated,
+        transform: GradientRotation(rotation),
+      ).createShader(rect);
+    } else {
+      paint.color = color;
+    }
+
+    if (withGlow) {
+      final glowPaint = Paint()
+        ..strokeWidth = strokeWidth
+        ..strokeCap = strokeCap
+        ..style = PaintingStyle.stroke
+        ..color = (gradientColors?.first ?? color).withOpacity(glowOpacity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+
+      canvas.drawArc(
+        rect,
+        -math.pi / 2,
+        2 * math.pi * progress,
+        false,
+        glowPaint,
+      );
+    }
 
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
+      rect,
       -math.pi / 2,
       2 * math.pi * progress,
       false,
@@ -381,6 +484,10 @@ class _TimerPainter extends CustomPainter {
   bool shouldRepaint(_TimerPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.strokeWidth != strokeWidth;
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.gradientColors != gradientColors ||
+        oldDelegate.withGlow != withGlow ||
+        oldDelegate.rotation != rotation ||
+        oldDelegate.glowOpacity != glowOpacity;
   }
 }

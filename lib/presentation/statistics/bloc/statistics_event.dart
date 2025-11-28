@@ -26,4 +26,12 @@ class ChangeTimeRange extends StatisticsEvent {
   List<Object?> get props => [timeRange];
 }
 
-enum StatisticsTimeRange { day, week, month }
+enum StatisticsTimeRange {
+  day,
+  yesterday,
+  week,
+  lastWeek,
+  last7Days,
+  month,
+  last30Days,
+}
