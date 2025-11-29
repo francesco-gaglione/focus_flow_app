@@ -127,7 +127,7 @@ class FocusViewState extends State<FocusView> {
                 final targetColor = int.parse(
                   state.selectedCategory!.color.replaceFirst('#', '0xFF'),
                 );
-                final currentColor = Theme.of(context).colorScheme.primary.value;
+                final currentColor = Theme.of(context).colorScheme.primary.toARGB32();
                 
                 if (currentColor != targetColor) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {

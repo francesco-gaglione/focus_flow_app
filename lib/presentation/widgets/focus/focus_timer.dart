@@ -228,7 +228,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: (isOvertime ? errorColor : indicatorColor)
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                             width: 4,
                           ),
                         ),
@@ -248,7 +248,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               height: 1.0,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   blurRadius: 10,
                                   offset: const Offset(0, 2),
                                 ),
@@ -275,7 +275,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                                 fontWeight: FontWeight.bold,
                                 shadows: [
                                   Shadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 4,
                                     offset: const Offset(0, 1),
                                   ),
@@ -456,7 +456,7 @@ class _WaterWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.6)
+      ..color = color.withValues(alpha: 0.6)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -486,7 +486,7 @@ class _WaterWavePainter extends CustomPainter {
 
     // Draw a second wave behind with slightly different phase/opacity for depth
     final paint2 = Paint()
-      ..color = color.withOpacity(0.4)
+      ..color = color.withValues(alpha: 0.4)
       ..style = PaintingStyle.fill;
 
     final path2 = Path();

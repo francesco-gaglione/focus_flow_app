@@ -328,7 +328,6 @@ class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
                             icon = Icons.weekend;
                           }
 
-                          final verticalPadding = height < 20 ? 0.0 : 4.0;
                           final showTimeRange = height > 40;
 
                           return Positioned(
@@ -353,7 +352,7 @@ class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Container(
-                                  color: color.withOpacity(0.2),
+                                  color: color.withValues(alpha: 0.2),
                                   child: Row(
                                     children: [
                                       // Left colored strip (simulates left border)
