@@ -135,10 +135,12 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
               children: [
                 Icon(Icons.category_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
-                Text(
-                  context.tr('focus.select_category_task'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    context.tr('focus.select_category_task'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
               ],
