@@ -6,7 +6,7 @@ import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/session_details_modal.dart';
 
-class FocusTimelineWidget extends StatelessWidget {
+class FocusTimelineWidget extends StatefulWidget {
   final List<FocusSession> sessions;
   final List<CategoryWithTasks> categories;
   final List<Task> orphanTasks;
@@ -19,8 +19,45 @@ class FocusTimelineWidget extends StatelessWidget {
   });
 
   @override
+  State<FocusTimelineWidget> createState() => _FocusTimelineWidgetState();
+}
+
+class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
+  final ScrollController _scrollController = ScrollController();
+  final double _hourHeight = 240.0;
+  final int _startHour = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentTime();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToCurrentTime() {
+    if (!_scrollController.hasClients) return;
+    final now = DateTime.now();
+    final currentMinute = now.hour * 60 + now.minute;
+    final offset = (currentMinute / 60) * _hourHeight - (200); // Center roughly
+    _scrollController.animateTo(
+      offset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    const double timeLabelWidth = 60.0;
+    const int endHour = 24;
 
     return Container(
       decoration: BoxDecoration(
@@ -45,7 +82,10 @@ class FocusTimelineWidget extends StatelessWidget {
                     color: colorScheme.primary.withAlpha((255 * 0.1).round()),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.timeline, color: colorScheme.primary),
+                  child: Icon(
+                    Icons.calendar_view_day,
+                    color: colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -55,11 +95,17 @@ class FocusTimelineWidget extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
+                const Spacer(),
+                IconButton(
+                  onPressed: _scrollToCurrentTime,
+                  icon: Icon(Icons.my_location, color: colorScheme.primary),
+                  tooltip: 'Go to current time',
+                ),
               ],
             ),
             const SizedBox(height: 24),
 
-            if (sessions.isEmpty)
+            if (widget.sessions.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -85,177 +131,211 @@ class FocusTimelineWidget extends StatelessWidget {
                 ),
               )
             else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sessions.length,
-                itemBuilder: (context, index) {
-                  final session = sessions[index];
-                  final isLast = index == sessions.length - 1;
-
-                  final startTime = DateFormat('HH:mm').format(
-                    DateTime.fromMillisecondsSinceEpoch(
-                      session.startedAt * 1000,
+              Container(
+                height: 600,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withAlpha((255 * 0.5).round()),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withAlpha(
+                      (255 * 0.2).round(),
                     ),
-                  );
-                  final endTime =
-                      session.endedAt != null
-                          ? DateFormat('HH:mm').format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                              session.endedAt! * 1000,
-                            ),
-                          )
-                          : '';
-                  final time = '$startTime - $endTime';
-
-                  Category? category;
-                  Task? task;
-                  String title;
-                  Color color;
-                  IconData icon;
-
-                  if (session.sessionType == SessionType.work) {
-                    if (session.categoryId != null) {
-                      try {
-                        category =
-                            categories
-                                .firstWhere(
-                                  (CategoryWithTasks c) =>
-                                      c.category.id == session.categoryId,
-                                )
-                                .category;
-                      } catch (e) {
-                        category = null;
-                      }
-                    }
-
-                    if (session.taskId != null) {
-                      if (category != null) {
-                        try {
-                          task = categories
-                              .firstWhere(
-                                (CategoryWithTasks c) =>
-                                    c.category.id == session.categoryId,
-                              )
-                              .tasks
-                              .firstWhere((t) => t.id == session.taskId);
-                        } catch (e) {
-                          task = null;
-                        }
-                      } else {
-                        try {
-                          task = orphanTasks.firstWhere(
-                            (t) => t.id == session.taskId,
-                          );
-                        } catch (e) {
-                          task = null;
-                        }
-                      }
-                    }
-
-                    title = category?.name ?? 'Uncategorized';
-                    color =
-                        category != null
-                            ? Color(
-                              int.parse(
-                                category.color.replaceFirst('#', '0xFF'),
-                              ),
-                            )
-                            : Colors.grey;
-                    icon = Icons.work;
-                  } else if (session.sessionType == SessionType.shortBreak) {
-                    title = context.tr('focus.short_break_title');
-                    color = Colors.green;
-                    icon = Icons.coffee;
-                  } else {
-                    title = context.tr('focus.long_break_title');
-                    color = Colors.blue;
-                    icon = Icons.weekend;
-                  }
-
-                  return IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: SizedBox(
+                    height: (endHour - _startHour) * _hourHeight,
+                    child: Stack(
                       children: [
-                        // Timeline indicator
-                        Column(
-                          children: [
-                            Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: color.withAlpha((255 * 0.2).round()),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: color, width: 2),
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            if (!isLast)
-                              Expanded(
-                                child: Container(
-                                  width: 2,
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        color.withAlpha((255 * 0.5).round()),
-                                        () {
-                                          if (sessions[index + 1].sessionType ==
-                                              SessionType.work) {
-                                            try {
-                                              final nextCategory =
-                                                  categories
-                                                      .firstWhere(
-                                                        (c) =>
-                                                            c.category.id ==
-                                                            sessions[index + 1]
-                                                                .categoryId,
-                                                      )
-                                                      .category;
-                                              if (nextCategory.color.startsWith(
-                                                '#',
-                                              )) {
-                                                return Color(
-                                                  int.parse(
-                                                    nextCategory.color
-                                                        .replaceFirst(
-                                                          '#',
-                                                          '0xFF',
-                                                        ),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (_) {}
-                                          }
-                                          return Colors.grey;
-                                        }().withAlpha((255 * 0.5).round()),
-                                      ],
+                        // Grid Lines and Time Labels
+                        ...List.generate(endHour - _startHour + 1, (index) {
+                          final hour = _startHour + index;
+                          final top = index * _hourHeight;
+                          return Positioned(
+                            top: top,
+                            left: 0,
+                            right: 0,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: timeLabelWidth,
+                                  child: Text(
+                                    '${hour.toString().padLeft(2, '0')}:00',
+                                    textAlign: TextAlign.end,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    color: colorScheme.outlineVariant.withAlpha(
+                                      (255 * 0.3).round(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+
+                        // Current Time Indicator
+                        Builder(
+                          builder: (context) {
+                            final now = DateTime.now();
+                            final currentMinute = now.hour * 60 + now.minute;
+                            final top =
+                                (currentMinute / 60) * _hourHeight -
+                                (_startHour * _hourHeight);
+                            return Positioned(
+                              top: top,
+                              left: 0,
+                              right: 0,
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: timeLabelWidth,
+                                    child: Text(
+                                      DateFormat('HH:mm').format(now),
+                                      textAlign: TextAlign.end,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelSmall?.copyWith(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Container(
+                                      height: 2,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
-                          ],
+                            );
+                          },
                         ),
 
-                        const SizedBox(width: 20),
+                        // Sessions
+                        ...widget.sessions.map((session) {
+                          final startTime = DateTime.fromMillisecondsSinceEpoch(
+                            session.startedAt * 1000,
+                          );
+                          final endTime =
+                              session.endedAt != null
+                                  ? DateTime.fromMillisecondsSinceEpoch(
+                                    session.endedAt! * 1000,
+                                  )
+                                  : DateTime.now();
 
-                        // Session card
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
+                          final startMinuteOfDay =
+                              startTime.hour * 60 + startTime.minute;
+                          final endMinuteOfDay =
+                              endTime.hour * 60 + endTime.minute;
+
+                          final relativeStartMinute =
+                              startMinuteOfDay - (_startHour * 60);
+                          final durationMinutes =
+                              endMinuteOfDay - startMinuteOfDay;
+
+                          // Ensure visible minimum height (e.g., 5 mins = 15px at 3px/min)
+                          final displayDuration =
+                              durationMinutes < 5 ? 5 : durationMinutes;
+
+                          final top =
+                              (relativeStartMinute / 60) * _hourHeight;
+                          final height =
+                              (displayDuration / 60) * _hourHeight;
+
+                          Category? category;
+                          Task? task;
+                          String title;
+                          Color color;
+                          IconData icon;
+
+                          if (session.sessionType == SessionType.work) {
+                            if (session.categoryId != null) {
+                              try {
+                                category =
+                                    widget.categories
+                                        .firstWhere(
+                                          (CategoryWithTasks c) =>
+                                              c.category.id ==
+                                              session.categoryId,
+                                        )
+                                        .category;
+                              } catch (e) {
+                                category = null;
+                              }
+                            }
+
+                            if (session.taskId != null) {
+                              if (category != null) {
+                                try {
+                                  task = widget.categories
+                                      .firstWhere(
+                                        (CategoryWithTasks c) =>
+                                            c.category.id == session.categoryId,
+                                      )
+                                      .tasks
+                                      .firstWhere(
+                                        (t) => t.id == session.taskId,
+                                      );
+                                } catch (e) {
+                                  task = null;
+                                }
+                              } else {
+                                try {
+                                  task = widget.orphanTasks.firstWhere(
+                                    (t) => t.id == session.taskId,
+                                  );
+                                } catch (e) {
+                                  task = null;
+                                }
+                              }
+                            }
+
+                            title = category?.name ?? 'Uncategorized';
+                            color =
+                                category != null
+                                    ? Color(
+                                      int.parse(
+                                        category.color.replaceFirst(
+                                          '#',
+                                          '0xFF',
+                                        ),
+                                      ),
+                                    )
+                                    : Colors.grey;
+                            icon = Icons.work;
+                          } else if (session.sessionType ==
+                              SessionType.shortBreak) {
+                            title = context.tr('focus.short_break_title');
+                            color = Colors.green;
+                            icon = Icons.coffee;
+                          } else {
+                            title = context.tr('focus.long_break_title');
+                            color = Colors.blue;
+                            icon = Icons.weekend;
+                          }
+
+                          final verticalPadding = height < 20 ? 0.0 : 4.0;
+                          final showTimeRange = height > 40;
+
+                          return Positioned(
+                            top: top,
+                            left: timeLabelWidth + 12,
+                            right: 16,
+                            height: height,
                             child: InkWell(
                               onTap: () {
                                 showModalBottomSheet(
@@ -270,158 +350,96 @@ class FocusTimelineWidget extends StatelessWidget {
                                       ),
                                 );
                               },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surface.withAlpha(
-                                    (255 * 0.5).round(),
-                                  ),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: color.withAlpha((255 * 0.3).round()),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: color.withAlpha(
-                                        (255 * 0.05).round(),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  color: color.withOpacity(0.2),
+                                  child: Row(
+                                    children: [
+                                      // Left colored strip (simulates left border)
+                                      Container(
+                                        width: 4,
+                                        color: color,
                                       ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time_rounded,
-                                          size: 16,
-                                          color: colorScheme.onSurfaceVariant,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          time,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelMedium?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                            fontWeight: FontWeight.w500,
+                                      Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            // Remove vertical padding for small items to ensure centering works
+                                            vertical: 0,
                                           ),
-                                        ),
-                                        const Spacer(),
-                                        if (session.concentrationScore != null)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: color.withAlpha(
-                                                (255 * 0.1).round(),
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color: color.withAlpha(
-                                                  (255 * 0.2).round(),
-                                                ),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
+                                          child: Row(
+                                            children: [
+                                              if (height >= 20) ...[
                                                 Icon(
-                                                  Icons.bolt,
+                                                  icon,
                                                   size: 14,
                                                   color: color,
                                                 ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  '${session.concentrationScore}',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .labelSmall
-                                                      ?.copyWith(
-                                                        color: color,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                ),
+                                                const SizedBox(width: 8),
                                               ],
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: color.withAlpha(
-                                              (255 * 0.1).round(),
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            icon,
-                                            size: 16,
-                                            color: color,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                title,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleSmall
-                                                    ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          colorScheme.onSurface,
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      '$title • ${durationMinutes}m',
+                                                      style: Theme.of(
+                                                        context,
+                                                      ).textTheme.labelSmall
+                                                          ?.copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color:
+                                                                colorScheme
+                                                                    .onSurface,
+                                                            fontSize:
+                                                                height < 20
+                                                                    ? 10
+                                                                    : null,
+                                                          ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
-                                              ),
-                                              if (task != null) ...[
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  task.name,
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.bodySmall?.copyWith(
-                                                    color:
-                                                        colorScheme
-                                                            .onSurfaceVariant,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                                    if (showTimeRange)
+                                                      Text(
+                                                        '${DateFormat('HH:mm').format(startTime)} - ${DateFormat('HH:mm').format(endTime)}',
+                                                        style: Theme.of(
+                                                          context,
+                                                        ).textTheme.bodySmall
+                                                            ?.copyWith(
+                                                              fontSize: 10,
+                                                              color:
+                                                                  colorScheme
+                                                                      .onSurfaceVariant,
+                                                            ),
+                                                        maxLines: 1,
+                                                        overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                      ),
+                                                  ],
                                                 ),
-                                              ],
+                                              ),
                                             ],
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
           ],
         ),
