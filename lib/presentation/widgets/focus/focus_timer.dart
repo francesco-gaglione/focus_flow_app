@@ -112,6 +112,11 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
 
     // Use theme colors instead of hardcoded values
     final accentColor = colorScheme.primary;
+    final isBreak = widget.sessionType == SessionTypeEnum.shortBreak ||
+        widget.sessionType == SessionTypeEnum.longBreak;
+    // Use gray for breaks or when not running (stopped), otherwise use accent color
+    final indicatorColor =
+        (isBreak || !isRunning) ? Colors.grey : accentColor;
     final trackColor = colorScheme.surfaceContainerHighest.withAlpha(
       (255 * 0.3).round(),
     );
@@ -195,46 +200,38 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Background Track
-                      CustomPaint(
-                        size: const Size(300, 300),
-                        painter: _TimerPainter(
-                          progress: 1.0,
-                          color: trackColor,
-                          strokeWidth: 20,
+                      // Water Wave Timer
+                      ClipOval(
+                        child: Container(
+                          width: 300,
+                          height: 300,
+                          color: trackColor, // Background color for empty part
+                          child: AnimatedBuilder(
+                            animation: _controller,
+                            builder: (context, child) {
+                              return CustomPaint(
+                                painter: _WaterWavePainter(
+                                  progress: isOvertime ? 0.0 : progress,
+                                  color: isOvertime ? errorColor : indicatorColor,
+                                  animationValue: _controller.value,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      // Progress Arc with Gradient and Glow
-                      AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return CustomPaint(
-                            size: const Size(300, 300),
-                            painter: _TimerPainter(
-                              progress: isOvertime ? 1.0 : progress,
-                              color: isOvertime ? errorColor : accentColor,
-                              strokeWidth: 20,
-                              strokeCap: StrokeCap.round,
-                              gradientColors:
-                                  isOvertime
-                                      ? [
-                                        errorColor,
-                                        errorColor.withAlpha(
-                                          (255 * 0.7).round(),
-                                        ),
-                                      ]
-                                      : [accentColor, colorScheme.tertiary],
-                              withGlow: true,
-                              rotation: _controller.value * 2 * math.pi,
-                              glowOpacity:
-                                  0.3 +
-                                  0.2 *
-                                      math.sin(
-                                        _controller.value * 2 * math.pi,
-                                      ), // Pulse between 0.3 and 0.5
-                            ),
-                          );
-                        },
+                      // Border Ring
+                      Container(
+                        width: 300,
+                        height: 300,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: (isOvertime ? errorColor : indicatorColor)
+                                .withOpacity(0.3),
+                            width: 4,
+                          ),
+                        ),
                       ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -249,6 +246,13 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               color: timerColor,
                               letterSpacing: -2.0,
                               height: 1.0,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -258,7 +262,7 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: (isOvertime ? errorColor : accentColor)
+                              color: (isOvertime ? errorColor : indicatorColor)
                                   .withAlpha((255 * 0.1).round()),
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -267,8 +271,15 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
                               style: Theme.of(
                                 context,
                               ).textTheme.titleMedium?.copyWith(
-                                color: isOvertime ? errorColor : accentColor,
+                                color: isOvertime ? errorColor : indicatorColor,
                                 fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -430,83 +441,74 @@ class _FocusTimerWidgetState extends State<FocusTimerWidget>
   }
 }
 
-/// Custom painter for circular timer
-class _TimerPainter extends CustomPainter {
-  final double progress;
+/// Custom painter for water wave effect
+class _WaterWavePainter extends CustomPainter {
+  final double progress; // 0.0 to 1.0 (1.0 = full)
   final Color color;
-  final double strokeWidth;
-  final StrokeCap strokeCap;
-  final List<Color>? gradientColors;
-  final bool withGlow;
-  final double rotation;
-  final double glowOpacity;
+  final double animationValue;
 
-  _TimerPainter({
+  _WaterWavePainter({
     required this.progress,
     required this.color,
-    this.strokeWidth = 8,
-    this.strokeCap = StrokeCap.butt,
-    this.gradientColors,
-    this.withGlow = false,
-    this.rotation = 0.0,
-    this.glowOpacity = 0.4,
+    required this.animationValue,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - strokeWidth) / 2;
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
 
-    final paint =
-        Paint()
-          ..strokeWidth = strokeWidth
-          ..strokeCap = strokeCap
-          ..style = PaintingStyle.stroke;
+    final path = Path();
+    
+    // Calculate water level height from bottom
+    final waterHeight = size.height * progress;
+    final baseHeight = size.height - waterHeight;
 
-    if (gradientColors != null && gradientColors!.isNotEmpty) {
-      paint.shader = SweepGradient(
-        colors: gradientColors!,
-        startAngle: -math.pi / 2 + rotation,
-        endAngle: 2 * math.pi - math.pi / 2 + rotation,
-        tileMode: TileMode.repeated,
-        transform: GradientRotation(rotation),
-      ).createShader(rect);
-    } else {
-      paint.color = color;
+    path.moveTo(0, baseHeight);
+
+    // Draw wave
+    // Wave parameters
+    const waveAmplitude = 10.0;
+    const waveFrequency = 2.0;
+    
+    for (double x = 0; x <= size.width; x++) {
+      final y = baseHeight + 
+          math.sin((x / size.width * waveFrequency * math.pi * 2) + (animationValue * math.pi * 2)) * waveAmplitude;
+      path.lineTo(x, y);
     }
 
-    if (withGlow) {
-      final glowPaint =
-          Paint()
-            ..strokeWidth = strokeWidth
-            ..strokeCap = strokeCap
-            ..style = PaintingStyle.stroke
-            ..color = (gradientColors?.first ?? color).withAlpha(
-              (glowOpacity * 255).round(),
-            )
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
 
-      canvas.drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * progress,
-        false,
-        glowPaint,
-      );
+    canvas.drawPath(path, paint);
+
+    // Draw a second wave behind with slightly different phase/opacity for depth
+    final paint2 = Paint()
+      ..color = color.withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+
+    final path2 = Path();
+    path2.moveTo(0, baseHeight);
+
+    for (double x = 0; x <= size.width; x++) {
+      final y = baseHeight + 
+          math.sin((x / size.width * waveFrequency * math.pi * 2) + (animationValue * math.pi * 2) + math.pi) * waveAmplitude;
+      path2.lineTo(x, y);
     }
 
-    canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * progress, false, paint);
+    path2.lineTo(size.width, size.height);
+    path2.lineTo(0, size.height);
+    path2.close();
+
+    canvas.drawPath(path2, paint2);
   }
 
   @override
-  bool shouldRepaint(_TimerPainter oldDelegate) {
+  bool shouldRepaint(_WaterWavePainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.strokeWidth != strokeWidth ||
-        oldDelegate.gradientColors != gradientColors ||
-        oldDelegate.withGlow != withGlow ||
-        oldDelegate.rotation != rotation ||
-        oldDelegate.glowOpacity != glowOpacity;
+        oldDelegate.animationValue != animationValue;
   }
 }
