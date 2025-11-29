@@ -11,6 +11,7 @@ class CategoryTaskSelector extends StatefulWidget {
   final ValueChanged<Task?>? onTaskChanged;
   final String? initialCategoryId;
   final String? initialTaskId;
+  final bool enabled;
 
   const CategoryTaskSelector({
     super.key,
@@ -20,6 +21,7 @@ class CategoryTaskSelector extends StatefulWidget {
     this.onTaskChanged,
     this.initialCategoryId,
     this.initialTaskId,
+    this.enabled = true,
   });
 
   @override
@@ -211,59 +213,64 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
     bool isExpanded,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isEnabled = widget.enabled;
+    
     return Material(
       color:
           isSelected
               ? colorScheme.primaryContainer.withAlpha((255 * 0.4).round())
               : Colors.transparent,
       child: InkWell(
-        onTap: () => _handleCategorySelect(category),
+        onTap: isEnabled ? () => _handleCategorySelect(category) : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(
-                  isExpanded
-                      ? Icons.keyboard_arrow_down
-                      : Icons.keyboard_arrow_right,
-                  color: colorScheme.onSurfaceVariant,
+          child: Opacity(
+            opacity: isEnabled ? 1.0 : 0.5,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_down
+                        : Icons.keyboard_arrow_right,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  onPressed: () => _toggleCategoryExpansion(category.id),
+                  visualDensity: VisualDensity.compact,
                 ),
-                onPressed: () => _toggleCategoryExpansion(category.id),
-                visualDensity: VisualDensity.compact,
-              ),
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: _parseColor(category.color),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  category.name,
-                  style: TextStyle(
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
-                    color:
-                        isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurface,
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: _parseColor(category.color),
+                    shape: BoxShape.circle,
                   ),
                 ),
-              ),
-              if (isSelected && selectedTaskId == null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Icon(
-                    Icons.check,
-                    size: 16,
-                    color: colorScheme.primary,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    category.name,
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color:
+                          isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurface,
+                    ),
                   ),
                 ),
-            ],
+                if (isSelected && selectedTaskId == null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Icon(
+                      Icons.check,
+                      size: 16,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -327,33 +334,38 @@ class _CategoryTaskSelectorState extends State<CategoryTaskSelector> {
     bool isSelected,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isEnabled = widget.enabled;
+
     return Material(
       color:
           isSelected
               ? colorScheme.primaryContainer.withAlpha((255 * 0.4).round())
               : Colors.transparent,
       child: InkWell(
-        onTap: () => _handleTaskSelect(task, category),
+        onTap: isEnabled ? () => _handleTaskSelect(task, category) : null,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(56, 12, 16, 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  task.name,
-                  style: TextStyle(
-                    color:
-                        isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isSelected ? FontWeight.w500 : FontWeight.normal,
+          child: Opacity(
+            opacity: isEnabled ? 1.0 : 0.5,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    task.name,
+                    style: TextStyle(
+                      color:
+                          isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.w500 : FontWeight.normal,
+                    ),
                   ),
                 ),
-              ),
-              if (isSelected)
-                Icon(Icons.check, size: 16, color: colorScheme.primary),
-            ],
+                if (isSelected)
+                  Icon(Icons.check, size: 16, color: colorScheme.primary),
+              ],
+            ),
           ),
         ),
       ),

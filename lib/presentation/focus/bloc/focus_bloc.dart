@@ -107,6 +107,13 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
 
       // Request initial sync
       _websocketRepository.requestSync();
+      
+      // Retry sync after a delay to ensure connection stability
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!isClosed) {
+          _websocketRepository.requestSync();
+        }
+      });
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     } finally {

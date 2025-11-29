@@ -26,6 +26,25 @@ class FocusViewState extends State<FocusView> {
 
   static const double desktopBreakpoint = 900;
 
+  @override
+  void initState() {
+    super.initState();
+    // Check initial state for active session color
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = context.read<FocusBloc>().state;
+      if (state.selectedCategory != null) {
+        try {
+          int colorInt = int.parse(
+            state.selectedCategory!.color.replaceFirst('#', '0xFF'),
+          );
+          context.read<ThemeCubit>().updateAccentColor(colorInt);
+        } catch (e) {
+          logger.e('Error parsing initial category color', error: e);
+        }
+      }
+    });
+  }
+
   void _onFocusLevelChanged(BuildContext context, int level) {
     logger.d('Focus level changed to $level');
     context.read<FocusBloc>().add(FocusLevelSelected(focusLevel: level));
@@ -102,6 +121,26 @@ class FocusViewState extends State<FocusView> {
               return const Center(child: CircularProgressIndicator());
             }
 
+            // Enforce color consistency
+            if (state.selectedCategory != null) {
+              try {
+                final targetColor = int.parse(
+                  state.selectedCategory!.color.replaceFirst('#', '0xFF'),
+                );
+                final currentColor = Theme.of(context).colorScheme.primary.value;
+                
+                if (currentColor != targetColor) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (context.mounted) {
+                      context.read<ThemeCubit>().updateAccentColor(targetColor);
+                    }
+                  });
+                }
+              } catch (e) {
+                // Ignore parsing errors
+              }
+            }
+
             final isDesktop =
                 MediaQuery.of(context).size.width >= desktopBreakpoint;
 
@@ -126,6 +165,11 @@ class FocusViewState extends State<FocusView> {
                     )
                     : SizedBox(height: 0);
 
+            final isSelectionEnabled =
+                state.sessionState == null ||
+                (state.sessionState!.sessionType != SessionTypeEnum.focus &&
+                    state.sessionState!.sessionType != SessionTypeEnum.work);
+
             final categoryTaskSelector = CategoryTaskSelector(
               categories: state.categories,
               orphanTasks: state.orphanTasks,
@@ -133,6 +177,7 @@ class FocusViewState extends State<FocusView> {
               initialTaskId: state.selectedTask?.id,
               onCategoryChanged: (cat) => _onCategoryChanged(context, cat),
               onTaskChanged: (task) => _onTaskChanged(context, task),
+              enabled: isSelectionEnabled,
             );
 
             final timelineWidget = FocusTimelineWidget(
