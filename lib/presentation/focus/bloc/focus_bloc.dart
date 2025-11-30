@@ -27,6 +27,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   StreamSubscription? _serverResponsesSubscription;
   StreamSubscription? _broadcastEventsSubscription;
   StreamSubscription? _pomodoroStateUpdatesSubscription;
+  StreamSubscription? _connectionStatusSubscription;
 
   FocusBloc({
     required GetCategoriesAndTasks getCategoriesAndTask,
@@ -54,6 +55,8 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       _onReloadTodaySessions,
       transformer: debounce(const Duration(milliseconds: 500)),
     );
+    on<WebSocketConnectionUpdated>(_onWebSocketConnectionUpdated);
+    on<CheckConnection>(_onCheckConnection);
   }
 
   @override
@@ -61,6 +64,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     _serverResponsesSubscription?.cancel();
     _broadcastEventsSubscription?.cancel();
     _pomodoroStateUpdatesSubscription?.cancel();
+    _connectionStatusSubscription?.cancel();
     return super.close();
   }
 
@@ -94,6 +98,9 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
 
       add(ReloadTodaySessions());
 
+      // Setup WebSocket message handlers
+      _handleWsMessage();
+
       // Initialize WebSocket AFTER loading data to ensure state is ready for syncData
       logger.d('Checking WebSocket connection...');
       if (!_websocketRepository.isConnected()) {
@@ -101,9 +108,6 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         await _websocketRepository.connect();
         logger.d('WebSocket connected');
       }
-
-      // Setup WebSocket message handlers
-      _handleWsMessage();
 
       // Request initial sync
       _websocketRepository.requestSync();
@@ -274,6 +278,15 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
           _handlePomodoroStateUpdate(pomodoroState);
         });
 
+    // Listen to connection status
+    _connectionStatusSubscription = _websocketRepository.connectionStatus
+        .listen((isConnected) {
+      add(WebSocketConnectionUpdated(isConnected));
+    });
+
+    // Check initial status
+    add(WebSocketConnectionUpdated(_websocketRepository.isConnected()));
+
     add(ReloadTodaySessions());
   }
 
@@ -353,5 +366,32 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         clearSessionState: sessionState == null,
       ),
     );
+  }
+  Future<void> _onWebSocketConnectionUpdated(
+    WebSocketConnectionUpdated event,
+    Emitter<FocusState> emit,
+  ) async {
+    logger.d('WebSocket connection updated: ${event.isConnected}');
+    emit(state.copyWith(isWebSocketConnected: event.isConnected));
+    if (event.isConnected) {
+      _websocketRepository.requestSync();
+    }
+  }
+
+  Future<void> _onCheckConnection(
+    CheckConnection event,
+    Emitter<FocusState> emit,
+  ) async {
+    logger.d('Checking WebSocket connection...');
+    if (!_websocketRepository.isConnected()) {
+      logger.d('WebSocket not connected, attempting to connect...');
+      await _websocketRepository.connect();
+    } else {
+      logger.d('WebSocket already connected');
+      // Ensure state reflects reality
+      if (!state.isWebSocketConnected) {
+        emit(state.copyWith(isWebSocketConnected: true));
+      }
+    }
   }
 }

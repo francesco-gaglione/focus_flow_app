@@ -21,6 +21,7 @@ class WebsocketRepository {
       StreamController<BroadcastEvent>.broadcast();
   final _pomodoroStateController =
       StreamController<UpdatePomodoroState>.broadcast();
+  final _connectionStatusController = StreamController<bool>.broadcast();
 
   // Streams for listening to messages
   Stream<ServerResponse> get serverResponses =>
@@ -29,29 +30,44 @@ class WebsocketRepository {
       _broadcastEventController.stream;
   Stream<UpdatePomodoroState> get pomodoroStateUpdates =>
       _pomodoroStateController.stream;
+  Stream<bool> get connectionStatus => _connectionStatusController.stream;
 
   WebsocketRepository(this.wsUrl);
 
   /// Connect to the WebSocket server
   Future<void> connect() async {
     try {
+      // If already connected, do nothing
+      if (_ws != null && _ws!.readyState == WebSocket.open) {
+        logger.d('Already connected to $wsUrl');
+        _connectionStatusController.add(true);
+        return;
+      }
+
       logger.d('Connecting to $wsUrl...');
       _ws = await WebSocket.connect(wsUrl);
       logger.i('Connected to $wsUrl');
+      _connectionStatusController.add(true);
 
       // Start listening to incoming messages
       _subscription = _ws!.listen(
         _handleMessage,
         onError: (error) {
           logger.e('WebSocket error: $error');
+          _connectionStatusController.add(false);
+          _ws = null;
         },
         onDone: () {
           logger.w('WebSocket connection closed');
+          _connectionStatusController.add(false);
+          _ws = null;
         },
       );
     } catch (e) {
       logger.e('Failed to connect to $wsUrl: $e');
-      throw Exception('Failed to connect to $wsUrl');
+      _connectionStatusController.add(false);
+      _ws = null;
+      // Don't throw, just log, so the app doesn't crash on reconnection attempts
     }
   }
 
@@ -104,8 +120,9 @@ class WebsocketRepository {
 
   /// Send a client message to the server
   void _sendMessage(ClientMessage message, {String? requestId}) {
-    if (_ws == null) {
+    if (_ws == null || _ws!.readyState != WebSocket.open) {
       logger.w('Cannot send message: WebSocket is not connected');
+      _connectionStatusController.add(false);
       return;
     }
 
@@ -254,12 +271,15 @@ class WebsocketRepository {
     if (_ws != null) {
       await _subscription?.cancel();
       await _ws!.close();
+      _ws = null;
       logger.i('Disconnected from websocket');
+      _connectionStatusController.add(false);
     }
 
     // Close stream controllers
     await _serverResponseController.close();
     await _broadcastEventController.close();
     await _pomodoroStateController.close();
+    await _connectionStatusController.close();
   }
 }

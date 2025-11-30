@@ -42,3 +42,11 @@ class PomodoroStateUpdated extends FocusEvent {
 }
 
 class ReloadTodaySessions extends FocusEvent {}
+
+class WebSocketConnectionUpdated extends FocusEvent {
+  final bool isConnected;
+
+  WebSocketConnectionUpdated(this.isConnected);
+}
+
+class CheckConnection extends FocusEvent {}

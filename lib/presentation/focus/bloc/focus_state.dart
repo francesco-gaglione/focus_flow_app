@@ -15,6 +15,8 @@ class FocusState extends Equatable {
   final List<FocusSession> todaySessions;
   final SessionState? sessionState;
 
+  final bool isWebSocketConnected;
+
   const FocusState({
     this.isLoading = false,
     this.errorMessage,
@@ -24,6 +26,7 @@ class FocusState extends Equatable {
     this.selectedTask,
     this.sessionState,
     this.todaySessions = const [],
+    this.isWebSocketConnected = false,
   });
 
   FocusState copyWith({
@@ -39,6 +42,7 @@ class FocusState extends Equatable {
     SessionState? sessionState,
     bool clearSessionState = false,
     List<FocusSession>? todaySessions,
+    bool? isWebSocketConnected,
   }) {
     return FocusState(
       categories: categories ?? this.categories,
@@ -54,6 +58,7 @@ class FocusState extends Equatable {
       sessionState:
           clearSessionState ? null : sessionState ?? this.sessionState,
       todaySessions: todaySessions ?? this.todaySessions,
+      isWebSocketConnected: isWebSocketConnected ?? this.isWebSocketConnected,
     );
   }
 
@@ -67,6 +72,7 @@ class FocusState extends Equatable {
     selectedTask,
     sessionState,
     todaySessions,
+    isWebSocketConnected,
   ];
 }
 

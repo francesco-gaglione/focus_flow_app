@@ -21,7 +21,7 @@ class FocusView extends StatefulWidget {
   FocusViewState createState() => FocusViewState();
 }
 
-class FocusViewState extends State<FocusView> {
+class FocusViewState extends State<FocusView> with WidgetsBindingObserver {
   final Logger logger = Logger();
 
   static const double desktopBreakpoint = 900;
@@ -29,6 +29,7 @@ class FocusViewState extends State<FocusView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Check initial state for active session color
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<FocusBloc>().state;
@@ -43,6 +44,20 @@ class FocusViewState extends State<FocusView> {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      logger.d('App resumed, checking WebSocket connection');
+      context.read<FocusBloc>().add(CheckConnection());
+    }
   }
 
   void _onFocusLevelChanged(BuildContext context, int level) {
@@ -82,6 +97,29 @@ class FocusViewState extends State<FocusView> {
       appBar: AppBar(
         title: Text(context.tr('focus.title')),
         centerTitle: false,
+        actions: [
+          BlocBuilder<FocusBloc, FocusState>(
+            buildWhen: (previous, current) =>
+                previous.isWebSocketConnected != current.isWebSocketConnected,
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Tooltip(
+                  message:
+                      state.isWebSocketConnected
+                          ? 'WebSocket Connected'
+                          : 'WebSocket Disconnected',
+                  child: Icon(
+                    state.isWebSocketConnected ? Icons.wifi : Icons.wifi_off,
+                    color:
+                        state.isWebSocketConnected ? Colors.green : Colors.red,
+                    size: 20,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
