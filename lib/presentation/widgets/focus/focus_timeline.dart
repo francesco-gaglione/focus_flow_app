@@ -45,7 +45,11 @@ class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
     if (!_scrollController.hasClients) return;
     final now = DateTime.now();
     final currentMinute = now.hour * 60 + now.minute;
-    final offset = (currentMinute / 60) * _hourHeight - (200); // Center roughly
+    // Calculate the top position of the current time line
+    final topPosition = ((currentMinute / 60) - _startHour) * _hourHeight;
+    // Center it in the 600px container (subtract half height = 300)
+    final offset = topPosition - 300;
+    
     _scrollController.animateTo(
       offset.clamp(0.0, _scrollController.position.maxScrollExtent),
       duration: const Duration(milliseconds: 500),
