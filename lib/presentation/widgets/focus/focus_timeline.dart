@@ -41,6 +41,17 @@ class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(FocusTimelineWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If we transition from empty to having sessions, try scrolling
+    if (oldWidget.sessions.isEmpty && widget.sessions.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToCurrentTime();
+      });
+    }
+  }
+
   void _scrollToCurrentTime() {
     if (!_scrollController.hasClients) return;
     final now = DateTime.now();
