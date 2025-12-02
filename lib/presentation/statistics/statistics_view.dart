@@ -6,6 +6,7 @@ import 'package:focus_flow_app/domain/entities/statistics.dart';
 import 'package:focus_flow_app/presentation/statistics/bloc/statistics_bloc.dart';
 import 'package:focus_flow_app/presentation/statistics/bloc/statistics_event.dart';
 import 'package:focus_flow_app/presentation/statistics/bloc/statistics_state.dart';
+import 'package:logger/logger.dart';
 
 class StatisticsView extends StatefulWidget {
   const StatisticsView({super.key});
@@ -15,6 +16,8 @@ class StatisticsView extends StatefulWidget {
 }
 
 class _StatisticsViewState extends State<StatisticsView> {
+  Logger logger = Logger();
+
   @override
   void initState() {
     super.initState();

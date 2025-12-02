@@ -71,7 +71,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                 spacing: 16,
                 runSpacing: 16,
                 children: List.generate(5, (index) {
-                  final level = index;
+                  final level = index + 1;
                   final isSelected = selectedLevel == level;
 
                   return InkWell(
@@ -129,7 +129,7 @@ class _FocusLevelSelectorState extends State<FocusLevelSelector> {
                       ),
                       child: Center(
                         child: Text(
-                          '${level + 1}',
+                          '$level',
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge?.copyWith(
