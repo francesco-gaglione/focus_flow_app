@@ -37,23 +37,13 @@ class HttpSessionRepository implements SessionRepository {
   @override
   Future<FocusSession?> getSessionById(String id) async {
     try {
-      final response = await _dio.get('$baseUrl/api/focus-sessions/$id');
-      final json = response.data;
-      return FocusSession(
-        id: json['id'],
-        sessionType: SessionType.fromString(json['sessionType']),
-        startedAt: json['startedAt'],
-        endedAt: json['endedAt'],
-        actualDuration: json['actualDuration'],
-        taskId: json['taskId'],
-        categoryId: json['categoryId'],
-        concentrationScore: json['concentrationScore'],
-        notes: json['notes'],
-        createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
+      final sessions = await getAllSessions();
+      return sessions.cast<FocusSession?>().firstWhere(
+        (s) => s?.id == id,
+        orElse: () => null,
       );
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) return null;
-      rethrow;
+    } catch (e) {
+      return null;
     }
   }
 
@@ -151,22 +141,42 @@ class HttpSessionRepository implements SessionRepository {
     int? concentrationScore,
     String? notes,
   }) async {
-    final data = <String, dynamic>{};
-    if (sessionType != null) data['sessionType'] = sessionType.value;
-    if (startedAt != null) data['startedAt'] = startedAt;
-    if (endedAt != null) data['endedAt'] = endedAt;
-    if (actualDuration != null) data['actualDuration'] = actualDuration;
-    if (taskId != null) data['taskId'] = taskId;
-    if (categoryId != null) data['categoryId'] = categoryId;
-    if (concentrationScore != null) {
-      data['concentrationScore'] = concentrationScore;
-    }
-    if (notes != null) data['notes'] = notes;
+    final dto = UpdateFocusSessionDto(
+      sessionType: sessionType?.value,
+      startedAt: startedAt,
+      endedAt: endedAt,
+      actualDuration: actualDuration,
+      taskId: taskId,
+      categoryId: categoryId,
+      concentrationScore: concentrationScore,
+      notes: notes,
+    );
 
+    print('Updating session $id with data: ${dto.toJson()}');
     final response = await _dio.put(
       '$baseUrl/api/focus-sessions/$id',
-      data: data,
+      data: dto.toJson(),
     );
+    print('Update response status: ${response.statusCode}');
+    print('Update response data: ${response.data}');
+
+    if (response.statusCode == 204 ||
+        (response.data is Map && (response.data as Map).isEmpty)) {
+      // Return a dummy session since we will refresh the list anyway
+      return FocusSession(
+        id: id,
+        sessionType: sessionType ?? SessionType.work,
+        startedAt: startedAt ?? 0,
+        endedAt: endedAt,
+        actualDuration: actualDuration,
+        taskId: taskId,
+        categoryId: categoryId,
+        concentrationScore: concentrationScore,
+        notes: notes,
+        createdAt: DateTime.now(),
+      );
+    }
+
     final json = response.data;
     return FocusSession(
       id: json['id'],

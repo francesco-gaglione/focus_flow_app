@@ -7,6 +7,10 @@ common:
   retry: Riprova
   save: Salva
   close: Chiudi
+  category: Categoria
+  task: Attività
+  start_time: Ora di inizio 
+  end_time: Ora di fine
 
 # Sezione Categorie
 category:
@@ -73,6 +77,9 @@ focus:
   orphan_tasks_helper: Attività senza una categoria
   duration_label: Durata
   time_range_label: Orario
+  edit_session_title: Modifica Sessione
+  save_success: Sessione aggiornata con successo
+  save_error: Errore durante l'aggiornamento della sessione
 
 # Sezione Impostazioni
 settings:

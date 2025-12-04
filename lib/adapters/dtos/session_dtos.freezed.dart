@@ -643,6 +643,368 @@ abstract class _GetSessionFiltersDto extends GetSessionFiltersDto {
   get copyWith => throw _privateConstructorUsedError;
 }
 
+UpdateFocusSessionDto _$UpdateFocusSessionDtoFromJson(
+  Map<String, dynamic> json,
+) {
+  return _UpdateFocusSessionDto.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UpdateFocusSessionDto {
+  @JsonKey(includeIfNull: true)
+  String? get categoryId => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: true)
+  String? get taskId => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: true)
+  String? get notes => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: true)
+  int? get concentrationScore => throw _privateConstructorUsedError;
+  int? get startedAt => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: true)
+  int? get endedAt => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: true)
+  int? get actualDuration => throw _privateConstructorUsedError;
+  String? get sessionType => throw _privateConstructorUsedError;
+
+  /// Serializes this UpdateFocusSessionDto to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of UpdateFocusSessionDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $UpdateFocusSessionDtoCopyWith<UpdateFocusSessionDto> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UpdateFocusSessionDtoCopyWith<$Res> {
+  factory $UpdateFocusSessionDtoCopyWith(
+    UpdateFocusSessionDto value,
+    $Res Function(UpdateFocusSessionDto) then,
+  ) = _$UpdateFocusSessionDtoCopyWithImpl<$Res, UpdateFocusSessionDto>;
+  @useResult
+  $Res call({
+    @JsonKey(includeIfNull: true) String? categoryId,
+    @JsonKey(includeIfNull: true) String? taskId,
+    @JsonKey(includeIfNull: true) String? notes,
+    @JsonKey(includeIfNull: true) int? concentrationScore,
+    int? startedAt,
+    @JsonKey(includeIfNull: true) int? endedAt,
+    @JsonKey(includeIfNull: true) int? actualDuration,
+    String? sessionType,
+  });
+}
+
+/// @nodoc
+class _$UpdateFocusSessionDtoCopyWithImpl<
+  $Res,
+  $Val extends UpdateFocusSessionDto
+>
+    implements $UpdateFocusSessionDtoCopyWith<$Res> {
+  _$UpdateFocusSessionDtoCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of UpdateFocusSessionDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? categoryId = freezed,
+    Object? taskId = freezed,
+    Object? notes = freezed,
+    Object? concentrationScore = freezed,
+    Object? startedAt = freezed,
+    Object? endedAt = freezed,
+    Object? actualDuration = freezed,
+    Object? sessionType = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            categoryId:
+                freezed == categoryId
+                    ? _value.categoryId
+                    : categoryId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            taskId:
+                freezed == taskId
+                    ? _value.taskId
+                    : taskId // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            notes:
+                freezed == notes
+                    ? _value.notes
+                    : notes // ignore: cast_nullable_to_non_nullable
+                        as String?,
+            concentrationScore:
+                freezed == concentrationScore
+                    ? _value.concentrationScore
+                    : concentrationScore // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            startedAt:
+                freezed == startedAt
+                    ? _value.startedAt
+                    : startedAt // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            endedAt:
+                freezed == endedAt
+                    ? _value.endedAt
+                    : endedAt // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            actualDuration:
+                freezed == actualDuration
+                    ? _value.actualDuration
+                    : actualDuration // ignore: cast_nullable_to_non_nullable
+                        as int?,
+            sessionType:
+                freezed == sessionType
+                    ? _value.sessionType
+                    : sessionType // ignore: cast_nullable_to_non_nullable
+                        as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$UpdateFocusSessionDtoImplCopyWith<$Res>
+    implements $UpdateFocusSessionDtoCopyWith<$Res> {
+  factory _$$UpdateFocusSessionDtoImplCopyWith(
+    _$UpdateFocusSessionDtoImpl value,
+    $Res Function(_$UpdateFocusSessionDtoImpl) then,
+  ) = __$$UpdateFocusSessionDtoImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(includeIfNull: true) String? categoryId,
+    @JsonKey(includeIfNull: true) String? taskId,
+    @JsonKey(includeIfNull: true) String? notes,
+    @JsonKey(includeIfNull: true) int? concentrationScore,
+    int? startedAt,
+    @JsonKey(includeIfNull: true) int? endedAt,
+    @JsonKey(includeIfNull: true) int? actualDuration,
+    String? sessionType,
+  });
+}
+
+/// @nodoc
+class __$$UpdateFocusSessionDtoImplCopyWithImpl<$Res>
+    extends
+        _$UpdateFocusSessionDtoCopyWithImpl<$Res, _$UpdateFocusSessionDtoImpl>
+    implements _$$UpdateFocusSessionDtoImplCopyWith<$Res> {
+  __$$UpdateFocusSessionDtoImplCopyWithImpl(
+    _$UpdateFocusSessionDtoImpl _value,
+    $Res Function(_$UpdateFocusSessionDtoImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UpdateFocusSessionDto
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? categoryId = freezed,
+    Object? taskId = freezed,
+    Object? notes = freezed,
+    Object? concentrationScore = freezed,
+    Object? startedAt = freezed,
+    Object? endedAt = freezed,
+    Object? actualDuration = freezed,
+    Object? sessionType = freezed,
+  }) {
+    return _then(
+      _$UpdateFocusSessionDtoImpl(
+        categoryId:
+            freezed == categoryId
+                ? _value.categoryId
+                : categoryId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        taskId:
+            freezed == taskId
+                ? _value.taskId
+                : taskId // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        notes:
+            freezed == notes
+                ? _value.notes
+                : notes // ignore: cast_nullable_to_non_nullable
+                    as String?,
+        concentrationScore:
+            freezed == concentrationScore
+                ? _value.concentrationScore
+                : concentrationScore // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        startedAt:
+            freezed == startedAt
+                ? _value.startedAt
+                : startedAt // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        endedAt:
+            freezed == endedAt
+                ? _value.endedAt
+                : endedAt // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        actualDuration:
+            freezed == actualDuration
+                ? _value.actualDuration
+                : actualDuration // ignore: cast_nullable_to_non_nullable
+                    as int?,
+        sessionType:
+            freezed == sessionType
+                ? _value.sessionType
+                : sessionType // ignore: cast_nullable_to_non_nullable
+                    as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UpdateFocusSessionDtoImpl implements _UpdateFocusSessionDto {
+  const _$UpdateFocusSessionDtoImpl({
+    @JsonKey(includeIfNull: true) this.categoryId,
+    @JsonKey(includeIfNull: true) this.taskId,
+    @JsonKey(includeIfNull: true) this.notes,
+    @JsonKey(includeIfNull: true) this.concentrationScore,
+    this.startedAt,
+    @JsonKey(includeIfNull: true) this.endedAt,
+    @JsonKey(includeIfNull: true) this.actualDuration,
+    this.sessionType,
+  });
+
+  factory _$UpdateFocusSessionDtoImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateFocusSessionDtoImplFromJson(json);
+
+  @override
+  @JsonKey(includeIfNull: true)
+  final String? categoryId;
+  @override
+  @JsonKey(includeIfNull: true)
+  final String? taskId;
+  @override
+  @JsonKey(includeIfNull: true)
+  final String? notes;
+  @override
+  @JsonKey(includeIfNull: true)
+  final int? concentrationScore;
+  @override
+  final int? startedAt;
+  @override
+  @JsonKey(includeIfNull: true)
+  final int? endedAt;
+  @override
+  @JsonKey(includeIfNull: true)
+  final int? actualDuration;
+  @override
+  final String? sessionType;
+
+  @override
+  String toString() {
+    return 'UpdateFocusSessionDto(categoryId: $categoryId, taskId: $taskId, notes: $notes, concentrationScore: $concentrationScore, startedAt: $startedAt, endedAt: $endedAt, actualDuration: $actualDuration, sessionType: $sessionType)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateFocusSessionDtoImpl &&
+            (identical(other.categoryId, categoryId) ||
+                other.categoryId == categoryId) &&
+            (identical(other.taskId, taskId) || other.taskId == taskId) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.concentrationScore, concentrationScore) ||
+                other.concentrationScore == concentrationScore) &&
+            (identical(other.startedAt, startedAt) ||
+                other.startedAt == startedAt) &&
+            (identical(other.endedAt, endedAt) || other.endedAt == endedAt) &&
+            (identical(other.actualDuration, actualDuration) ||
+                other.actualDuration == actualDuration) &&
+            (identical(other.sessionType, sessionType) ||
+                other.sessionType == sessionType));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    categoryId,
+    taskId,
+    notes,
+    concentrationScore,
+    startedAt,
+    endedAt,
+    actualDuration,
+    sessionType,
+  );
+
+  /// Create a copy of UpdateFocusSessionDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateFocusSessionDtoImplCopyWith<_$UpdateFocusSessionDtoImpl>
+  get copyWith =>
+      __$$UpdateFocusSessionDtoImplCopyWithImpl<_$UpdateFocusSessionDtoImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UpdateFocusSessionDtoImplToJson(this);
+  }
+}
+
+abstract class _UpdateFocusSessionDto implements UpdateFocusSessionDto {
+  const factory _UpdateFocusSessionDto({
+    @JsonKey(includeIfNull: true) final String? categoryId,
+    @JsonKey(includeIfNull: true) final String? taskId,
+    @JsonKey(includeIfNull: true) final String? notes,
+    @JsonKey(includeIfNull: true) final int? concentrationScore,
+    final int? startedAt,
+    @JsonKey(includeIfNull: true) final int? endedAt,
+    @JsonKey(includeIfNull: true) final int? actualDuration,
+    final String? sessionType,
+  }) = _$UpdateFocusSessionDtoImpl;
+
+  factory _UpdateFocusSessionDto.fromJson(Map<String, dynamic> json) =
+      _$UpdateFocusSessionDtoImpl.fromJson;
+
+  @override
+  @JsonKey(includeIfNull: true)
+  String? get categoryId;
+  @override
+  @JsonKey(includeIfNull: true)
+  String? get taskId;
+  @override
+  @JsonKey(includeIfNull: true)
+  String? get notes;
+  @override
+  @JsonKey(includeIfNull: true)
+  int? get concentrationScore;
+  @override
+  int? get startedAt;
+  @override
+  @JsonKey(includeIfNull: true)
+  int? get endedAt;
+  @override
+  @JsonKey(includeIfNull: true)
+  int? get actualDuration;
+  @override
+  String? get sessionType;
+
+  /// Create a copy of UpdateFocusSessionDto
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UpdateFocusSessionDtoImplCopyWith<_$UpdateFocusSessionDtoImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
 FocusSessionDto _$FocusSessionDtoFromJson(Map<String, dynamic> json) {
   return _FocusSessionDto.fromJson(json);
 }

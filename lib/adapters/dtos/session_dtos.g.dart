@@ -53,6 +53,32 @@ Map<String, dynamic> _$$GetSessionFiltersDtoImplToJson(
   'maxConcentrationScore': instance.maxConcentrationScore,
 };
 
+_$UpdateFocusSessionDtoImpl _$$UpdateFocusSessionDtoImplFromJson(
+  Map<String, dynamic> json,
+) => _$UpdateFocusSessionDtoImpl(
+  categoryId: json['categoryId'] as String?,
+  taskId: json['taskId'] as String?,
+  notes: json['notes'] as String?,
+  concentrationScore: (json['concentrationScore'] as num?)?.toInt(),
+  startedAt: (json['startedAt'] as num?)?.toInt(),
+  endedAt: (json['endedAt'] as num?)?.toInt(),
+  actualDuration: (json['actualDuration'] as num?)?.toInt(),
+  sessionType: json['sessionType'] as String?,
+);
+
+Map<String, dynamic> _$$UpdateFocusSessionDtoImplToJson(
+  _$UpdateFocusSessionDtoImpl instance,
+) => <String, dynamic>{
+  'categoryId': instance.categoryId,
+  'taskId': instance.taskId,
+  'notes': instance.notes,
+  'concentrationScore': instance.concentrationScore,
+  'startedAt': instance.startedAt,
+  'endedAt': instance.endedAt,
+  'actualDuration': instance.actualDuration,
+  'sessionType': instance.sessionType,
+};
+
 _$FocusSessionDtoImpl _$$FocusSessionDtoImplFromJson(
   Map<String, dynamic> json,
 ) => _$FocusSessionDtoImpl(
