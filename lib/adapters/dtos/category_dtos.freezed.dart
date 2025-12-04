@@ -1503,7 +1503,6 @@ DeleteCategoriesResponseDto _$DeleteCategoriesResponseDtoFromJson(
 
 /// @nodoc
 mixin _$DeleteCategoriesResponseDto {
-  // ignore: invalid_annotation_target
   @JsonKey(name: 'deleted_ids')
   List<String> get deletedIds => throw _privateConstructorUsedError;
 
@@ -1616,9 +1615,7 @@ class _$DeleteCategoriesResponseDtoImpl
     Map<String, dynamic> json,
   ) => _$$DeleteCategoriesResponseDtoImplFromJson(json);
 
-  // ignore: invalid_annotation_target
   final List<String> _deletedIds;
-  // ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'deleted_ids')
   List<String> get deletedIds {
@@ -1675,7 +1672,6 @@ abstract class _DeleteCategoriesResponseDto
   factory _DeleteCategoriesResponseDto.fromJson(Map<String, dynamic> json) =
       _$DeleteCategoriesResponseDtoImpl.fromJson;
 
-  // ignore: invalid_annotation_target
   @override
   @JsonKey(name: 'deleted_ids')
   List<String> get deletedIds;

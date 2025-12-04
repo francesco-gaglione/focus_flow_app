@@ -49,13 +49,13 @@ class GetSessionFiltersDto with _$GetSessionFiltersDto {
 @freezed
 class UpdateFocusSessionDto with _$UpdateFocusSessionDto {
   const factory UpdateFocusSessionDto({
-    @JsonKey(includeIfNull: true) String? categoryId,
-    @JsonKey(includeIfNull: true) String? taskId,
-    @JsonKey(includeIfNull: true) String? notes,
-    @JsonKey(includeIfNull: true) int? concentrationScore,
+    String? categoryId,
+    String? taskId,
+    String? notes,
+    int? concentrationScore,
     int? startedAt,
-    @JsonKey(includeIfNull: true) int? endedAt,
-    @JsonKey(includeIfNull: true) int? actualDuration,
+    int? endedAt,
+    int? actualDuration,
     String? sessionType,
   }) = _UpdateFocusSessionDto;
 

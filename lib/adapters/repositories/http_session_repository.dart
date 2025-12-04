@@ -152,13 +152,10 @@ class HttpSessionRepository implements SessionRepository {
       notes: notes,
     );
 
-    print('Updating session $id with data: ${dto.toJson()}');
     final response = await _dio.put(
       '$baseUrl/api/focus-sessions/$id',
       data: dto.toJson(),
     );
-    print('Update response status: ${response.statusCode}');
-    print('Update response data: ${response.data}');
 
     if (response.statusCode == 204 ||
         (response.data is Map && (response.data as Map).isEmpty)) {

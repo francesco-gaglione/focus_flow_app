@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/task.dart';
 
@@ -91,7 +92,6 @@ class UpdateTaskResponseDto with _$UpdateTaskResponseDto {
 @freezed
 class DeleteTasksResponseDto with _$DeleteTasksResponseDto {
   const factory DeleteTasksResponseDto({
-    // ignore: invalid_annotation_target
     @JsonKey(name: 'deleted_ids') required List<String> deletedIds,
   }) = _DeleteTasksResponseDto;
 

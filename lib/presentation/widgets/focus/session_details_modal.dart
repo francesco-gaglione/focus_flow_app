@@ -81,9 +81,7 @@ class _SessionDetailsModalState extends State<SessionDetailsModal> {
           SnackBar(content: Text(context.tr('focus.save_success'))),
         );
       }
-    } catch (e, stackTrace) {
-      print('Error updating session: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${context.tr('focus.save_error')}: $e')),
@@ -274,7 +272,7 @@ class _SessionDetailsModalState extends State<SessionDetailsModal> {
             
             if (isWorkSession) ...[
               DropdownButtonFormField<String>(
-                value: _selectedCategoryId,
+                initialValue: _selectedCategoryId,
                 decoration: InputDecoration(
                   labelText: context.tr('common.category'),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -312,7 +310,7 @@ class _SessionDetailsModalState extends State<SessionDetailsModal> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedTaskId,
+                initialValue: _selectedTaskId,
                 decoration: InputDecoration(
                   labelText: context.tr('common.task'),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

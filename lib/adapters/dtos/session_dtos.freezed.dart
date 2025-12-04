@@ -651,18 +651,12 @@ UpdateFocusSessionDto _$UpdateFocusSessionDtoFromJson(
 
 /// @nodoc
 mixin _$UpdateFocusSessionDto {
-  @JsonKey(includeIfNull: true)
   String? get categoryId => throw _privateConstructorUsedError;
-  @JsonKey(includeIfNull: true)
   String? get taskId => throw _privateConstructorUsedError;
-  @JsonKey(includeIfNull: true)
   String? get notes => throw _privateConstructorUsedError;
-  @JsonKey(includeIfNull: true)
   int? get concentrationScore => throw _privateConstructorUsedError;
   int? get startedAt => throw _privateConstructorUsedError;
-  @JsonKey(includeIfNull: true)
   int? get endedAt => throw _privateConstructorUsedError;
-  @JsonKey(includeIfNull: true)
   int? get actualDuration => throw _privateConstructorUsedError;
   String? get sessionType => throw _privateConstructorUsedError;
 
@@ -684,13 +678,13 @@ abstract class $UpdateFocusSessionDtoCopyWith<$Res> {
   ) = _$UpdateFocusSessionDtoCopyWithImpl<$Res, UpdateFocusSessionDto>;
   @useResult
   $Res call({
-    @JsonKey(includeIfNull: true) String? categoryId,
-    @JsonKey(includeIfNull: true) String? taskId,
-    @JsonKey(includeIfNull: true) String? notes,
-    @JsonKey(includeIfNull: true) int? concentrationScore,
+    String? categoryId,
+    String? taskId,
+    String? notes,
+    int? concentrationScore,
     int? startedAt,
-    @JsonKey(includeIfNull: true) int? endedAt,
-    @JsonKey(includeIfNull: true) int? actualDuration,
+    int? endedAt,
+    int? actualDuration,
     String? sessionType,
   });
 }
@@ -780,13 +774,13 @@ abstract class _$$UpdateFocusSessionDtoImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(includeIfNull: true) String? categoryId,
-    @JsonKey(includeIfNull: true) String? taskId,
-    @JsonKey(includeIfNull: true) String? notes,
-    @JsonKey(includeIfNull: true) int? concentrationScore,
+    String? categoryId,
+    String? taskId,
+    String? notes,
+    int? concentrationScore,
     int? startedAt,
-    @JsonKey(includeIfNull: true) int? endedAt,
-    @JsonKey(includeIfNull: true) int? actualDuration,
+    int? endedAt,
+    int? actualDuration,
     String? sessionType,
   });
 }
@@ -866,13 +860,13 @@ class __$$UpdateFocusSessionDtoImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UpdateFocusSessionDtoImpl implements _UpdateFocusSessionDto {
   const _$UpdateFocusSessionDtoImpl({
-    @JsonKey(includeIfNull: true) this.categoryId,
-    @JsonKey(includeIfNull: true) this.taskId,
-    @JsonKey(includeIfNull: true) this.notes,
-    @JsonKey(includeIfNull: true) this.concentrationScore,
+    this.categoryId,
+    this.taskId,
+    this.notes,
+    this.concentrationScore,
     this.startedAt,
-    @JsonKey(includeIfNull: true) this.endedAt,
-    @JsonKey(includeIfNull: true) this.actualDuration,
+    this.endedAt,
+    this.actualDuration,
     this.sessionType,
   });
 
@@ -880,24 +874,18 @@ class _$UpdateFocusSessionDtoImpl implements _UpdateFocusSessionDto {
       _$$UpdateFocusSessionDtoImplFromJson(json);
 
   @override
-  @JsonKey(includeIfNull: true)
   final String? categoryId;
   @override
-  @JsonKey(includeIfNull: true)
   final String? taskId;
   @override
-  @JsonKey(includeIfNull: true)
   final String? notes;
   @override
-  @JsonKey(includeIfNull: true)
   final int? concentrationScore;
   @override
   final int? startedAt;
   @override
-  @JsonKey(includeIfNull: true)
   final int? endedAt;
   @override
-  @JsonKey(includeIfNull: true)
   final int? actualDuration;
   @override
   final String? sessionType;
@@ -961,13 +949,13 @@ class _$UpdateFocusSessionDtoImpl implements _UpdateFocusSessionDto {
 
 abstract class _UpdateFocusSessionDto implements UpdateFocusSessionDto {
   const factory _UpdateFocusSessionDto({
-    @JsonKey(includeIfNull: true) final String? categoryId,
-    @JsonKey(includeIfNull: true) final String? taskId,
-    @JsonKey(includeIfNull: true) final String? notes,
-    @JsonKey(includeIfNull: true) final int? concentrationScore,
+    final String? categoryId,
+    final String? taskId,
+    final String? notes,
+    final int? concentrationScore,
     final int? startedAt,
-    @JsonKey(includeIfNull: true) final int? endedAt,
-    @JsonKey(includeIfNull: true) final int? actualDuration,
+    final int? endedAt,
+    final int? actualDuration,
     final String? sessionType,
   }) = _$UpdateFocusSessionDtoImpl;
 
@@ -975,24 +963,18 @@ abstract class _UpdateFocusSessionDto implements UpdateFocusSessionDto {
       _$UpdateFocusSessionDtoImpl.fromJson;
 
   @override
-  @JsonKey(includeIfNull: true)
   String? get categoryId;
   @override
-  @JsonKey(includeIfNull: true)
   String? get taskId;
   @override
-  @JsonKey(includeIfNull: true)
   String? get notes;
   @override
-  @JsonKey(includeIfNull: true)
   int? get concentrationScore;
   @override
   int? get startedAt;
   @override
-  @JsonKey(includeIfNull: true)
   int? get endedAt;
   @override
-  @JsonKey(includeIfNull: true)
   int? get actualDuration;
   @override
   String? get sessionType;
