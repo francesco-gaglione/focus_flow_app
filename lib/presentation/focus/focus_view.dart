@@ -91,6 +91,11 @@ class FocusViewState extends State<FocusView> with WidgetsBindingObserver {
     context.read<FocusBloc>().add(TerminateFocus());
   }
 
+  void _refreshSessions() {
+    logger.d('Refreshing sessions');
+    context.read<FocusBloc>().add(ReloadTodaySessions());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -222,6 +227,7 @@ class FocusViewState extends State<FocusView> with WidgetsBindingObserver {
               sessions: state.todaySessions,
               categories: state.categories,
               orphanTasks: state.orphanTasks,
+              onSessionUpdated: _refreshSessions,
             );
 
             final focusTimerWidget = FocusTimerWidget(

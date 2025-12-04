@@ -46,6 +46,23 @@ class GetSessionFiltersDto with _$GetSessionFiltersDto {
       sessionType != null ? SessionType.fromString(sessionType!) : null;
 }
 
+@freezed
+class UpdateFocusSessionDto with _$UpdateFocusSessionDto {
+  const factory UpdateFocusSessionDto({
+    String? categoryId,
+    String? taskId,
+    String? notes,
+    int? concentrationScore,
+    int? startedAt,
+    int? endedAt,
+    int? actualDuration,
+    String? sessionType,
+  }) = _UpdateFocusSessionDto;
+
+  factory UpdateFocusSessionDto.fromJson(Map<String, dynamic> json) =>
+      _$UpdateFocusSessionDtoFromJson(json);
+}
+
 // Response DTOs
 
 @freezed

@@ -10,12 +10,14 @@ class FocusTimelineWidget extends StatefulWidget {
   final List<FocusSession> sessions;
   final List<CategoryWithTasks> categories;
   final List<Task> orphanTasks;
+  final VoidCallback? onSessionUpdated;
 
   const FocusTimelineWidget({
     super.key,
     this.sessions = const [],
     this.categories = const [],
     this.orphanTasks = const [],
+    this.onSessionUpdated,
   });
 
   @override
@@ -361,6 +363,9 @@ class _FocusTimelineWidgetState extends State<FocusTimelineWidget> {
                                         session: session,
                                         category: category,
                                         task: task,
+                                        categories: widget.categories,
+                                        orphanTasks: widget.orphanTasks,
+                                        onSessionUpdated: widget.onSessionUpdated,
                                       ),
                                 );
                               },
