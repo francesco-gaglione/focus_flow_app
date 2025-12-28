@@ -37,7 +37,12 @@ import '../../core/services/token_service.dart';
 import '../../adapters/repositories/http_auth_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_user.dart';
+import '../../domain/usecases/logout_user.dart';
+import '../../domain/usecases/user_usecases/get_user_info.dart';
+import '../../domain/usecases/user_usecases/update_password.dart';
+import '../../domain/usecases/user_usecases/update_username.dart';
 import '../../presentation/auth/cubit/auth_cubit.dart';
+import '../../presentation/settings/cubit/account_cubit.dart';
 import '../../presentation/app/app_router.dart';
 
 final sl = GetIt.instance;
@@ -70,8 +75,43 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
             handler.next(options);
           },
           onError: (error, handler) async {
+            if (error.type == DioExceptionType.cancel) {
+              handler.next(error);
+              return;
+            }
+            
             if (error.response?.statusCode == 401) {
-              await sl<TokenService>().clearToken();
+              final path = error.requestOptions.path;
+              // Avoid loops: don't refresh if we failed on login or refresh endpoints
+              if (path.contains('/api/auth/login') || path.contains('/api/auth/refresh')) {
+                handler.next(error);
+                return;
+              }
+
+              final refreshToken = sl<TokenService>().getRefreshToken();
+              if (refreshToken != null) {
+                try {
+                  // Attempt refresh
+                  final response = await sl<AuthRepository>().refreshToken(refreshToken);
+                  
+                  // Save new tokens
+                  await sl<TokenService>().saveToken(response.token);
+                  await sl<TokenService>().saveRefreshToken(response.refreshToken);
+
+                  // Retry the original request
+                  final options = error.requestOptions;
+                  options.headers['Authorization'] = 'Bearer ${response.token}';
+                  
+                  final cloneReq = await sl<Dio>().fetch(options);
+                  handler.resolve(cloneReq);
+                  return;
+                } catch (e) {
+                  // Refresh failed, clear session
+                  await sl<TokenService>().clearToken();
+                }
+              } else {
+                 await sl<TokenService>().clearToken();
+              }
             }
             handler.next(error);
           },
@@ -144,16 +184,43 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
     () => GetAppVersion(),
   );
   
-  // Use Cases - Auth
+  // Use Cases - Auth & User
   sl.registerLazySingleton<LoginUser>(
     () => LoginUser(sl()),
+  );
+  
+  sl.registerLazySingleton<LogoutUser>(
+    () => LogoutUser(sl()),
+  );
+  
+  sl.registerLazySingleton<UpdatePassword>(
+    () => UpdatePassword(sl()),
+  );
+
+  sl.registerLazySingleton<UpdateUsername>(
+    () => UpdateUsername(sl()),
+  );
+  
+  sl.registerLazySingleton<GetUserInfo>(
+    () => GetUserInfo(sl()),
   );
 
   // Cubits
   sl.registerFactory(() => LocaleCubit(getSavedLocale: sl(), saveLocale: sl()));
+  
+  sl.registerFactory(() => AccountCubit(
+    updatePassword: sl(), 
+    updateUsername: sl(),
+    getUserInfo: sl(),
+  ));
+
   // AuthCubit needs to be a singleton because it's used by the Router which is a singleton.
   // OR factory if we re-create router? No, router is long lived.
-  sl.registerLazySingleton(() => AuthCubit(loginUser: sl(), tokenService: sl()));
+  sl.registerLazySingleton(() => AuthCubit(
+    loginUser: sl(), 
+    logoutUser: sl(),
+    tokenService: sl(),
+  ));
     
   // Router
   sl.registerLazySingleton(() => AppRouter(sl()));

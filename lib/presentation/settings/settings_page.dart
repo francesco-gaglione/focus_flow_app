@@ -6,6 +6,9 @@ import '../app/locale_cubit.dart';
 import '../app/theme_cubit.dart';
 import '../../domain/usecases/get_app_version.dart';
 import '../../core/di/service_locator.dart';
+import 'cubit/account_cubit.dart';
+import 'cubit/account_state.dart';
+import '../auth/cubit/auth_cubit.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -121,13 +124,15 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+           _buildAccountSection(context),
+          const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                   Row(
                     children: [
                       Icon(
                         Icons.info_outline,
@@ -161,6 +166,153 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAccountSection(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<AccountCubit>()..loadUserInfo(),
+      child: BlocConsumer<AccountCubit, AccountState>(
+        listener: (context, state) {
+          if (state is AccountSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          } else if (state is AccountError) {
+             ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (context, state) {
+           String? currentUsername;
+           if (state is AccountLoaded) {
+               currentUsername = state.userInfo.username;
+           }
+
+           return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_circle_outlined,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Account${currentUsername != null ? ' ($currentUsername)' : ''}',
+                         // TODO: Add to translations context.tr('settings.account'),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (state is AccountLoading && currentUsername == null)
+                    const Center(child: CircularProgressIndicator())
+                  else ...[
+                    ListTile(
+                        title: const Text('Change Username'), // TODO: Translate
+                        leading: const Icon(Icons.person),
+                        onTap: state is AccountLoading ? null : () => _showChangeUsernameDialog(context, currentUsername),
+                    ),
+                    ListTile(
+                        title: const Text('Change Password'), // TODO: Translate
+                        leading: const Icon(Icons.lock),
+                        onTap: state is AccountLoading ? null : () => _showChangePasswordDialog(context),
+                    ),
+                    const Divider(),
+                    ListTile(
+                        title: const Text('Logout', style: TextStyle(color: Colors.red)), // TODO: Translate
+                        leading: const Icon(Icons.logout, color: Colors.red),
+                        onTap: () {
+                             context.read<AuthCubit>().logout();
+                             // Router will handle redirect
+                        },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showChangeUsernameDialog(BuildContext context, String? currentUsername) async {
+    final controller = TextEditingController(text: currentUsername);
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<AccountCubit>(),
+        child: AlertDialog(
+          title: const Text('Change Username'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(labelText: 'New Username'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                 context.read<AccountCubit>().changeUsername(controller.text);
+                 Navigator.pop(dialogContext);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+     final oldPassController = TextEditingController();
+     final newPassController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<AccountCubit>(),
+        child: AlertDialog(
+          title: const Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               TextField(
+                controller: oldPassController,
+                decoration: const InputDecoration(labelText: 'Old Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: newPassController,
+                 decoration: const InputDecoration(labelText: 'New Password'),
+                 obscureText: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+             TextButton(
+              onPressed: () {
+                 context.read<AccountCubit>().changePassword(oldPassController.text, newPassController.text);
+                 Navigator.pop(dialogContext);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }
