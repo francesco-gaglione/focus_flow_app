@@ -22,6 +22,7 @@ import 'package:focus_flow_app/domain/usecases/tasks_usecases/delete_tasks.dart'
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/update_task.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../adapters/theme/user_settings_theme_repository.dart';
 import '../../domain/repositories/theme_repository.dart';
@@ -32,19 +33,52 @@ import '../../domain/usecases/save_locale.dart';
 import '../../domain/usecases/toggle_theme.dart';
 import '../../domain/usecases/update_accent_color.dart';
 import '../../presentation/app/locale_cubit.dart';
+import '../../core/services/token_service.dart';
+import '../../adapters/repositories/http_auth_repository.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/login_user.dart';
+import '../../presentation/auth/cubit/auth_cubit.dart';
+import '../../presentation/app/app_router.dart';
 
 final sl = GetIt.instance;
 
 Future<void> setupDependencies(String baseUrl, String wsUrl) async {
+  // External
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(sharedPreferences);
+
+  // Core Services
+  sl.registerLazySingleton<TokenService>(() => TokenService(sl()));
+
   // Dio
   sl.registerLazySingleton<Dio>(
-    () => Dio(
-      BaseOptions(
-        baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 15),
-      ),
-    ),
+    () {
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            final token = sl<TokenService>().getToken();
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+            handler.next(options);
+          },
+          onError: (error, handler) async {
+            if (error.response?.statusCode == 401) {
+              await sl<TokenService>().clearToken();
+            }
+            handler.next(error);
+          },
+        ),
+      );
+      return dio;
+    },
   );
 
   // Repositories - User Settings
@@ -73,11 +107,15 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<StatisticsRepository>(
     () => HttpStatisticsRepository(dio: sl(), baseUrl: baseUrl),
   );
+  
+  sl.registerLazySingleton<AuthRepository>(
+    () => HttpAuthRepository(dio: sl(), baseUrl: baseUrl),
+  );
 
   // Repositories - WebSocket
   sl.registerLazySingleton<WebsocketRepository>(
     //TODO read ws url from config
-    () => WebsocketRepository(wsUrl),
+    () => WebsocketRepository(wsUrl, sl()),
   );
 
   // Use Cases - Theme
@@ -105,9 +143,20 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<GetAppVersion>(
     () => GetAppVersion(),
   );
+  
+  // Use Cases - Auth
+  sl.registerLazySingleton<LoginUser>(
+    () => LoginUser(sl()),
+  );
 
   // Cubits
   sl.registerFactory(() => LocaleCubit(getSavedLocale: sl(), saveLocale: sl()));
+  // AuthCubit needs to be a singleton because it's used by the Router which is a singleton.
+  // OR factory if we re-create router? No, router is long lived.
+  sl.registerLazySingleton(() => AuthCubit(loginUser: sl(), tokenService: sl()));
+    
+  // Router
+  sl.registerLazySingleton(() => AppRouter(sl()));
 
   // Use Cases - Category
   sl.registerLazySingleton<GetCategoriesAndTasks>(
@@ -160,11 +209,4 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<CalculateStatsByPeriod>(
     () => CalculateStatsByPeriod(statisticsRepository: sl()),
   );
-
-  // Bloc/Cubit can be registered here as a factory:
-  // sl.registerFactory(() => CounterBloc(
-  //   getCounter: sl(),
-  //   incrementCounter: sl(),
-  //   decrementCounter: sl(),
-  // ));
 }

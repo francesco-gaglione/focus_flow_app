@@ -1,16 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../core/di/service_locator.dart';
 import '../../core/theme/app_theme.dart';
-import '../focus/focus_page.dart';
-import '../category/category_page.dart';
-import '../statistics/statistics_page.dart';
-import '../settings/settings_page.dart';
 import 'locale_cubit.dart';
-import 'main_layout.dart';
 import 'theme_cubit.dart';
+import 'app_router.dart';
 
 class AppView extends StatelessWidget {
   const AppView({super.key});
@@ -32,7 +28,7 @@ class AppView extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            routerConfig: _router,
+            routerConfig: sl<AppRouter>().router,
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
@@ -42,29 +38,3 @@ class AppView extends StatelessWidget {
     );
   }
 }
-
-final _router = GoRouter(
-  initialLocation: '/focus',
-  routes: [
-    ShellRoute(
-      builder: (context, state, child) {
-        return MainLayout(currentPath: state.uri.path, child: child);
-      },
-      routes: [
-        GoRoute(path: '/focus', builder: (context, state) => const FocusPage()),
-        GoRoute(
-          path: '/categories',
-          builder: (context, state) => const CategoryPage(),
-        ),
-        GoRoute(
-          path: '/stats',
-          builder: (context, state) => const StatisticsPage(),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsPage(),
-        ),
-      ],
-    ),
-  ],
-);

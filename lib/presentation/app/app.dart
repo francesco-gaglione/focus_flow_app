@@ -8,6 +8,7 @@ import '../../domain/usecases/update_accent_color.dart';
 import 'app_view.dart';
 import 'locale_cubit.dart';
 import 'theme_cubit.dart';
+import '../auth/cubit/auth_cubit.dart';
 
 class App extends StatelessWidget {
   final GetThemeSettings getThemeSettings;
@@ -32,7 +33,10 @@ class App extends StatelessWidget {
           )..loadTheme(),
       child: BlocProvider(
         create: (_) => sl<LocaleCubit>()..loadLocale(),
-        child: const AppView(),
+        child: BlocProvider(
+          create: (_) => sl<AuthCubit>()..checkAuthStatus(),
+          child: const AppView(),
+        ),
       ),
     );
   }

@@ -21,10 +21,10 @@ class HttpTaskRepository implements TaskRepository {
   Future<List<Task>> getAllTasks() async {
     try {
       if (kDebugMode) {
-        _logger.d('GET $baseUrl/api/tasks');
+        _logger.d('GET $baseUrl/api/task');
       }
 
-      final response = await _dio.get('$baseUrl/api/tasks');
+      final response = await _dio.get('$baseUrl/api/task');
 
       if (kDebugMode) {
         _logger.d(
@@ -60,38 +60,17 @@ class HttpTaskRepository implements TaskRepository {
   @override
   Future<Task?> getTaskById(String id) async {
     try {
-      if (kDebugMode) {
-        _logger.d('GET $baseUrl/api/tasks/$id');
-      }
-
-      final response = await _dio.get('$baseUrl/api/tasks/$id');
-      final json = response.data;
-
-      if (kDebugMode) {
-        _logger.d('Response ${response.statusCode}: task ${json['name']}');
-      }
-
-      return Task(
-        id: json['id'],
-        name: json['name'],
-        description: json['description'],
-        categoryId: json['categoryId'],
-        scheduledDate: json['scheduledDate'],
-        completedAt: json['completedAt'],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-    } on DioException catch (e, stackTrace) {
-      if (e.response?.statusCode == 404) {
-        _logger.w('Task not found: $id');
-        return null;
-      }
+      // Fetching all tasks using singular path to filter locally
+      final tasks = await getAllTasks(); 
+      return tasks.where((t) => t.id == id).firstOrNull;
+      
+    } catch (e, stackTrace) {
       _logger.e(
         'Failed getTaskById: $id',
         error: e,
         stackTrace: kDebugMode ? stackTrace : null,
       );
-      rethrow;
+      return null;
     }
   }
 
@@ -99,10 +78,10 @@ class HttpTaskRepository implements TaskRepository {
   Future<List<Task>> getOrphanTasks() async {
     try {
       if (kDebugMode) {
-        _logger.d('GET $baseUrl/api/tasks/orphans');
+        _logger.d('GET $baseUrl/api/task/orphans');
       }
 
-      final response = await _dio.get('$baseUrl/api/tasks/orphans');
+      final response = await _dio.get('$baseUrl/api/task/orphans');
       final dto = OrphanTasksResponseDto.fromJson(response.data);
 
       if (kDebugMode) {
@@ -151,11 +130,11 @@ class HttpTaskRepository implements TaskRepository {
       );
 
       if (kDebugMode) {
-        _logger.d('POST $baseUrl/api/tasks - name: $name');
+        _logger.d('POST $baseUrl/api/task - name: $name');
       }
 
       final response = await _dio.post(
-        '$baseUrl/api/tasks',
+        '$baseUrl/api/task',
         data: dto.toJson(),
       );
       final responseDto = CreateTaskResponseDto.fromJson(response.data);
@@ -205,11 +184,11 @@ class HttpTaskRepository implements TaskRepository {
       );
 
       if (kDebugMode) {
-        _logger.d('PUT $baseUrl/api/tasks/$id');
+        _logger.d('PUT $baseUrl/api/task/$id');
       }
 
       final response = await _dio.put(
-        '$baseUrl/api/tasks/$id',
+        '$baseUrl/api/task/$id',
         data: dto.toJson(),
       );
       final updated = UpdateTaskResponseDto.fromJson(response.data);
@@ -244,11 +223,11 @@ class HttpTaskRepository implements TaskRepository {
       final dto = DeleteTasksDto(taskIds: taskIds);
 
       if (kDebugMode) {
-        _logger.d('DELETE $baseUrl/api/tasks - count: ${taskIds.length}');
+        _logger.d('DELETE $baseUrl/api/task - count: ${taskIds.length}');
       }
 
       final response = await _dio.delete(
-        '$baseUrl/api/tasks',
+        '$baseUrl/api/task',
         data: dto.toJson(),
       );
       final responseDto = DeleteTasksResponseDto.fromJson(response.data);
