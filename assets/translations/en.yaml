@@ -98,6 +98,19 @@ settings:
   version: Version
   app_name: Focus Flow
   app_description: Pomodoro Timer & Task Manager
+  account: Account
+  change_username: Change Username
+  change_password: Change Password
+  create_user: Create User
+  logout: Logout
+  new_username: New Username
+  old_password: Old Password
+  new_password: New Password
+  cancel: Cancel
+  save: Save
+  create: Create
+  username: Username
+  password: Password
 
 # Statistics Section
 statistics:

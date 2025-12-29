@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 
 import '../app/locale_cubit.dart';
 import '../app/theme_cubit.dart';
@@ -211,8 +210,7 @@ class SettingsPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Account${currentUsername != null ? ' ($currentUsername)' : ''}',
-                        // TODO: Add to translations context.tr('settings.account'),
+                        '${context.tr('settings.account')}${currentUsername != null ? ' ($currentUsername)' : ''}',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -222,7 +220,7 @@ class SettingsPage extends StatelessWidget {
                     const Center(child: CircularProgressIndicator())
                   else ...[
                     ListTile(
-                      title: const Text('Change Username'), // TODO: Translate
+                      title: Text(context.tr('settings.change_username')),
                       leading: const Icon(Icons.person),
                       onTap:
                           state is AccountLoading
@@ -233,7 +231,7 @@ class SettingsPage extends StatelessWidget {
                               ),
                     ),
                     ListTile(
-                      title: const Text('Change Password'), // TODO: Translate
+                      title: Text(context.tr('settings.change_password')),
                       leading: const Icon(Icons.lock),
                       onTap:
                           state is AccountLoading
@@ -242,7 +240,7 @@ class SettingsPage extends StatelessWidget {
                     ),
                     if (isAdmin)
                       ListTile(
-                        title: const Text('Create User'), // TODO: Translate
+                        title: Text(context.tr('settings.create_user')),
                         leading: const Icon(Icons.person_add),
                         onTap:
                             state is AccountLoading
@@ -251,10 +249,10 @@ class SettingsPage extends StatelessWidget {
                       ),
                     const Divider(),
                     ListTile(
-                      title: const Text(
-                        'Logout',
-                        style: TextStyle(color: Colors.red),
-                      ), // TODO: Translate
+                      title: Text(
+                        context.tr('settings.logout'),
+                        style: const TextStyle(color: Colors.red),
+                      ),
                       leading: const Icon(Icons.logout, color: Colors.red),
                       onTap: () {
                         context.read<AuthCubit>().logout();
@@ -281,17 +279,21 @@ class SettingsPage extends StatelessWidget {
           (dialogContext) => BlocProvider.value(
             value: context.read<AccountCubit>(),
             child: AlertDialog(
-              title: const Text('Create User'),
+              title: Text(context.tr('settings.create_user')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: usernameController,
-                    decoration: const InputDecoration(labelText: 'Username'),
+                    decoration: InputDecoration(
+                      labelText: context.tr('settings.username'),
+                    ),
                   ),
                   TextField(
                     controller: passwordController,
-                    decoration: const InputDecoration(labelText: 'Password'),
+                    decoration: InputDecoration(
+                      labelText: context.tr('settings.password'),
+                    ),
                     obscureText: true,
                   ),
                 ],
@@ -299,7 +301,7 @@ class SettingsPage extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(context.tr('settings.cancel')),
                 ),
                 TextButton(
                   onPressed: () {
@@ -309,7 +311,7 @@ class SettingsPage extends StatelessWidget {
                     );
                     Navigator.pop(dialogContext);
                   },
-                  child: const Text('Create'),
+                  child: Text(context.tr('settings.create')),
                 ),
               ],
             ),
@@ -328,15 +330,17 @@ class SettingsPage extends StatelessWidget {
           (dialogContext) => BlocProvider.value(
             value: context.read<AccountCubit>(),
             child: AlertDialog(
-              title: const Text('Change Username'),
+              title: Text(context.tr('settings.change_username')),
               content: TextField(
                 controller: controller,
-                decoration: const InputDecoration(labelText: 'New Username'),
+                decoration: InputDecoration(
+                  labelText: context.tr('settings.new_username'),
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(context.tr('settings.cancel')),
                 ),
                 TextButton(
                   onPressed: () {
@@ -345,7 +349,7 @@ class SettingsPage extends StatelessWidget {
                     );
                     Navigator.pop(dialogContext);
                   },
-                  child: const Text('Save'),
+                  child: Text(context.tr('settings.save')),
                 ),
               ],
             ),
@@ -363,21 +367,21 @@ class SettingsPage extends StatelessWidget {
           (dialogContext) => BlocProvider.value(
             value: context.read<AccountCubit>(),
             child: AlertDialog(
-              title: const Text('Change Password'),
+              title: Text(context.tr('settings.change_password')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: oldPassController,
-                    decoration: const InputDecoration(
-                      labelText: 'Old Password',
+                    decoration: InputDecoration(
+                      labelText: context.tr('settings.old_password'),
                     ),
                     obscureText: true,
                   ),
                   TextField(
                     controller: newPassController,
-                    decoration: const InputDecoration(
-                      labelText: 'New Password',
+                    decoration: InputDecoration(
+                      labelText: context.tr('settings.new_password'),
                     ),
                     obscureText: true,
                   ),
@@ -386,7 +390,7 @@ class SettingsPage extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(context.tr('settings.cancel')),
                 ),
                 TextButton(
                   onPressed: () {
@@ -396,7 +400,7 @@ class SettingsPage extends StatelessWidget {
                     );
                     Navigator.pop(dialogContext);
                   },
-                  child: const Text('Save'),
+                  child: Text(context.tr('settings.save')),
                 ),
               ],
             ),
