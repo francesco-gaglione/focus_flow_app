@@ -41,6 +41,7 @@ import '../../domain/usecases/logout_user.dart';
 import '../../domain/usecases/user_usecases/get_user_info.dart';
 import '../../domain/usecases/user_usecases/update_password.dart';
 import '../../domain/usecases/user_usecases/update_username.dart';
+import '../../domain/usecases/user_usecases/create_user.dart';
 import '../../presentation/auth/cubit/auth_cubit.dart';
 import '../../presentation/settings/cubit/account_cubit.dart';
 import '../../presentation/app/app_router.dart';
@@ -56,70 +57,73 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<TokenService>(() => TokenService(sl()));
 
   // Dio
-  sl.registerLazySingleton<Dio>(
-    () {
-      final dio = Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 15),
-        ),
-      );
-      dio.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) {
-            final token = sl<TokenService>().getToken();
-            if (token != null) {
-              options.headers['Authorization'] = 'Bearer $token';
-            }
-            handler.next(options);
-          },
-          onError: (error, handler) async {
-            if (error.type == DioExceptionType.cancel) {
+  sl.registerLazySingleton<Dio>(() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 15),
+      ),
+    );
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final token = sl<TokenService>().getToken();
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          handler.next(options);
+        },
+        onError: (error, handler) async {
+          if (error.type == DioExceptionType.cancel) {
+            handler.next(error);
+            return;
+          }
+
+          if (error.response?.statusCode == 401) {
+            final path = error.requestOptions.path;
+            // Avoid loops: don't refresh if we failed on login or refresh endpoints
+            if (path.contains('/api/auth/login') ||
+                path.contains('/api/auth/refresh')) {
               handler.next(error);
               return;
             }
-            
-            if (error.response?.statusCode == 401) {
-              final path = error.requestOptions.path;
-              // Avoid loops: don't refresh if we failed on login or refresh endpoints
-              if (path.contains('/api/auth/login') || path.contains('/api/auth/refresh')) {
-                handler.next(error);
+
+            final refreshToken = sl<TokenService>().getRefreshToken();
+            if (refreshToken != null) {
+              try {
+                // Attempt refresh
+                final response = await sl<AuthRepository>().refreshToken(
+                  refreshToken,
+                );
+
+                // Save new tokens
+                await sl<TokenService>().saveToken(response.token);
+                await sl<TokenService>().saveRefreshToken(
+                  response.refreshToken,
+                );
+
+                // Retry the original request
+                final options = error.requestOptions;
+                options.headers['Authorization'] = 'Bearer ${response.token}';
+
+                final cloneReq = await sl<Dio>().fetch(options);
+                handler.resolve(cloneReq);
                 return;
+              } catch (e) {
+                // Refresh failed, clear session
+                await sl<TokenService>().clearToken();
               }
-
-              final refreshToken = sl<TokenService>().getRefreshToken();
-              if (refreshToken != null) {
-                try {
-                  // Attempt refresh
-                  final response = await sl<AuthRepository>().refreshToken(refreshToken);
-                  
-                  // Save new tokens
-                  await sl<TokenService>().saveToken(response.token);
-                  await sl<TokenService>().saveRefreshToken(response.refreshToken);
-
-                  // Retry the original request
-                  final options = error.requestOptions;
-                  options.headers['Authorization'] = 'Bearer ${response.token}';
-                  
-                  final cloneReq = await sl<Dio>().fetch(options);
-                  handler.resolve(cloneReq);
-                  return;
-                } catch (e) {
-                  // Refresh failed, clear session
-                  await sl<TokenService>().clearToken();
-                }
-              } else {
-                 await sl<TokenService>().clearToken();
-              }
+            } else {
+              await sl<TokenService>().clearToken();
             }
-            handler.next(error);
-          },
-        ),
-      );
-      return dio;
-    },
-  );
+          }
+          handler.next(error);
+        },
+      ),
+    );
+    return dio;
+  });
 
   // Repositories - User Settings
   sl.registerLazySingleton<UserSettingsRepository>(
@@ -147,7 +151,7 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
   sl.registerLazySingleton<StatisticsRepository>(
     () => HttpStatisticsRepository(dio: sl(), baseUrl: baseUrl),
   );
-  
+
   sl.registerLazySingleton<AuthRepository>(
     () => HttpAuthRepository(dio: sl(), baseUrl: baseUrl),
   );
@@ -180,48 +184,39 @@ Future<void> setupDependencies(String baseUrl, String wsUrl) async {
     () => SaveLocale(sl<UserSettingsRepository>()),
   );
 
-  sl.registerLazySingleton<GetAppVersion>(
-    () => GetAppVersion(),
-  );
-  
-  // Use Cases - Auth & User
-  sl.registerLazySingleton<LoginUser>(
-    () => LoginUser(sl()),
-  );
-  
-  sl.registerLazySingleton<LogoutUser>(
-    () => LogoutUser(sl()),
-  );
-  
-  sl.registerLazySingleton<UpdatePassword>(
-    () => UpdatePassword(sl()),
-  );
+  sl.registerLazySingleton<GetAppVersion>(() => GetAppVersion());
 
-  sl.registerLazySingleton<UpdateUsername>(
-    () => UpdateUsername(sl()),
-  );
-  
-  sl.registerLazySingleton<GetUserInfo>(
-    () => GetUserInfo(sl()),
-  );
+  // Use Cases - Auth & User
+  sl.registerLazySingleton<LoginUser>(() => LoginUser(sl()));
+
+  sl.registerLazySingleton<LogoutUser>(() => LogoutUser(sl()));
+
+  sl.registerLazySingleton<UpdatePassword>(() => UpdatePassword(sl()));
+
+  sl.registerLazySingleton<UpdateUsername>(() => UpdateUsername(sl()));
+
+  sl.registerLazySingleton<GetUserInfo>(() => GetUserInfo(sl()));
+
+  sl.registerLazySingleton<CreateUser>(() => CreateUser(sl()));
 
   // Cubits
   sl.registerFactory(() => LocaleCubit(getSavedLocale: sl(), saveLocale: sl()));
-  
-  sl.registerFactory(() => AccountCubit(
-    updatePassword: sl(), 
-    updateUsername: sl(),
-    getUserInfo: sl(),
-  ));
+
+  sl.registerFactory(
+    () => AccountCubit(
+      updatePassword: sl(),
+      updateUsername: sl(),
+      getUserInfo: sl(),
+      createUserUseCase: sl(),
+    ),
+  );
 
   // AuthCubit needs to be a singleton because it's used by the Router which is a singleton.
   // OR factory if we re-create router? No, router is long lived.
-  sl.registerLazySingleton(() => AuthCubit(
-    loginUser: sl(), 
-    logoutUser: sl(),
-    tokenService: sl(),
-  ));
-    
+  sl.registerLazySingleton(
+    () => AuthCubit(loginUser: sl(), logoutUser: sl(), tokenService: sl()),
+  );
+
   // Router
   sl.registerLazySingleton(() => AppRouter(sl()));
 

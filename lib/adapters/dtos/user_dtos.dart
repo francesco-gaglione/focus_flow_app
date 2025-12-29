@@ -15,9 +15,7 @@ class UpdateUsernameDto {
 
   UpdateUsernameDto({required this.newUsername});
 
-  Map<String, dynamic> toJson() => {
-    'new_username': newUsername,
-  };
+  Map<String, dynamic> toJson() => {'new_username': newUsername};
 }
 
 class UserInfoResponseDto {
@@ -38,4 +36,13 @@ class UserInfoResponseDto {
       role: json['role'] as String,
     );
   }
+}
+
+class CreateUserDto {
+  final String username;
+  final String password;
+
+  CreateUserDto({required this.username, required this.password});
+
+  Map<String, dynamic> toJson() => {'username': username, 'password': password};
 }

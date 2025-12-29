@@ -12,20 +12,29 @@ class HttpAuthRepository implements AuthRepository {
   @override
   Future<LoginResponseDto> login(String username, String password) async {
     final dto = LoginDto(username: username, password: password);
-    final response = await _dio.post('$baseUrl/api/auth/login', data: dto.toJson());
+    final response = await _dio.post(
+      '$baseUrl/api/auth/login',
+      data: dto.toJson(),
+    );
     return LoginResponseDto.fromJson(response.data);
   }
 
   @override
   Future<RefreshResponseDto> refreshToken(String refreshToken) async {
     final dto = RefreshDto(refreshToken: refreshToken);
-    final response = await _dio.post('$baseUrl/api/auth/refresh', data: dto.toJson());
+    final response = await _dio.post(
+      '$baseUrl/api/auth/refresh',
+      data: dto.toJson(),
+    );
     return RefreshResponseDto.fromJson(response.data);
   }
 
   @override
   Future<void> updatePassword(String oldPassword, String newPassword) async {
-    final dto = UpdatePasswordDto(oldPassword: oldPassword, newPassword: newPassword);
+    final dto = UpdatePasswordDto(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
     await _dio.put('$baseUrl/api/users/password', data: dto.toJson());
   }
 
@@ -33,6 +42,12 @@ class HttpAuthRepository implements AuthRepository {
   Future<void> updateUsername(String newUsername) async {
     final dto = UpdateUsernameDto(newUsername: newUsername);
     await _dio.put('$baseUrl/api/users/username', data: dto.toJson());
+  }
+
+  @override
+  Future<void> createUser(String username, String password) async {
+    final dto = CreateUserDto(username: username, password: password);
+    await _dio.post('$baseUrl/api/users', data: dto.toJson());
   }
 
   @override
