@@ -35,9 +35,6 @@ RUN flutter pub get
 # Copy the rest of the source code
 COPY --chown=appuser:appuser . .
 
-# Create a dummy .env file to satisfy the asset requirement
-RUN touch .env
-
 # Pass build arguments
 ARG BASE_URL
 ARG WS_URL
@@ -48,11 +45,18 @@ RUN flutter build web --release --dart-define=BASE_URL=${BASE_URL} --dart-define
 # Stage 2: Create the final production image with Nginx
 FROM nginx:alpine
 
+# Install necessary tools if needed (alpine normally has sed)
+# RUN apk add --no-cache gettext
+
 # Copy the built web app from the builder stage
 COPY --from=builder /app/build/web /usr/share/nginx/html
 
 # Copy the custom Nginx configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy entrypoint script
+COPY entrypoint.sh /docker-entrypoint.d/99-config-subst.sh
+RUN chmod +x /docker-entrypoint.d/99-config-subst.sh
 
 # Expose port 80
 EXPOSE 80
