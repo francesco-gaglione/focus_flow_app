@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:focus_flow_app/core/services/token_service.dart';
 
 class WebsocketRepository {
@@ -13,8 +13,9 @@ class WebsocketRepository {
   final TokenService _tokenService;
   final Uuid _uuid = const Uuid();
 
-  WebSocket? _ws;
+  WebSocketChannel? _ws;
   StreamSubscription? _subscription;
+  bool _isConnected = false;
 
   // Stream controllers for different message types
   final _serverResponseController =
@@ -40,7 +41,7 @@ class WebsocketRepository {
   Future<void> connect() async {
     try {
       // If already connected, do nothing
-      if (_ws != null && _ws!.readyState == WebSocket.open) {
+      if (_ws != null && _isConnected) {
         logger.d('Already connected to $wsUrl');
         _connectionStatusController.add(true);
         return;
@@ -48,35 +49,47 @@ class WebsocketRepository {
 
       logger.d('Connecting to $wsUrl...');
       final token = _tokenService.getToken();
-      
+
       // Pass token as query parameter instead of header to avoid server 500 errors
       // during handshake if it doesn't handle headers well.
       String url = wsUrl;
       if (token != null) {
-         final separator = url.contains('?') ? '&' : '?';
-         url = '$url${separator}token=$token';
+        final separator = url.contains('?') ? '&' : '?';
+        url = '$url${separator}token=$token';
       }
 
-      _ws = await WebSocket.connect(url);
-      logger.i('Connected to $url');
+      final uri = Uri.parse(url);
+      _ws = WebSocketChannel.connect(uri);
+
+      // Since WebSocketChannel.connect doesn't await the connection, we assume it's connecting.
+      // The stream listen will handle errors and close events.
+      logger.i('Connecting to $url');
+      _isConnected = true;
       _connectionStatusController.add(true);
 
       // Start listening to incoming messages
-      _subscription = _ws!.listen(
+      _subscription = _ws!.stream.listen(
         _handleMessage,
         onError: (error) {
           logger.e('WebSocket error: $error');
+          _isConnected = false;
           _connectionStatusController.add(false);
           _ws = null;
         },
         onDone: () {
           logger.w('WebSocket connection closed');
+          _isConnected = false;
           _connectionStatusController.add(false);
           _ws = null;
         },
       );
+
+      // Attempt to wait for the connection to be established or fail?
+      // WebSocketChannel doesn't expose readyState directly in a cross-platform way easily without casting.
+      // We rely on the stream.
     } catch (e) {
       logger.e('Failed to connect to $wsUrl: $e');
+      _isConnected = false;
       _connectionStatusController.add(false);
       _ws = null;
       // Don't throw, just log, so the app doesn't crash on reconnection attempts
@@ -132,7 +145,7 @@ class WebsocketRepository {
 
   /// Send a client message to the server
   void _sendMessage(ClientMessage message, {String? requestId}) {
-    if (_ws == null || _ws!.readyState != WebSocket.open) {
+    if (_ws == null) {
       logger.w('Cannot send message: WebSocket is not connected');
       _connectionStatusController.add(false);
       return;
@@ -172,7 +185,7 @@ class WebsocketRepository {
 
       final jsonString = json.encode(jsonMessage);
       logger.d('Sending message: $jsonString');
-      _ws!.add(jsonString);
+      _ws!.sink.add(jsonString);
     } catch (e) {
       logger.e('Error sending message: $e');
     }
@@ -243,7 +256,7 @@ class WebsocketRepository {
   )
   void registerListener(Function(dynamic) callback) {
     if (_ws != null) {
-      _subscription = _ws!.listen(callback);
+      _subscription = _ws!.stream.listen(callback);
     } else {
       logger.w('Cannot register listener: WebSocket is not initialized');
     }
@@ -256,7 +269,7 @@ class WebsocketRepository {
   void send(String message) {
     if (_ws != null) {
       logger.d('Sending raw message: $message');
-      _ws!.add(message);
+      _ws!.sink.add(message);
     } else {
       logger.w('Cannot send message: WebSocket is not connected');
     }
@@ -268,22 +281,16 @@ class WebsocketRepository {
 
   /// Check if WebSocket is connected
   bool isConnected() {
-    logger.d('Checking WebSocket connection...');
-    if (_ws == null) {
-      logger.d('WebSocket is null, not connected');
-      return false;
-    }
-    final connected = _ws!.readyState == WebSocket.open;
-    logger.d('WebSocket connected: $connected');
-    return connected;
+    return _isConnected;
   }
 
   /// Disconnect from the WebSocket server
   Future<void> disconnect() async {
     if (_ws != null) {
       await _subscription?.cancel();
-      await _ws!.close();
+      await _ws!.sink.close();
       _ws = null;
+      _isConnected = false;
       logger.i('Disconnected from websocket');
       _connectionStatusController.add(false);
     }
