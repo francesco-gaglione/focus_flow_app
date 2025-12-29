@@ -10,12 +10,30 @@ import 'domain/usecases/update_accent_color.dart';
 import 'presentation/app/app.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env");
+  // Load .env if available, but don't crash if it's just an empty placeholder
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Ignore error if file is missing or invalid, as we might be using dart-define
+    debugPrint("Could not load .env file: $e");
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  // Initialize the service locator with the base URL from the environment variable
-  await setupDependencies(dotenv.env["BASE_URL"]!, dotenv.env["WS_URL"]!);
+  // Prioritize dart-define (build-time) variables, fallback to dotenv (runtime/asset)
+  final baseUrl =
+      const String.fromEnvironment('BASE_URL').isNotEmpty
+          ? const String.fromEnvironment('BASE_URL')
+          : dotenv.env["BASE_URL"] ?? 'http://localhost:8080';
+
+  final wsUrl =
+      const String.fromEnvironment('WS_URL').isNotEmpty
+          ? const String.fromEnvironment('WS_URL')
+          : dotenv.env["WS_URL"] ?? 'ws://localhost:8080/ws/workspace/session';
+
+  // Initialize the service locator with the base URL
+  await setupDependencies(baseUrl, wsUrl);
 
   runApp(
     EasyLocalization(

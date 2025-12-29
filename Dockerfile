@@ -35,6 +35,9 @@ RUN flutter pub get
 # Copy the rest of the source code
 COPY --chown=appuser:appuser . .
 
+# Create a dummy .env file to satisfy the asset requirement
+RUN touch .env
+
 # Pass build arguments
 ARG BASE_URL
 ARG WS_URL
