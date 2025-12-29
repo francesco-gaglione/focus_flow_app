@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 
 import '../app/locale_cubit.dart';
 import '../app/theme_cubit.dart';
@@ -193,7 +194,7 @@ class SettingsPage extends StatelessWidget {
           bool isAdmin = false;
           if (state is AccountLoaded) {
             currentUsername = state.userInfo.username;
-            isAdmin = state.userInfo.role == 'admin';
+            isAdmin = state.userInfo.role == 'Admin';
           }
 
           return Card(
