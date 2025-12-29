@@ -21,7 +21,7 @@ class HttpUserSettingsRepository implements UserSettingsRepository {
   @override
   Future<List<UserSetting>> getUserSettings() async {
     try {
-      final response = await _dio.get('$baseUrl/api/user-settings');
+      final response = await _dio.get('$baseUrl/api/setting');
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
@@ -48,7 +48,7 @@ class HttpUserSettingsRepository implements UserSettingsRepository {
   Future<bool> updateUserSetting(UserSetting setting) async {
     try {
       final response = await _dio.patch(
-        '$baseUrl/api/user-settings',
+        '$baseUrl/api/setting',
         data: {'key': setting.key, 'value': setting.value},
       );
 

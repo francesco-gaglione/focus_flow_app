@@ -5,10 +5,12 @@ import 'dart:io';
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
+import 'package:focus_flow_app/core/services/token_service.dart';
 
 class WebsocketRepository {
   final Logger logger = Logger();
   final String wsUrl;
+  final TokenService _tokenService;
   final Uuid _uuid = const Uuid();
 
   WebSocket? _ws;
@@ -32,7 +34,7 @@ class WebsocketRepository {
       _pomodoroStateController.stream;
   Stream<bool> get connectionStatus => _connectionStatusController.stream;
 
-  WebsocketRepository(this.wsUrl);
+  WebsocketRepository(this.wsUrl, this._tokenService);
 
   /// Connect to the WebSocket server
   Future<void> connect() async {
@@ -45,8 +47,18 @@ class WebsocketRepository {
       }
 
       logger.d('Connecting to $wsUrl...');
-      _ws = await WebSocket.connect(wsUrl);
-      logger.i('Connected to $wsUrl');
+      final token = _tokenService.getToken();
+      
+      // Pass token as query parameter instead of header to avoid server 500 errors
+      // during handshake if it doesn't handle headers well.
+      String url = wsUrl;
+      if (token != null) {
+         final separator = url.contains('?') ? '&' : '?';
+         url = '$url${separator}token=$token';
+      }
+
+      _ws = await WebSocket.connect(url);
+      logger.i('Connected to $url');
       _connectionStatusController.add(true);
 
       // Start listening to incoming messages

@@ -98,6 +98,19 @@ settings:
   version: Versione
   app_name: Focus Flow
   app_description: Timer Pomodoro e Gestore Attività
+  account: Account
+  change_username: Cambia Username
+  change_password: Cambia Password
+  create_user: Crea Utente
+  logout: Logout
+  new_username: Nuovo Username
+  old_password: Vecchia Password
+  new_password: Nuova Password
+  cancel: Annulla
+  save: Salva
+  create: Crea
+  username: Username
+  password: Password
 
 # Sezione Statistiche
 statistics:

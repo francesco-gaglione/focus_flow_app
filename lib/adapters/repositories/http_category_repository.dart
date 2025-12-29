@@ -18,7 +18,7 @@ class HttpCategoryRepository implements CategoryRepository {
 
   @override
   Future<List<CategoryWithTasks>> getAllCategories() async {
-    final response = await _dio.get('$baseUrl/api/categories');
+    final response = await _dio.get('$baseUrl/api/category');
     final dto = GetCategoriesResponseDto.fromJson(response.data);
     return dto.categories.map((catDto) {
       final category = Category(
@@ -50,7 +50,7 @@ class HttpCategoryRepository implements CategoryRepository {
   Future<Category?> getCategoryById(String id) async {
     try {
       logger.d('Fetching category with ID: $id');
-      final response = await _dio.get('$baseUrl/api/categories/$id');
+      final response = await _dio.get('$baseUrl/api/category/$id');
       logger.d('Fetched category with ID: $id');
       final cat = CategoryDto.fromJson(response.data);
       logger.d('Parsed category with ID: $id');
@@ -79,7 +79,7 @@ class HttpCategoryRepository implements CategoryRepository {
       color: color,
       description: description,
     );
-    await _dio.post('$baseUrl/api/categories', data: dto.toJson());
+    await _dio.post('$baseUrl/api/category', data: dto.toJson());
     // Return created category (assuming API returns it or generate ID)
     return Category(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -104,7 +104,7 @@ class HttpCategoryRepository implements CategoryRepository {
       description: description,
     );
     final response = await _dio.put(
-      '$baseUrl/api/categories/$id',
+      '$baseUrl/api/category/$id',
       data: dto.toJson(),
     );
     final updated = UpdateCategoryResponseDto.fromJson(response.data);
@@ -121,7 +121,7 @@ class HttpCategoryRepository implements CategoryRepository {
   @override
   Future<bool> deleteCategory(String id) async {
     try {
-      await _dio.delete('$baseUrl/api/categories/$id');
+      await _dio.delete('$baseUrl/api/category/$id');
       return true;
     } catch (e) {
       return false;
