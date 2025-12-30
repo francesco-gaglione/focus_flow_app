@@ -14,7 +14,7 @@ class HttpSessionRepository implements SessionRepository {
 
   @override
   Future<List<FocusSession>> getAllSessions() async {
-    final response = await _dio.get('$baseUrl/api/focus-sessions');
+    final response = await _dio.get('$baseUrl/api/focus-session');
     final dto = GetSessionFiltersResponseDto.fromJson(response.data);
     return dto.focusSessions
         .map(
@@ -69,7 +69,7 @@ class HttpSessionRepository implements SessionRepository {
     }
 
     final response = await _dio.get(
-      '$baseUrl/api/focus-sessions',
+      '$baseUrl/api/focus-session',
       queryParameters: queryParams,
     );
     final dto = GetSessionFiltersResponseDto.fromJson(response.data);
@@ -111,7 +111,7 @@ class HttpSessionRepository implements SessionRepository {
       notes: notes,
     );
     final response = await _dio.post(
-      '$baseUrl/api/focus-sessions/manual',
+      '$baseUrl/api/focus-session/manual',
       data: dto.toJson(),
     );
     final responseDto = CreateManualSessionResponseDto.fromJson(response.data);
@@ -153,7 +153,7 @@ class HttpSessionRepository implements SessionRepository {
     );
 
     final response = await _dio.put(
-      '$baseUrl/api/focus-sessions/$id',
+      '$baseUrl/api/focus-session/$id',
       data: dto.toJson(),
     );
 
@@ -192,7 +192,7 @@ class HttpSessionRepository implements SessionRepository {
   @override
   Future<bool> deleteSession(String id) async {
     try {
-      await _dio.delete('$baseUrl/api/focus-sessions/$id');
+      await _dio.delete('$baseUrl/api/focus-session/$id');
       return true;
     } catch (e) {
       return false;
