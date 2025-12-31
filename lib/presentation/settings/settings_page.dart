@@ -9,13 +9,24 @@ import '../../core/di/service_locator.dart';
 import 'cubit/account_cubit.dart';
 import 'cubit/account_state.dart';
 import '../auth/cubit/auth_cubit.dart';
+import 'bloc/settings_bloc.dart';
+import 'bloc/settings_event.dart';
+import 'bloc/settings_state.dart';
+import '../../domain/entities/note_template.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocProvider(
+      create: (context) => sl<SettingsBloc>()..add(LoadSettings()),
+      child: Scaffold(
       appBar: AppBar(title: Text(context.tr('settings.title'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -124,6 +135,8 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          _buildNoteTemplateSection(context),
+          const SizedBox(height: 16),
           _buildAccountSection(context),
           const SizedBox(height: 16),
           Card(
@@ -166,6 +179,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -404,6 +418,163 @@ class SettingsPage extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+    );
+  }
+  Widget _buildNoteTemplateSection(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.note_alt_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      context.tr('settings.note_templates'),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _showEditTemplateDialog(context, null),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            BlocBuilder<SettingsBloc, SettingsState>(
+              builder: (context, state) {
+                if (state.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state.noteTemplates.isEmpty) {
+                   return Center(
+                     child: Text(
+                       context.tr('settings.no_templates'),
+                       style: TextStyle(fontStyle: FontStyle.italic),
+                     )
+                   );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: state.noteTemplates.length,
+                  itemBuilder: (context, index) {
+                    final template = state.noteTemplates[index];
+                    return ListTile(
+                      title: Text(template.name),
+                      subtitle: Text(
+                        template.content,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis
+                      ),
+                      leading: const Icon(Icons.notes),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _showEditTemplateDialog(context, template),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                             onPressed: () {
+                               context.read<SettingsBloc>().add(DeleteNoteTemplate(template.id));
+                             },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showEditTemplateDialog(
+    BuildContext context,
+    NoteTemplate? template,
+  ) async {
+    final nameController = TextEditingController(text: template?.name ?? '');
+    final contentController = TextEditingController(text: template?.content ?? '');
+    
+    // Capture the bloc context before showing dialog
+    final settingsBloc = context.read<SettingsBloc>();
+
+    await showDialog(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text(template == null ? context.tr('settings.add_template') : context.tr('settings.edit_template')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: context.tr('settings.template_name'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: contentController,
+                  decoration: InputDecoration(
+                    labelText: context.tr('settings.template_content'),
+                  ),
+                  maxLines: 5,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(context.tr('settings.cancel')),
+              ),
+              TextButton(
+                onPressed: () {
+                   if (nameController.text.isEmpty) return;
+
+                   if (template != null) {
+                     settingsBloc.add(
+                       EditNoteTemplate(
+                         template.copyWith(
+                           name: nameController.text,
+                           content: contentController.text,
+                         )
+                       )
+                     );
+                   } else {
+                     final newId = DateTime.now().millisecondsSinceEpoch.toString();
+                     settingsBloc.add(
+                       AddNoteTemplate(
+                         NoteTemplate(
+                           id: newId,
+                           name: nameController.text,
+                           content: contentController.text,
+                         )
+                       )
+                     );
+                   }
+                   Navigator.pop(dialogContext);
+                },
+                child: Text(context.tr('settings.save')),
+              ),
+            ],
           ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/category_with_tasks.dart';
 import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/entities/note_template.dart';
 
 class FocusState extends Equatable {
   final bool isLoading;
@@ -16,6 +17,7 @@ class FocusState extends Equatable {
   final SessionState? sessionState;
 
   final bool isWebSocketConnected;
+  final List<NoteTemplate> noteTemplates;
 
   const FocusState({
     this.isLoading = false,
@@ -27,6 +29,7 @@ class FocusState extends Equatable {
     this.sessionState,
     this.todaySessions = const [],
     this.isWebSocketConnected = false,
+    this.noteTemplates = const [],
   });
 
   FocusState copyWith({
@@ -43,6 +46,7 @@ class FocusState extends Equatable {
     bool clearSessionState = false,
     List<FocusSession>? todaySessions,
     bool? isWebSocketConnected,
+    List<NoteTemplate>? noteTemplates,
   }) {
     return FocusState(
       categories: categories ?? this.categories,
@@ -59,6 +63,7 @@ class FocusState extends Equatable {
           clearSessionState ? null : sessionState ?? this.sessionState,
       todaySessions: todaySessions ?? this.todaySessions,
       isWebSocketConnected: isWebSocketConnected ?? this.isWebSocketConnected,
+      noteTemplates: noteTemplates ?? this.noteTemplates,
     );
   }
 
@@ -73,6 +78,8 @@ class FocusState extends Equatable {
     sessionState,
     todaySessions,
     isWebSocketConnected,
+    isWebSocketConnected,
+    noteTemplates,
   ];
 }
 
