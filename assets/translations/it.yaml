@@ -9,7 +9,7 @@ common:
   close: Chiudi
   category: Categoria
   task: Attività
-  start_time: Ora di inizio 
+  start_time: Ora di inizio
   end_time: Ora di fine
 
 # Sezione Categorie
@@ -80,6 +80,7 @@ focus:
   edit_session_title: Modifica Sessione
   save_success: Sessione aggiornata con successo
   save_error: Errore durante l'aggiornamento della sessione
+  load_template: Carica Modello
 
 # Sezione Impostazioni
 settings:
@@ -111,6 +112,15 @@ settings:
   create: Crea
   username: Username
   password: Password
+
+  note_templates: Modelli Note
+  note_template_desc: Definisci un modello per le note della sessione
+  add_template: Aggiungi Modello
+  edit_template: Modifica Modello
+  template_name: Nome Modello
+  template_content: Contenuto Modello
+  template_saved: Modello salvato
+  no_templates: Nessun modello definito
 
 # Sezione Statistiche
 statistics:

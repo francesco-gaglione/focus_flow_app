@@ -221,6 +221,7 @@ class FocusViewState extends State<FocusView> with WidgetsBindingObserver {
                     ? FocusNotesWidget(
                       initialNotes: state.sessionState?.note,
                       onNotesChanged: (notes) => _onNoteChanged(context, notes),
+                      templates: state.noteTemplates,
                     )
                     : SizedBox(height: 0);
 

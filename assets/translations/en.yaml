@@ -80,6 +80,7 @@ focus:
   edit_session_title: Edit Session
   save_success: Session updated successfully
   save_error: Error updating session
+  load_template: Load Template
 
 # Settings Section
 settings:
@@ -111,6 +112,15 @@ settings:
   create: Create
   username: Username
   password: Password
+
+  note_templates: Note Templates
+  note_template_desc: Define a template for your session notes
+  add_template: Add Template
+  edit_template: Edit Template
+  template_name: Template Name
+  template_content: Template Content
+  template_saved: Template saved
+  no_templates: No templates defined
 
 # Statistics Section
 statistics:

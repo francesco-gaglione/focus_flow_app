@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
+import 'package:focus_flow_app/domain/entities/user_setting.dart';
+import 'package:focus_flow_app/domain/entities/note_template.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
 import 'package:focus_flow_app/domain/entities/focus_session.dart';
 import 'package:focus_flow_app/domain/repositories/session_repository.dart';
+import 'package:focus_flow_app/domain/repositories/user_settings_repository.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
@@ -27,6 +31,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   final WebsocketRepository _websocketRepository;
   final GetSessionsWithFilters _getSessionsWithFilters;
   final SessionRepository _sessionRepository;
+  final UserSettingsRepository _userSettingsRepository;
   StreamSubscription? _serverResponsesSubscription;
   StreamSubscription? _broadcastEventsSubscription;
   StreamSubscription? _pomodoroStateUpdatesSubscription;
@@ -38,11 +43,13 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     required WebsocketRepository websocketRepository,
     required GetSessionsWithFilters getSessionsWithFilters,
     required SessionRepository sessionRepository,
+    required UserSettingsRepository userSettingsRepository,
   }) : _getCategoriesAndTasks = getCategoriesAndTask,
        _fetchOrphanTasks = fetchOrphanTasks,
        _websocketRepository = websocketRepository,
        _getSessionsWithFilters = getSessionsWithFilters,
        _sessionRepository = sessionRepository,
+       _userSettingsRepository = userSettingsRepository,
        super(const FocusState()) {
     on<InitState>(_onInitState);
     on<CategorySelected>(_onCategorySelected);
@@ -82,10 +89,12 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
       final results = await Future.wait([
         _getCategoriesAndTasks.execute(),
         _fetchOrphanTasks.execute(),
+        _userSettingsRepository.getUserSettings(),
       ]);
 
       final categoriesResult = results[0] as GetCategoriesAndTasksResult;
       final orphanTasksResult = results[1] as FetchOrphanTasksResult;
+      final userSettings = results[2] as List<UserSetting>;
 
       if (categoriesResult.error != null || orphanTasksResult.error != null) {
         final errorMessage =
@@ -95,10 +104,25 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         return;
       }
 
+      List<NoteTemplate> noteTemplates = [];
+      try {
+        final templatesJsonString =
+            userSettings
+                .firstWhere((s) => s.key == 'note_templates')
+                .value;
+        if (templatesJsonString.isNotEmpty) {
+           final List<dynamic> jsonList = jsonDecode(templatesJsonString);
+           noteTemplates = jsonList.map((json) => NoteTemplate.fromJson(json)).toList();
+        }
+      } catch (_) {
+        // No templates found or invalid json
+      }
+
       emit(
         state.copyWith(
           categories: categoriesResult.categoriesWithTasks,
           orphanTasks: orphanTasksResult.orphanTasks ?? [],
+          noteTemplates: noteTemplates,
         ),
       );
 
@@ -356,7 +380,11 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
         note: pomodoroState.currentSession!.note,
         selectedFocusLevel: pomodoroState.currentSession!.concentrationScore,
       );
+
+
     }
+    
+    // Original ReloadTodaySessions call
     add(ReloadTodaySessions());
 
     logger.d(
