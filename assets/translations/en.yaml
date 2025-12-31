@@ -151,3 +151,15 @@ navigation:
 error:
   title: Something went wrong
   retry: Retry
+
+# Manual Session
+manual_session:
+  title: Add Manual Session
+  category: Category
+  task: Task
+  start_time: Start Time
+  end_time: End Time
+  focus_level: Focus Level
+  notes: Notes
+  error_end_time: End time cannot be before start time
+  error_category: Please select a category
