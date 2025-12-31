@@ -2,6 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+
+<p align="center">
+  <img src="assets/icon/app_icon.png" alt="Focus Flow Logo" width="150" height="150">
+</p>
+
 This is the official Flutter client for [FocusFlow Cloud](https://github.com/francesco-gaglione/focus_flow_cloud), a backend service for Pomodoro technique tracking. I built this application to manage my focus sessions and tasks across my devices, and I'm sharing it for others who might find it helpful.
 
 ## 🎯 What is Focus Flow?
