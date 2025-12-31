@@ -151,3 +151,15 @@ navigation:
 error:
   title: Qualcosa è andato storto
   retry: Riprova
+
+# Sessione Manuale
+manual_session:
+  title: Aggiungi Sessione Manuale
+  category: Categoria
+  task: Attività
+  start_time: Ora Inizio
+  end_time: Ora Fine
+  focus_level: Livello Focus
+  notes: Note
+  error_end_time: L'ora di fine non può essere prima dell'inizio
+  error_category: Seleziona una categoria

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:focus_flow_app/adapters/ws/ws_repository.dart';
 import 'package:focus_flow_app/domain/entities/category.dart';
 import 'package:focus_flow_app/domain/entities/task.dart';
+import 'package:focus_flow_app/domain/entities/focus_session.dart';
+import 'package:focus_flow_app/domain/repositories/session_repository.dart';
 import 'package:focus_flow_app/domain/usecases/categories_usecases/get_categories_and_tasks.dart';
 import 'package:focus_flow_app/domain/usecases/sessions_usecases/get_sessions_with_filters.dart';
 import 'package:focus_flow_app/domain/usecases/tasks_usecases/fetch_orphan_tasks.dart';
@@ -24,6 +26,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
   final FetchOrphanTasks _fetchOrphanTasks;
   final WebsocketRepository _websocketRepository;
   final GetSessionsWithFilters _getSessionsWithFilters;
+  final SessionRepository _sessionRepository;
   StreamSubscription? _serverResponsesSubscription;
   StreamSubscription? _broadcastEventsSubscription;
   StreamSubscription? _pomodoroStateUpdatesSubscription;
@@ -34,10 +37,12 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     required FetchOrphanTasks fetchOrphanTasks,
     required WebsocketRepository websocketRepository,
     required GetSessionsWithFilters getSessionsWithFilters,
+    required SessionRepository sessionRepository,
   }) : _getCategoriesAndTasks = getCategoriesAndTask,
        _fetchOrphanTasks = fetchOrphanTasks,
        _websocketRepository = websocketRepository,
        _getSessionsWithFilters = getSessionsWithFilters,
+       _sessionRepository = sessionRepository,
        super(const FocusState()) {
     on<InitState>(_onInitState);
     on<CategorySelected>(_onCategorySelected);
@@ -57,6 +62,7 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     );
     on<WebSocketConnectionUpdated>(_onWebSocketConnectionUpdated);
     on<CheckConnection>(_onCheckConnection);
+    on<AddManualSession>(_onAddManualSession);
   }
 
   @override
@@ -375,6 +381,28 @@ class FocusBloc extends Bloc<FocusEvent, FocusState> {
     emit(state.copyWith(isWebSocketConnected: event.isConnected));
     if (event.isConnected) {
       _websocketRepository.requestSync();
+    }
+  }
+
+  Future<void> _onAddManualSession(
+    AddManualSession event,
+    Emitter<FocusState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true));
+      await _sessionRepository.createManualSession(
+        sessionType: SessionType.work,
+        startedAt: event.startTime.millisecondsSinceEpoch ~/ 1000,
+        endedAt: event.endTime.millisecondsSinceEpoch ~/ 1000,
+        taskId: event.task?.id,
+        categoryId: event.category?.id,
+        concentrationScore: event.focusLevel,
+        notes: event.note,
+      );
+      add(ReloadTodaySessions());
+      emit(state.copyWith(isLoading: false));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
   }
 

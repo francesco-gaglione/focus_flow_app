@@ -17,6 +17,7 @@ class FocusPage extends StatelessWidget {
             fetchOrphanTasks: sl(),
             websocketRepository: sl(),
             getSessionsWithFilters: sl(),
+            sessionRepository: sl(),
           )..add(InitState()),
       child: FocusView(),
     );

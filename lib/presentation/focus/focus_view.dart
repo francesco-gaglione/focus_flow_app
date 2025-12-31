@@ -11,6 +11,7 @@ import 'package:focus_flow_app/presentation/widgets/focus/focus_level_selector.d
 import 'package:focus_flow_app/presentation/widgets/focus/focus_notes.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timeline.dart';
 import 'package:focus_flow_app/presentation/widgets/focus/focus_timer.dart';
+import 'package:focus_flow_app/presentation/widgets/focus/manual_session_bottom_sheet.dart';
 import 'package:focus_flow_app/adapters/dtos/ws_dtos.dart';
 import 'package:logger/logger.dart';
 
@@ -125,6 +126,21 @@ class FocusViewState extends State<FocusView> with WidgetsBindingObserver {
             },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final focusBloc = context.read<FocusBloc>();
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder:
+                (context) => BlocProvider.value(
+                  value: focusBloc,
+                  child: const ManualSessionBottomSheet(),
+                ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
       body: Container(
         decoration: BoxDecoration(

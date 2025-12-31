@@ -50,3 +50,21 @@ class WebSocketConnectionUpdated extends FocusEvent {
 }
 
 class CheckConnection extends FocusEvent {}
+
+class AddManualSession extends FocusEvent {
+  final Category? category;
+  final Task? task;
+  final DateTime startTime;
+  final DateTime endTime;
+  final int focusLevel;
+  final String note;
+
+  AddManualSession({
+    this.category,
+    this.task,
+    required this.startTime,
+    required this.endTime,
+    required this.focusLevel,
+    required this.note,
+  });
+}
