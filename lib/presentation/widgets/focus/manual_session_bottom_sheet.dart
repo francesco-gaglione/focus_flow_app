@@ -122,7 +122,8 @@ class _ManualSessionBottomSheetState extends State<ManualSessionBottomSheet> {
 
                 // Category Selector
                 DropdownButtonFormField<Category>(
-                  value: _selectedCategory,
+                  key: ValueKey(_selectedCategory),
+                  initialValue: _selectedCategory,
                   decoration: InputDecoration(
                     labelText: 'manual_session.category'.tr(),
                   ),
@@ -145,7 +146,8 @@ class _ManualSessionBottomSheetState extends State<ManualSessionBottomSheet> {
                 // Task Selector (Optional)
                 if (_selectedCategory != null)
                   DropdownButtonFormField<Task>(
-                    value: _selectedTask,
+                    key: ValueKey('task_${_selectedCategory?.id}_$_selectedTask'),
+                    initialValue: _selectedTask,
                     decoration: InputDecoration(
                       labelText: 'manual_session.task'.tr(),
                     ),
