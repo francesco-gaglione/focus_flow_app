@@ -29,13 +29,10 @@ jobs:
       - name: Build APK (Release)
         run: flutter build apk --release
 
-      - name: Create Release Branch
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          BRANCH_NAME="release/$TAG_NAME"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b $BRANCH_NAME
-          git push origin $BRANCH_NAME
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
 
 
